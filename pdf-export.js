@@ -18,7 +18,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     <thead>
       <tr>
         <th style='border:1px solid #000;padding:5px;'>Tipo</th>
-        <th style='border:1px solid #000;padding:5px;width:40%;'>Immagine</th>
+        <th style='border:1px solid #000;padding:5px;width:60%;'>Immagine</th>
         <th style='border:1px solid #000;padding:5px;'>Descrizione</th>
       </tr>
     </thead>
@@ -54,8 +54,8 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
         reader.onload = () => {
           const img = new Image();
           img.src = reader.result;
-          img.style.maxWidth = "113px";
-          img.style.maxHeight = "100px";
+          img.style.maxWidth = "255px";
+          img.style.maxHeight = "100%";
           img.onload = () => {
             tdImg.appendChild(img);
             row.appendChild(tdTipo);
