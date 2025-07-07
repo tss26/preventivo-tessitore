@@ -5,6 +5,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
 
   const container = document.createElement("div");
   container.style.fontFamily = "Arial, sans-serif";
+  container.style.width = "794px"; // A4 210mm in px at 96dpi
 
   const title = document.createElement("h2");
   title.innerText = nota;
@@ -33,6 +34,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       const imgInput = box.querySelector("input[type='file']");
       const descInput = box.querySelector("input[type='text']");
       const row = document.createElement("tr");
+      row.style.pageBreakInside = "avoid"; // evita taglio dentro la riga
 
       const tdTipo = document.createElement("td");
       tdTipo.style.border = "1px solid #000";
@@ -88,11 +90,12 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
 
   setTimeout(() => {
     html2pdf().from(container).set({
-      margin: 0.5,
+      margin: 10,
       filename: nota.replace(/\s+/g, "_") + ".pdf",
       image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: "in", format: "letter", orientation: "portrait" }
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: "px", format: "a4", orientation: "portrait" },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     }).save().then(() => {
       document.body.removeChild(previewArea);
     });
