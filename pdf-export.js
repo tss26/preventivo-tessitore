@@ -1,5 +1,5 @@
 
-function salvaPDF() {
+function generaPDF() {
   const nota = document.getElementById("nota").value || "Preventivo";
   const doc = new jspdf.jsPDF();
   const tableData = [];
@@ -45,22 +45,4 @@ function salvaPDF() {
   doc.save(nota.replace(/[^a-z0-9]/gi, "_").toLowerCase() + ".pdf");
 }
 
-function inviaEmail() {
-  const nota = document.getElementById("nota").value || "Preventivo";
-  const subject = encodeURIComponent("Preventivo abbigliamento - " + nota);
-  const body = encodeURIComponent(
-    "In allegato il preventivo "" + nota + "". Ricorda di allegare il file PDF generato."
-  );
-  window.location.href = `mailto:?subject=${subject}&body=${body}`;
-}
-
-function condividiWhatsApp() {
-  const nota = document.getElementById("nota").value || "Preventivo";
-  const messaggio = `Preventivo: ${nota}\nTi invio la bozza del preventivo. Il PDF è allegato.`;
-  const url = `https://wa.me/?text=${encodeURIComponent(messaggio)}`;
-  window.open(url, "_blank");
-}
-
-window.salvaPDF = salvaPDF;
-window.inviaEmail = inviaEmail;
-window.condividiWhatsApp = condividiWhatsApp;
+window.generaPDF = generaPDF;
