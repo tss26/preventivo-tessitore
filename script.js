@@ -78,3 +78,56 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("codiceInterno").addEventListener("input", aggiornaTabella);
   document.getElementById("sconto").addEventListener("change", aggiornaTabella);
 });
+
+
+const uploadContainer = document.getElementById("uploadContainer");
+
+function creaUploadBox(key, label) {
+  const box = document.createElement("div");
+  box.className = "upload-box";
+  box.id = `upload-${key}`;
+  box.innerHTML = `
+    <h4>${label}</h4>
+    <label>Immagine: <input type="file" accept="image/*" data-upload="${key}"></label><br>
+    <label>Descrizione: <input type="text" placeholder="Inserisci descrizione" data-desc="${key}"></label>
+  `;
+  return box;
+}
+
+const labelMap = {
+  K6: "Ricamo lato cuore",
+  K7: "Ricamo lato opposto",
+  K8: "Ricamo manica SX",
+  K9: "Ricamo manica DX",
+  K10: "Ricamo sottocollo",
+  K11: "Ricamo spalle",
+  M6: "Nome ricamato",
+  K14: "Stampa fronte A4",
+  M14: "Stampa fronte A3",
+  K15: "Stampa lato cuore",
+  K16: "Stampa manica SX",
+  K17: "Stampa manica DX",
+  K18: "Stampa sottocollo",
+  K19: "Stampa spalle A4",
+  M19: "Stampa spalle A3",
+  M15: "Stampa nome"
+};
+
+// Aggiungiamo la gestione dei box upload/descrizione
+document.querySelectorAll(".button-group button").forEach(button => {
+  const key = button.dataset.key;
+  button.addEventListener("click", () => {
+    button.classList.toggle("active");
+    personalizzazioni[key] = button.classList.contains("active");
+
+    if (personalizzazioni[key]) {
+      const box = creaUploadBox(key, labelMap[key] || key);
+      uploadContainer.appendChild(box);
+    } else {
+      const existing = document.getElementById(`upload-${key}`);
+      if (existing) existing.remove();
+    }
+
+    aggiornaTabella();
+  });
+});

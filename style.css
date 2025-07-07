@@ -52,3 +52,15 @@ h1, h2, h3 {
 #quantitaRow th {
   background-color: #e0f3ff;
 }
+
+.upload-box {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+.upload-box h4 {
+  margin-top: 0;
+  color: #007bff;
+}
