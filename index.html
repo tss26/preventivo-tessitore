@@ -1,61 +1,45 @@
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Preventivo Abbigliamento</title>
-  <link rel="stylesheet" href="style.css"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preventivo Abbigliamento</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Preventivo Abbigliamento</h1>
+    <h1>Preventivo Abbigliamento</h1>
 
-  <label for="codice">Codice interno:</label>
-  <input type="number" id="codice" value="1"/>
+    <label for="codice">Codice interno:</label>
+    <input type="number" id="codice" />
 
-  <label for="quantita">Quantità:</label>
-  <input type="number" id="quantita" value="1"/>
+    <label for="quantita">Quantità:</label>
+    <input type="number" id="quantita" />
 
-  <label for="sconto">Sconto:</label>
-  <select id="sconto">
-    <option value="0">Nessuno</option>
-    <option value="5">5%</option>
-    <option value="10">10%</option>
-    <option value="15">15%</option>
-  </select>
+    <label for="sconto">Sconto:</label>
+    <select id="sconto">
+        <option>Nessuno</option>
+        <option>5%</option>
+        <option>10%</option>
+    </select>
 
-  <label for="nota">Nota (Titolo PDF):</label>
-  <input type="text" id="nota" placeholder="Inserisci una nota (facoltativa)"/>
+    <label for="nota">Nota (Titolo PDF):</label>
+    <input type="text" id="nota" placeholder="Inserisci una nota (facoltativa)" />
 
-  <h2>Personalizzazioni</h2>
-  <div class="personalizzazioni">
-    <div class="box">
-      <h3>Ricami</h3>
-      <div id="ricami" class="bottoni"></div>
+    <h2>Personalizzazioni</h2>
+    <div id="personalizzazioni">
+        <!-- Bottoni per Ricami e Stampe -->
+        <button class="btn-personalizzazione">Ricamo lato cuore</button>
+        <button class="btn-personalizzazione">Ricamo lato opposto</button>
+        <!-- Aggiungi altri se servono -->
     </div>
-    <div class="box">
-      <h3>Stampe</h3>
-      <div id="stampe" class="bottoni"></div>
-    </div>
-  </div>
 
-  <div id="dettagli-personalizzazioni" class="upload-container"></div>
+    <h2>Azioni PDF</h2>
+    <button id="btnSalva">Salva PDF</button>
+    <button id="btnEmail">Invia PDF via Email</button>
+    <button id="btnWhatsApp">Condividi su WhatsApp</button>
 
-  <h2>Prezzi unitari</h2>
-  <table id="tabella-prezzi">
-    <thead></thead>
-    <tbody>
-      <tr id="prezzi-base"></tr>
-      <tr id="prezzi-sconto"></tr>
-    </tbody>
-  </table>
-
-  <button onclick="salvaPDF()">💾 Salva PDF</button>
-  <button onclick="inviaEmail()">📧 Invia PDF via Email</button>
-  <button onclick="condividiWhatsApp()">💬 Condividi su WhatsApp</button>
-
-  <script src="script.js"></script>
-  <script src="pdf-export.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <script src="script.js"></script>
+    <script src="pdf-export.js"></script>
 </body>
 </html>
