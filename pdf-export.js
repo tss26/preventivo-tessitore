@@ -4,6 +4,8 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
   const uploadBoxes = document.querySelectorAll(".upload-box");
 
   const container = document.createElement("div");
+  container.style.fontFamily = "Arial, sans-serif";
+
   const title = document.createElement("h2");
   title.innerText = nota;
   container.appendChild(title);
@@ -54,12 +56,14 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
           img.src = reader.result;
           img.style.maxWidth = "100px";
           img.style.maxHeight = "100px";
-          tdImg.appendChild(img);
-          row.appendChild(tdTipo);
-          row.appendChild(tdImg);
-          row.appendChild(tdDesc);
-          tbody.appendChild(row);
-          resolve();
+          img.onload = () => {
+            tdImg.appendChild(img);
+            row.appendChild(tdTipo);
+            row.appendChild(tdImg);
+            row.appendChild(tdDesc);
+            tbody.appendChild(row);
+            resolve();
+          };
         };
         reader.readAsDataURL(file);
       } else {
@@ -74,21 +78,28 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
   });
 
   await Promise.all(promises);
+  container.appendChild(table);
 
-  // Ritardo finale per Safari iOS (fotocamera release delay)
+  // Inserisci nel DOM temporaneamente per garantire rendering su Safari
+  const previewArea = document.createElement("div");
+  previewArea.style.position = "absolute";
+  previewArea.style.left = "-9999px";
+  previewArea.appendChild(container);
+  document.body.appendChild(previewArea);
+
   setTimeout(() => {
-    container.appendChild(table);
-    generaPdf(container, nota);
-  }, 500); // 500ms di attesa per garantire visibilità immagini
-});
+    html2canvas(container, { scale: 2 }).then(canvas => {
+      const imgData = canvas.toDataURL("image/jpeg", 1.0);
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const ratio = canvas.width / canvas.height;
+      const pdfWidth = pageWidth - 20;
+      const pdfHeight = pdfWidth / ratio;
 
-function generaPdf(contentNode, fileName) {
-  const opt = {
-    margin: 0.5,
-    filename: `${fileName.replace(/\s+/g, "_")}.pdf`,
-    image: { type: "jpeg", quality: 0.98 },
-    html2canvas: { scale: 2 },
-    jsPDF: { unit: "in", format: "letter", orientation: "portrait" }
-  };
-  html2pdf().from(contentNode).set(opt).save();
-}
+      pdf.addImage(imgData, "JPEG", 10, 10, pdfWidth, pdfHeight);
+      pdf.save(nota.replace(/\s+/g, "_") + ".pdf");
+      document.body.removeChild(previewArea);
+    });
+  }, 500);
+});
