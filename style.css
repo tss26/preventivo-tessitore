@@ -1,46 +1,54 @@
+/* style.css */
 
 body {
-  font-family: Arial, sans-serif;
-  background-color: #fff;
-  padding: 20px;
+  background-color: white;
+  font-family: sans-serif;
+  margin: 20px;
+  color: #333;
 }
+
 h1, h2, h3 {
   color: #007bff;
 }
-label {
-  display: block;
-  margin-bottom: 10px;
+
+.form-section, .custom-section {
+  margin-bottom: 20px;
 }
-input, select {
-  width: 100%;
-  padding: 8px;
-  margin-top: 4px;
-  box-sizing: border-box;
-}
-.personalizzazioni {
+
+.button-group {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 10px 0;
 }
-.bottoni button {
-  margin: 5px;
-  padding: 8px 12px;
-  background-color: #0099ff;
+
+.button-group button {
+  background-color: #009dff;
   color: white;
   border: none;
   border-radius: 6px;
+  padding: 10px 15px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
-.bottoni button.attivo {
-  background-color: #0077cc;
+
+.button-group button.active {
+  background-color: #0070c0;
 }
-table {
+
+.table-container table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 15px;
+  margin-top: 10px;
 }
-th, td {
+
+.table-container th,
+.table-container td {
   border: 1px solid #ccc;
   padding: 8px;
   text-align: center;
+}
+
+#quantitaRow th {
+  background-color: #e0f3ff;
 }
