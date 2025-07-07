@@ -10,36 +10,35 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       const descInput = box.querySelector("input[type='text']");
 
       const page = document.createElement("div");
-      page.style.width = "794px"; // A4 width in px @96dpi
-      page.style.height = "1123px"; // A4 height in px @96dpi
+      page.style.width = "794px"; // A4 width @96dpi
+      page.style.height = "1123px"; // A4 height @96dpi
       page.style.padding = "40px";
       page.style.boxSizing = "border-box";
       page.style.fontFamily = "Arial, sans-serif";
       page.style.pageBreakAfter = "always";
+      page.style.display = "flex";
+      page.style.flexDirection = "column";
+      page.style.justifyContent = "space-between";
+      page.style.alignItems = "center";
 
-      const titolo = document.createElement("h2");
-      titolo.innerText = nota;
-      titolo.style.marginBottom = "20px";
-
-      const tipoLabel = document.createElement("h3");
+      const tipoLabel = document.createElement("h2");
       tipoLabel.innerText = tipo;
-      tipoLabel.style.marginBottom = "20px";
-
-      const row = document.createElement("div");
-      row.style.display = "flex";
-      row.style.gap = "20px";
-      row.style.alignItems = "flex-start";
+      tipoLabel.style.textAlign = "center";
 
       const imgWrapper = document.createElement("div");
       imgWrapper.style.flex = "1";
-      imgWrapper.style.textAlign = "center";
+      imgWrapper.style.display = "flex";
+      imgWrapper.style.alignItems = "center";
+      imgWrapper.style.justifyContent = "center";
+      imgWrapper.style.margin = "20px 0";
+      imgWrapper.style.maxHeight = "500px";
 
-      const descWrapper = document.createElement("div");
-      descWrapper.style.flex = "1";
-      descWrapper.style.fontSize = "16px";
-      descWrapper.style.lineHeight = "1.4";
-      descWrapper.style.wordBreak = "break-word";
-      descWrapper.innerText = descInput.value;
+      const desc = document.createElement("p");
+      desc.innerText = descInput.value;
+      desc.style.fontSize = "16px";
+      desc.style.textAlign = "center";
+      desc.style.lineHeight = "1.5";
+      desc.style.wordBreak = "break-word";
 
       const file = imgInput.files[0];
       if (file) {
@@ -47,26 +46,22 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
         reader.onload = () => {
           const img = new Image();
           img.src = reader.result;
-          img.style.width = "255px"; // 9cm
-          img.style.height = "auto";
+          img.style.maxWidth = "100%";
+          img.style.maxHeight = "100%";
           img.onload = () => {
             imgWrapper.appendChild(img);
-            row.appendChild(imgWrapper);
-            row.appendChild(descWrapper);
-            page.appendChild(titolo);
             page.appendChild(tipoLabel);
-            page.appendChild(row);
+            page.appendChild(imgWrapper);
+            page.appendChild(desc);
             resolve(page);
           };
         };
         reader.readAsDataURL(file);
       } else {
         imgWrapper.innerText = "Nessuna immagine";
-        row.appendChild(imgWrapper);
-        row.appendChild(descWrapper);
-        page.appendChild(titolo);
         page.appendChild(tipoLabel);
-        page.appendChild(row);
+        page.appendChild(imgWrapper);
+        page.appendChild(desc);
         resolve(page);
       }
     });
