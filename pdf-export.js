@@ -10,14 +10,16 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       const descInput = box.querySelector("input[type='text']");
 
       const page = document.createElement("div");
-      page.style.width = "794px";
+      page.style.width = "794px"; // A4 width
+      page.style.height = "1123px"; // A4 height
       page.style.padding = "40px";
       page.style.boxSizing = "border-box";
       page.style.fontFamily = "Arial, sans-serif";
       page.style.display = "flex";
       page.style.flexDirection = "column";
-      page.style.justifyContent = "space-between";
+      page.style.justifyContent = "flex-start";
       page.style.alignItems = "center";
+      page.style.overflow = "hidden";
       if (index !== arr.length - 1) {
         page.style.pageBreakAfter = "always";
       }
@@ -25,12 +27,15 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       const tipoLabel = document.createElement("h2");
       tipoLabel.innerText = tipo;
       tipoLabel.style.textAlign = "center";
+      tipoLabel.style.marginBottom = "20px";
 
       const imgWrapper = document.createElement("div");
       imgWrapper.style.display = "flex";
       imgWrapper.style.alignItems = "center";
       imgWrapper.style.justifyContent = "center";
-      imgWrapper.style.margin = "20px 0";
+      imgWrapper.style.maxHeight = "500px";
+      imgWrapper.style.flex = "0 0 auto";
+      imgWrapper.style.marginBottom = "20px";
 
       const desc = document.createElement("p");
       desc.innerText = descInput.value;
@@ -38,6 +43,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       desc.style.textAlign = "center";
       desc.style.lineHeight = "1.5";
       desc.style.wordBreak = "break-word";
+      desc.style.flex = "0 0 auto";
 
       const file = imgInput.files[0];
       if (file) {
@@ -45,8 +51,9 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
         reader.onload = () => {
           const img = new Image();
           img.src = reader.result;
-          img.style.width = "312px";
-          img.style.height = "auto";
+          img.style.maxWidth = "100%";
+          img.style.maxHeight = "500px";
+          img.style.objectFit = "contain";
           img.onload = () => {
             imgWrapper.appendChild(img);
             page.appendChild(tipoLabel);
