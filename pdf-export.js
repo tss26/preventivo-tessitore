@@ -3,7 +3,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
   const nota = document.getElementById("nota").value || "Preventivo";
   const uploadBoxes = document.querySelectorAll(".upload-box");
 
-  const pages = await Promise.all(Array.from(uploadBoxes).map(box => {
+  const pages = await Promise.all(Array.from(uploadBoxes).map((box, index, arr) => {
     return new Promise(resolve => {
       const tipo = box.querySelector("h4").innerText;
       const imgInput = box.querySelector("input[type='file']");
@@ -18,7 +18,9 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       page.style.flexDirection = "column";
       page.style.justifyContent = "space-between";
       page.style.alignItems = "center";
-      page.style.pageBreakAfter = "always";
+      if (index !== arr.length - 1) {
+        page.style.pageBreakAfter = "always";
+      }
 
       const tipoLabel = document.createElement("h2");
       tipoLabel.innerText = tipo;
@@ -43,7 +45,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
         reader.onload = () => {
           const img = new Image();
           img.src = reader.result;
-          img.style.width = "312px"; // 11 cm
+          img.style.width = "312px";
           img.style.height = "auto";
           img.onload = () => {
             imgWrapper.appendChild(img);
