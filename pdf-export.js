@@ -1,68 +1,92 @@
 
 document.getElementById("generaPdf").addEventListener("click", async () => {
   const nota = document.getElementById("nota").value || "Preventivo";
+  const uploadBoxes = document.querySelectorAll(".upload-box");
 
-  const pdf = new jsPDF("p", "mm", "a4");
-  const a4Width = 210;
-  const a4Height = 297;
+  const pages = await Promise.all(Array.from(uploadBoxes).map(box => {
+    return new Promise(resolve => {
+      const tipo = box.querySelector("h4").innerText;
+      const imgInput = box.querySelector("input[type='file']");
+      const descInput = box.querySelector("input[type='text']");
 
-  const container = document.createElement("div");
-  container.style.width = "794px";
-  container.style.minHeight = "1123px";
-  container.style.padding = "40px";
-  container.style.boxSizing = "border-box";
-  container.style.fontFamily = "Arial, sans-serif";
-  container.style.display = "flex";
-  container.style.flexDirection = "column";
-  container.style.justifyContent = "flex-start";
-  container.style.alignItems = "center";
-  container.style.textAlign = "center";
+      const page = document.createElement("div");
+      page.style.width = "794px";
+      page.style.padding = "40px";
+      page.style.boxSizing = "border-box";
+      page.style.fontFamily = "Arial, sans-serif";
+      page.style.display = "flex";
+      page.style.flexDirection = "column";
+      page.style.justifyContent = "space-between";
+      page.style.alignItems = "center";
+      page.style.pageBreakAfter = "always";
 
-  const title = document.createElement("h2");
-  title.innerText = "TITOLO DI TEST";
-  title.style.marginBottom = "20px";
+      const tipoLabel = document.createElement("h2");
+      tipoLabel.innerText = tipo;
+      tipoLabel.style.textAlign = "center";
 
-  const img = new Image();
-  img.src = "https://via.placeholder.com/300x400";
-  img.style.width = "300px";
-  img.style.height = "400px";
-  img.style.marginBottom = "20px";
+      const imgWrapper = document.createElement("div");
+      imgWrapper.style.display = "flex";
+      imgWrapper.style.alignItems = "center";
+      imgWrapper.style.justifyContent = "center";
+      imgWrapper.style.margin = "20px 0";
 
-  const desc = document.createElement("p");
-  desc.innerText = "Questa è una descrizione di esempio per testare il rendering PDF in alto.";
-  desc.style.fontSize = "16px";
-  desc.style.maxWidth = "90%";
+      const desc = document.createElement("p");
+      desc.innerText = descInput.value;
+      desc.style.fontSize = "16px";
+      desc.style.textAlign = "center";
+      desc.style.lineHeight = "1.5";
+      desc.style.wordBreak = "break-word";
 
-  container.appendChild(title);
-  container.appendChild(img);
-  container.appendChild(desc);
+      const file = imgInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = new Image();
+          img.src = reader.result;
+          img.style.width = "312px"; // 11 cm
+          img.style.height = "auto";
+          img.onload = () => {
+            imgWrapper.appendChild(img);
+            page.appendChild(tipoLabel);
+            page.appendChild(imgWrapper);
+            page.appendChild(desc);
+            resolve(page);
+          };
+        };
+        reader.readAsDataURL(file);
+      } else {
+        imgWrapper.innerText = "Nessuna immagine";
+        page.appendChild(tipoLabel);
+        page.appendChild(imgWrapper);
+        page.appendChild(desc);
+        resolve(page);
+      }
+    });
+  }));
 
   const wrapper = document.createElement("div");
-  wrapper.style.position = "absolute";
-  wrapper.style.left = "-9999px";
-  document.body.appendChild(wrapper);
-  wrapper.appendChild(container);
+  wrapper.style.width = "794px";
+  wrapper.style.display = "flex";
+  wrapper.style.flexDirection = "column";
 
-  setTimeout(async () => {
-    await html2canvas(container, { scale: 2 }).then(canvas => {
-      const imgData = canvas.toDataURL("image/jpeg", 1.0);
-      const imgProps = pdf.getImageProperties(imgData);
-      const ratio = imgProps.width / imgProps.height;
+  pages.forEach(p => wrapper.appendChild(p));
 
-      let width = a4Width;
-      let height = width / ratio;
-      if (height > a4Height) {
-        height = a4Height;
-        width = height * ratio;
-      }
+  const previewArea = document.createElement("div");
+  previewArea.style.position = "absolute";
+  previewArea.style.left = "-9999px";
+  previewArea.appendChild(wrapper);
+  document.body.appendChild(previewArea);
 
-      const x = (a4Width - width) / 2;
-      const y = 10;
-
-      pdf.addImage(imgData, "JPEG", x, y, width, height);
+  setTimeout(() => {
+    html2pdf().from(wrapper).set({
+      margin: 0,
+      filename: nota.replace(/\s+/g, "_") + ".pdf",
+      image: { type: "jpeg", quality: 1 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "px", format: "a4", orientation: "portrait" },
+      pagebreak: { mode: ["css", "legacy"] }
+    }).save().then(() => {
+      document.body.removeChild(previewArea);
     });
-
-    document.body.removeChild(wrapper);
-    pdf.save(nota.replace(/\s+/g, "_") + ".pdf");
   }, 500);
 });
