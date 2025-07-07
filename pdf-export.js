@@ -11,7 +11,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
 
       const page = document.createElement("div");
       page.style.width = "794px"; // A4 width
-      page.style.height = "1123px"; // A4 height
+      page.style.minHeight = "1000px"; // lasciamo html2pdf adattare l'altezza
       page.style.padding = "40px";
       page.style.boxSizing = "border-box";
       page.style.fontFamily = "Arial, sans-serif";
@@ -19,7 +19,6 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       page.style.flexDirection = "column";
       page.style.justifyContent = "flex-start";
       page.style.alignItems = "center";
-      page.style.overflow = "hidden";
       if (index !== arr.length - 1) {
         page.style.pageBreakAfter = "always";
       }
@@ -33,9 +32,8 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       imgWrapper.style.display = "flex";
       imgWrapper.style.alignItems = "center";
       imgWrapper.style.justifyContent = "center";
-      imgWrapper.style.maxHeight = "500px";
-      imgWrapper.style.flex = "0 0 auto";
       imgWrapper.style.marginBottom = "20px";
+      imgWrapper.style.maxHeight = "600px";
 
       const desc = document.createElement("p");
       desc.innerText = descInput.value;
@@ -43,7 +41,6 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       desc.style.textAlign = "center";
       desc.style.lineHeight = "1.5";
       desc.style.wordBreak = "break-word";
-      desc.style.flex = "0 0 auto";
 
       const file = imgInput.files[0];
       if (file) {
@@ -52,7 +49,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
           const img = new Image();
           img.src = reader.result;
           img.style.maxWidth = "100%";
-          img.style.maxHeight = "500px";
+          img.style.maxHeight = "600px";
           img.style.objectFit = "contain";
           img.onload = () => {
             imgWrapper.appendChild(img);
@@ -88,7 +85,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
 
   setTimeout(() => {
     html2pdf().from(wrapper).set({
-      margin: 0,
+      margin: [20, 20, 20, 20],
       filename: nota.replace(/\s+/g, "_") + ".pdf",
       image: { type: "jpeg", quality: 1 },
       html2canvas: { scale: 2 },
