@@ -10,12 +10,11 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       const descInput = box.querySelector("input[type='text']");
 
       const page = document.createElement("div");
-      page.style.width = "794px"; // A4 width @96dpi
-      page.style.height = "1123px"; // A4 height @96dpi
+      page.style.width = "794px";
+      page.style.height = "1123px";
       page.style.padding = "40px";
       page.style.boxSizing = "border-box";
       page.style.fontFamily = "Arial, sans-serif";
-      page.style.pageBreakAfter = "always";
       page.style.display = "flex";
       page.style.flexDirection = "column";
       page.style.justifyContent = "space-between";
@@ -46,8 +45,8 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
         reader.onload = () => {
           const img = new Image();
           img.src = reader.result;
-          img.style.maxWidth = "100%";
-          img.style.maxHeight = "100%";
+          img.style.maxWidth = "312px"; // 11 cm
+          img.style.height = "auto";
           img.onload = () => {
             imgWrapper.appendChild(img);
             page.appendChild(tipoLabel);
@@ -69,7 +68,13 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
 
   const wrapper = document.createElement("div");
   wrapper.style.width = "794px";
-  pages.forEach(p => wrapper.appendChild(p));
+  wrapper.style.display = "flex";
+  wrapper.style.flexDirection = "column";
+
+  pages.forEach((p, i) => {
+    if (i !== 0) p.style.marginTop = "0";
+    wrapper.appendChild(p);
+  });
 
   const previewArea = document.createElement("div");
   previewArea.style.position = "absolute";
@@ -84,7 +89,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       image: { type: "jpeg", quality: 1 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: "px", format: [794, 1123], orientation: "portrait" },
-      pagebreak: { mode: ["avoid-all"] }
+      pagebreak: { mode: ["css", "legacy"] }
     }).save().then(() => {
       document.body.removeChild(previewArea);
     });
