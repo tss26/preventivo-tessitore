@@ -15,26 +15,31 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       page.style.padding = "40px";
       page.style.boxSizing = "border-box";
       page.style.fontFamily = "Arial, sans-serif";
-      page.style.display = "flex";
-      page.style.flexDirection = "column";
-      page.style.justifyContent = "flex-start";
       page.style.pageBreakAfter = "always";
 
       const titolo = document.createElement("h2");
       titolo.innerText = nota;
-      titolo.style.marginBottom = "10px";
+      titolo.style.marginBottom = "20px";
 
       const tipoLabel = document.createElement("h3");
       tipoLabel.innerText = tipo;
-      tipoLabel.style.marginTop = "20px";
+      tipoLabel.style.marginBottom = "20px";
+
+      const row = document.createElement("div");
+      row.style.display = "flex";
+      row.style.gap = "20px";
+      row.style.alignItems = "flex-start";
 
       const imgWrapper = document.createElement("div");
+      imgWrapper.style.flex = "1";
       imgWrapper.style.textAlign = "center";
-      imgWrapper.style.margin = "20px 0";
 
-      const desc = document.createElement("p");
-      desc.innerText = descInput.value;
-      desc.style.marginTop = "10px";
+      const descWrapper = document.createElement("div");
+      descWrapper.style.flex = "1";
+      descWrapper.style.fontSize = "16px";
+      descWrapper.style.lineHeight = "1.4";
+      descWrapper.style.wordBreak = "break-word";
+      descWrapper.innerText = descInput.value;
 
       const file = imgInput.files[0];
       if (file) {
@@ -44,24 +49,24 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
           img.src = reader.result;
           img.style.width = "255px"; // 9cm
           img.style.height = "auto";
-          img.style.display = "block";
-          img.style.margin = "0 auto";
           img.onload = () => {
             imgWrapper.appendChild(img);
+            row.appendChild(imgWrapper);
+            row.appendChild(descWrapper);
             page.appendChild(titolo);
             page.appendChild(tipoLabel);
-            page.appendChild(imgWrapper);
-            page.appendChild(desc);
+            page.appendChild(row);
             resolve(page);
           };
         };
         reader.readAsDataURL(file);
       } else {
         imgWrapper.innerText = "Nessuna immagine";
+        row.appendChild(imgWrapper);
+        row.appendChild(descWrapper);
         page.appendChild(titolo);
         page.appendChild(tipoLabel);
-        page.appendChild(imgWrapper);
-        page.appendChild(desc);
+        page.appendChild(row);
         resolve(page);
       }
     });
