@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const box = document.createElement("div");
     box.className = "upload-box";
     box.id = `upload-${key}`;
-    box.innerHTML = `<div class="spinner" id="spinner-${key}" style="display:none;margin-top:5px;">Caricamento immagine...</div>` + 
+    box.innerHTML = `
       <h4>${label}</h4>
       <label>Immagine: <input type="file" accept="image/*" data-upload="${key}"></label><br>
       <label>Descrizione: <input type="text" placeholder="Inserisci descrizione" data-desc="${key}"></label>
@@ -120,26 +120,4 @@ document.addEventListener("DOMContentLoaded", function () {
 
   document.getElementById("codiceInterno").addEventListener("input", aggiornaTabella);
   document.getElementById("sconto").addEventListener("change", aggiornaTabella);
-});
-
-document.addEventListener("change", function (e) {
-  if (e.target && e.target.matches("input[type='file'][data-upload]")) {
-    const key = e.target.dataset.upload;
-    const spinner = document.getElementById(`spinner-${key}`);
-    if (spinner) {
-      spinner.style.display = "block";
-    }
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const img = new Image();
-        img.onload = () => {
-          spinner.style.display = "none";
-        };
-        img.src = reader.result;
-      };
-      reader.readAsDataURL(file);
-    }
-  }
 });
