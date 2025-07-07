@@ -1,5 +1,5 @@
 
-document.getElementById("generaPdf").addEventListener("click", () => {
+document.getElementById("generaPdf").addEventListener("click", async () => {
   const nota = document.getElementById("nota").value || "Preventivo";
   const uploadBoxes = document.querySelectorAll(".upload-box");
 
@@ -73,10 +73,13 @@ document.getElementById("generaPdf").addEventListener("click", () => {
     });
   });
 
-  Promise.all(promises).then(() => {
+  await Promise.all(promises);
+
+  // Ritardo finale per Safari iOS (fotocamera release delay)
+  setTimeout(() => {
     container.appendChild(table);
     generaPdf(container, nota);
-  });
+  }, 500); // 500ms di attesa per garantire visibilità immagini
 });
 
 function generaPdf(contentNode, fileName) {
