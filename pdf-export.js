@@ -54,8 +54,8 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
         reader.onload = () => {
           const img = new Image();
           img.src = reader.result;
-          img.style.maxWidth = "255px";
-          img.style.maxHeight = "100%";
+          img.style.width = "255px";
+          img.style.height = "auto";
           img.onload = () => {
             tdImg.appendChild(img);
             row.appendChild(tdTipo);
