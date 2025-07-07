@@ -11,7 +11,6 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
 
       const page = document.createElement("div");
       page.style.width = "794px";
-      page.style.height = "1123px";
       page.style.padding = "40px";
       page.style.boxSizing = "border-box";
       page.style.fontFamily = "Arial, sans-serif";
@@ -19,18 +18,17 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       page.style.flexDirection = "column";
       page.style.justifyContent = "space-between";
       page.style.alignItems = "center";
+      page.style.pageBreakAfter = "always";
 
       const tipoLabel = document.createElement("h2");
       tipoLabel.innerText = tipo;
       tipoLabel.style.textAlign = "center";
 
       const imgWrapper = document.createElement("div");
-      imgWrapper.style.flex = "1";
       imgWrapper.style.display = "flex";
       imgWrapper.style.alignItems = "center";
       imgWrapper.style.justifyContent = "center";
       imgWrapper.style.margin = "20px 0";
-      imgWrapper.style.maxHeight = "500px";
 
       const desc = document.createElement("p");
       desc.innerText = descInput.value;
@@ -45,7 +43,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
         reader.onload = () => {
           const img = new Image();
           img.src = reader.result;
-          img.style.maxWidth = "312px"; // 11 cm
+          img.style.width = "312px"; // 11 cm
           img.style.height = "auto";
           img.onload = () => {
             imgWrapper.appendChild(img);
@@ -71,10 +69,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
   wrapper.style.display = "flex";
   wrapper.style.flexDirection = "column";
 
-  pages.forEach((p, i) => {
-    if (i !== 0) p.style.marginTop = "0";
-    wrapper.appendChild(p);
-  });
+  pages.forEach(p => wrapper.appendChild(p));
 
   const previewArea = document.createElement("div");
   previewArea.style.position = "absolute";
@@ -88,7 +83,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       filename: nota.replace(/\s+/g, "_") + ".pdf",
       image: { type: "jpeg", quality: 1 },
       html2canvas: { scale: 2 },
-      jsPDF: { unit: "px", format: [794, 1123], orientation: "portrait" },
+      jsPDF: { unit: "px", format: "a4", orientation: "portrait" },
       pagebreak: { mode: ["css", "legacy"] }
     }).save().then(() => {
       document.body.removeChild(previewArea);
