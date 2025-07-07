@@ -12,22 +12,28 @@ async function salvaPDF() {
 
     const tableData = [];
 
-    for (const key of selezionate || []) {
-        const tipo = personalizzazioni[key] || key;
-        const descrizione = descrizioni[key] || "";
-        const immagine = immagini[key];
+    if (typeof selezionate !== 'undefined') {
+        for (const key of selezionate) {
+            const tipo = personalizzazioni?.[key] || key;
+            const descrizione = descrizioni?.[key] || "";
+            const immagine = immagini?.[key];
 
-        if (immagine) {
-            const imgProps = doc.getImageProperties(immagine);
-            const ratio = imgProps.width / imgProps.height;
-            const imgWidth = 40;
-            const imgHeight = imgWidth / ratio;
-            const imgY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 35;
+            if (immagine) {
+                try {
+                    const imgProps = doc.getImageProperties(immagine);
+                    const ratio = imgProps.width / imgProps.height;
+                    const imgWidth = 40;
+                    const imgHeight = imgWidth / ratio;
+                    const imgY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 35;
 
-            doc.addImage(immagine, "JPEG", 10, imgY, imgWidth, imgHeight);
-            tableData.push([tipo, "[Vedi immagine a sinistra]", descrizione]);
-        } else {
-            tableData.push([tipo, "(Nessuna immagine)", descrizione]);
+                    doc.addImage(immagine, "JPEG", 10, imgY, imgWidth, imgHeight);
+                    tableData.push([tipo, "[Vedi immagine a sinistra]", descrizione]);
+                } catch (e) {
+                    tableData.push([tipo, "(Errore immagine)", descrizione]);
+                }
+            } else {
+                tableData.push([tipo, "(Nessuna immagine)", descrizione]);
+            }
         }
     }
 
