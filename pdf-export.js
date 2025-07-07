@@ -4,16 +4,29 @@ function generaPDF() {
   const doc = new jspdf.jsPDF();
   const tableData = [];
 
-  const selezionate = window.selezionate || [];
-  const descrizioni = window.descrizioni || {};
-  const immagini = window.immagini || {};
+  const descrizioni = {
+    "Ricamo lato cuore": "Ricamo lato cuore",
+    "Ricamo lato opposto": "Ricamo lato opposto",
+    "Ricamo manica SX": "Ricamo manica sinistra",
+    "Ricamo manica DX": "Ricamo manica destra",
+    "Ricamo sottocollo": "Ricamo sotto il colletto",
+    "Ricamo spalle": "Ricamo sulle spalle",
+    "Nome ricamato": "Nome personalizzato ricamato",
+    "Stampa fronte A4": "Stampa fronte A4",
+    "Stampa lato cuore": "Stampa lato cuore",
+    "Stampa manica SX": "Stampa manica sinistra",
+    "Stampa manica DX": "Stampa manica destra",
+    "Stampa sottocollo": "Stampa sotto il colletto",
+    "Stampa spalle A4": "Stampa spalle A4",
+    "Stampa spalle A3": "Stampa spalle A3",
+    "Stampa fronte A3": "Stampa fronte A3",
+    "Stampa nome": "Nome stampato"
+  };
 
-  selezionate.forEach(key => {
-    tableData.push([
-      key,
-      immagini[key] ? { image: immagini[key], width: 30, height: 30 } : "",
-      descrizioni[key] || ""
-    ]);
+  const attive = window.attive || [];
+
+  attive.forEach(p => {
+    tableData.push([p, "[immagine allegata]", descrizioni[p] || ""]);
   });
 
   doc.setFontSize(16);
@@ -21,28 +34,17 @@ function generaPDF() {
 
   doc.autoTable({
     startY: 30,
-    head: [["Tipo Personalizzazione", "Immagine", "Descrizione"]],
-    body: tableData,
-    styles: { valign: "middle" },
-    columnStyles: {
-      0: { cellWidth: 50 },
-      1: { cellWidth: 60 },
-      2: { cellWidth: 80 }
-    }
+    head: [["Tipo", "Immagine", "Descrizione"]],
+    body: tableData
   });
 
-  const pageCount = doc.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.setFontSize(10);
-    doc.text(
-      "Il presente documento è una bozza non vincolante. Il preventivo ufficiale sarà fornito su carta intestata.",
-      10,
-      290
-    );
-  }
+  doc.setFontSize(10);
+  doc.text(
+    "Il presente documento è una bozza non vincolante. Il preventivo ufficiale sarà fornito su carta intestata.",
+    10,
+    290
+  );
 
-  doc.save(nota.replace(/[^a-z0-9]/gi, "_").toLowerCase() + ".pdf");
+  // Mostra anteprima in nuova finestra
+  window.open(doc.output('bloburl'), '_blank');
 }
-
-window.generaPDF = generaPDF;
