@@ -1,5 +1,5 @@
 
-async function esportaPDF() {
+async function salvaPDF() {
     const nota = document.getElementById("nota").value || "Preventivo";
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -52,4 +52,12 @@ async function esportaPDF() {
     });
 
     doc.save(nota.replace(/[^a-z0-9]/gi, '_').toLowerCase() + ".pdf");
+}
+
+function inviaEmail() {
+    const nota = document.getElementById("nota").value || "Preventivo";
+    const email = "";
+    const subject = encodeURIComponent("Preventivo abbigliamento - " + nota);
+    const body = encodeURIComponent("In allegato il preventivo "" + nota + "". Ricorda di allegare il PDF generato dall’app.");
+    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
 }
