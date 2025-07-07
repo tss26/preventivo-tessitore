@@ -89,7 +89,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       }
 
       const x = (a4Width - width) / 2;
-      const y = (a4Height - height) / 2;
+      const y = 10;
 
       if (i > 0) pdf.addPage();
       pdf.addImage(imgData, "JPEG", x, y, width, height);
