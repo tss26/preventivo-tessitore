@@ -78,3 +78,6 @@ function condividiWhatsApp() {
     const url = `https://wa.me/?text=${messaggio}`;
     window.open(url, "_blank");
 }
+window.salvaPDF = salvaPDF;
+window.inviaEmail = inviaEmail;
+window.condividiWhatsApp = condividiWhatsApp;
