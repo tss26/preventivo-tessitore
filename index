@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Preventivo Abbigliamento</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <h1>Preventivo Abbigliamento</h1>
+    <label for="codice">Codice interno:</label>
+    <input type="number" id="codice" value="1" />
+
+    <label for="quantita">Quantità:</label>
+    <input type="number" id="quantita" value="1" />
+
+    <label for="sconto">Sconto:</label>
+    <select id="sconto">
+        <option value="0">Nessuno</option>
+        <option value="5">5%</option>
+        <option value="10">10%</option>
+        <option value="15">15%</option>
+    </select>
+
+    <label for="nota">Nota (Titolo PDF):</label>
+    <input type="text" id="nota" placeholder="Inserisci una nota (facoltativa)" />
+
+    <h2>Personalizzazioni</h2>
+    <div class="personalizzazioni">
+        <div class="box">
+            <h3>Ricami</h3>
+            <div id="ricami" class="bottoni"></div>
+        </div>
+        <div class="box">
+            <h3>Stampe</h3>
+            <div id="stampe" class="bottoni"></div>
+        </div>
+    </div>
+
+    <h2>Prezzi unitari</h2>
+    <table id="tabella-prezzi">
+        <thead></thead>
+        <tbody>
+            <tr id="prezzi-base"></tr>
+            <tr id="prezzi-sconto"></tr>
+        </tbody>
+    </table>
+
+    <button onclick="esportaPDF()">Esporta PDF</button>
+
+    <script src="script.js"></script>
+    <script src="pdf-export.js"></script>
+</body>
+</html>
