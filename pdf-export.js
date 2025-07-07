@@ -10,15 +10,15 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       const descInput = box.querySelector("input[type='text']");
 
       const page = document.createElement("div");
-      page.style.width = "794px"; // A4 width
-      page.style.minHeight = "1123px"; // A4 height
+      page.style.width = "794px";
+      page.style.minHeight = "1123px";
       page.style.boxSizing = "border-box";
       page.style.fontFamily = "Arial, sans-serif";
       page.style.display = "flex";
       page.style.flexDirection = "column";
-      page.style.justifyContent = "center";
       page.style.alignItems = "center";
-      page.style.padding = "40px";
+      page.style.justifyContent = "flex-start";
+      page.style.padding = "20px";
       page.style.textAlign = "center";
 
       const tipoLabel = document.createElement("h2");
@@ -74,7 +74,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
   for (let i = 0; i < pages.length; i++) {
     const pageElement = pages[i];
     wrapper.appendChild(pageElement);
-    await new Promise(resolve => setTimeout(resolve, 300)); // garantisce il rendering
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     await html2canvas(pageElement, { scale: 2 }).then(canvas => {
       const imgData = canvas.toDataURL("image/jpeg", 1.0);
@@ -89,7 +89,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       }
 
       const x = (a4Width - width) / 2;
-      const y = 10;
+      const y = 10; // margine alto fisso (scrive dall'alto)
 
       if (i > 0) pdf.addPage();
       pdf.addImage(imgData, "JPEG", x, y, width, height);
