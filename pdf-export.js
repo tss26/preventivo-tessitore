@@ -3,49 +3,35 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
   const nota = document.getElementById("nota").value || "Preventivo";
   const uploadBoxes = document.querySelectorAll(".upload-box");
 
-  const pages = await Promise.all(Array.from(uploadBoxes).map((box, index, arr) => {
+  const pages = await Promise.all(Array.from(uploadBoxes).map((box) => {
     return new Promise(resolve => {
       const tipo = box.querySelector("h4").innerText;
       const imgInput = box.querySelector("input[type='file']");
       const descInput = box.querySelector("input[type='text']");
 
-      // Contenitore singola pagina
       const page = document.createElement("div");
-      page.style.width = "794px"; // A4 width @96dpi
-      page.style.height = "1123px"; // A4 height
+      page.style.width = "794px"; // A4 width
+      page.style.minHeight = "1123px"; // A4 height
+      page.style.boxSizing = "border-box";
+      page.style.fontFamily = "Arial, sans-serif";
       page.style.display = "flex";
       page.style.flexDirection = "column";
       page.style.justifyContent = "center";
       page.style.alignItems = "center";
       page.style.padding = "40px";
-      page.style.boxSizing = "border-box";
-      page.style.fontFamily = "Arial, sans-serif";
-      if (index !== arr.length - 1) {
-        page.style.pageBreakAfter = "always";
-      }
+      page.style.textAlign = "center";
 
-      // Tipo personalizzazione
       const tipoLabel = document.createElement("h2");
       tipoLabel.innerText = tipo;
       tipoLabel.style.marginBottom = "20px";
-      tipoLabel.style.textAlign = "center";
 
-      // Immagine
       const imgWrapper = document.createElement("div");
-      imgWrapper.style.flex = "0 0 auto";
-      imgWrapper.style.maxHeight = "600px";
       imgWrapper.style.marginBottom = "20px";
-      imgWrapper.style.display = "flex";
-      imgWrapper.style.justifyContent = "center";
-      imgWrapper.style.alignItems = "center";
 
-      // Descrizione
       const desc = document.createElement("p");
       desc.innerText = descInput.value;
       desc.style.fontSize = "16px";
-      desc.style.textAlign = "center";
-      desc.style.lineHeight = "1.5";
-      desc.style.wordBreak = "break-word";
+      desc.style.lineHeight = "1.4";
       desc.style.maxWidth = "100%";
 
       const file = imgInput.files[0];
@@ -54,7 +40,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
         reader.onload = () => {
           const img = new Image();
           img.src = reader.result;
-          img.style.maxWidth = "312px"; // 11 cm
+          img.style.maxWidth = "100%";
           img.style.maxHeight = "600px";
           img.style.objectFit = "contain";
           img.onload = () => {
@@ -77,28 +63,41 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
   }));
 
   const wrapper = document.createElement("div");
-  wrapper.style.width = "794px";
-  wrapper.style.display = "flex";
-  wrapper.style.flexDirection = "column";
+  wrapper.style.position = "absolute";
+  wrapper.style.left = "-9999px";
+  document.body.appendChild(wrapper);
 
-  pages.forEach(p => wrapper.appendChild(p));
+  const pdf = new jsPDF("p", "mm", "a4");
+  const a4Width = 210;
+  const a4Height = 297;
 
-  const previewArea = document.createElement("div");
-  previewArea.style.position = "absolute";
-  previewArea.style.left = "-9999px";
-  previewArea.appendChild(wrapper);
-  document.body.appendChild(previewArea);
+  for (let i = 0; i < pages.length; i++) {
+    const pageElement = pages[i];
+    wrapper.appendChild(pageElement);
+    await new Promise(resolve => setTimeout(resolve, 300)); // garantisce il rendering
 
-  setTimeout(() => {
-    html2pdf().from(wrapper).set({
-      margin: 0,
-      filename: nota.replace(/\s+/g, "_") + ".pdf",
-      image: { type: "jpeg", quality: 1 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: "px", format: [794, 1123], orientation: "portrait" },
-      pagebreak: { mode: ["css", "legacy"] }
-    }).save().then(() => {
-      document.body.removeChild(previewArea);
+    await html2canvas(pageElement, { scale: 2 }).then(canvas => {
+      const imgData = canvas.toDataURL("image/jpeg", 1.0);
+      const imgProps = pdf.getImageProperties(imgData);
+      const ratio = imgProps.width / imgProps.height;
+      let width = a4Width;
+      let height = width / ratio;
+
+      if (height > a4Height) {
+        height = a4Height;
+        width = height * ratio;
+      }
+
+      const x = (a4Width - width) / 2;
+      const y = (a4Height - height) / 2;
+
+      if (i > 0) pdf.addPage();
+      pdf.addImage(imgData, "JPEG", x, y, width, height);
     });
-  }, 500);
+
+    wrapper.removeChild(pageElement);
+  }
+
+  document.body.removeChild(wrapper);
+  pdf.save(nota.replace(/\s+/g, "_") + ".pdf");
 });
