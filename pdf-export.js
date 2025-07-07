@@ -12,7 +12,7 @@ async function salvaPDF() {
 
     const tableData = [];
 
-    for (const key of selezionate) {
+    for (const key of selezionate || []) {
         const tipo = personalizzazioni[key] || key;
         const descrizione = descrizioni[key] || "";
         const immagine = immagini[key];
@@ -25,17 +25,9 @@ async function salvaPDF() {
             const imgY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 35;
 
             doc.addImage(immagine, "JPEG", 10, imgY, imgWidth, imgHeight);
-            tableData.push([
-                tipo,
-                "[Vedi immagine a sinistra]",
-                descrizione
-            ]);
+            tableData.push([tipo, "[Vedi immagine a sinistra]", descrizione]);
         } else {
-            tableData.push([
-                tipo,
-                "(Nessuna immagine)",
-                descrizione
-            ]);
+            tableData.push([tipo, "(Nessuna immagine)", descrizione]);
         }
     }
 
@@ -79,7 +71,7 @@ function condividiWhatsApp() {
     window.open(url, "_blank");
 }
 
-// Rende le funzioni accessibili dal browser
+// Espone le funzioni al browser
 window.salvaPDF = salvaPDF;
 window.inviaEmail = inviaEmail;
 window.condividiWhatsApp = condividiWhatsApp;
