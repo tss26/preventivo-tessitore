@@ -13,38 +13,38 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     const page = document.createElement("div");
     page.style.width = "794px"; // A4 width at 96 DPI
     page.style.height = "1123px"; // A4 height at 96 DPI
-    page.style.padding = "40px";
+    page.style.padding = "40px 10px"; // Modificato: padding a 40px sopra/sotto, 10px a destra/sinistra
     page.style.boxSizing = "border-box";
     page.style.fontFamily = "Arial, sans-serif";
     page.style.display = "flex";
     page.style.flexDirection = "column";
     page.style.justifyContent = "flex-start";
-    page.style.alignItems = "center";
+    page.style.alignItems = "flex-start"; // Modificato: Allinea gli elementi all'inizio (sinistra)
     page.style.overflow = "hidden";
 
     const tipoLabel = document.createElement("h2");
     tipoLabel.innerText = tipo;
-    tipoLabel.style.textAlign = "center";
+    tipoLabel.style.textAlign = "left"; // Modificato: Allinea il testo a sinistra
     tipoLabel.style.marginBottom = "20px";
-    tipoLabel.style.color = "#007bff"; // Coerente con lo stile
+    tipoLabel.style.color = "#007bff";
 
     const imgWrapper = document.createElement("div");
     imgWrapper.style.display = "flex";
     imgWrapper.style.alignItems = "center";
-    imgWrapper.style.justifyContent = "center";
+    imgWrapper.style.justifyContent = "flex-start"; // Modificato: Allinea l'immagine a sinistra
     imgWrapper.style.maxHeight = "500px";
     imgWrapper.style.flex = "0 0 auto";
     imgWrapper.style.marginBottom = "20px";
-    imgWrapper.style.width = "100%"; // Assicura che l'immagine possa espandersi
+    imgWrapper.style.width = "100%";
 
     const desc = document.createElement("p");
     desc.innerText = descInput.value;
     desc.style.fontSize = "16px";
-    desc.style.textAlign = "center";
+    desc.style.textAlign = "left"; // Modificato: Allinea il testo a sinistra
     desc.style.lineHeight = "1.5";
     desc.style.wordBreak = "break-word";
     desc.style.flex = "0 0 auto";
-    desc.style.maxWidth = "700px"; // Limita la larghezza della descrizione
+    desc.style.maxWidth = "700px";
 
     page.appendChild(tipoLabel);
     page.appendChild(imgWrapper);
@@ -60,57 +60,3 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
           img.style.maxWidth = "100%";
           img.style.maxHeight = "500px";
           img.style.objectFit = "contain";
-          img.onload = () => {
-            imgWrapper.appendChild(img);
-            resolve();
-          };
-        };
-        reader.readAsDataURL(file);
-      });
-    } else {
-      const noImgText = document.createElement("p");
-      noImgText.innerText = "Nessuna immagine allegata";
-      noImgText.style.color = "#888";
-      imgWrapper.appendChild(noImgText);
-    }
-    pagesToRender.push(page);
-  }
-
-  if (pagesToRender.length === 0) {
-    alert("Nessuna personalizzazione selezionata o nessuna immagine/descrizione aggiunta per generare il PDF.");
-    return;
-  }
-
-  const wrapper = document.createElement("div");
-  wrapper.style.width = "794px";
-  wrapper.style.display = "flex";
-  wrapper.style.flexDirection = "column";
-
-  // Aggiungi le pagine al wrapper
-  pagesToRender.forEach((p, index) => {
-    wrapper.appendChild(p);
-    // Aggiungi un page break tra le pagine, tranne l'ultima
-    if (index < pagesToRender.length - 1) {
-      const pageBreak = document.createElement("div");
-      pageBreak.style.pageBreakAfter = "always";
-      wrapper.appendChild(pageBreak);
-    }
-  });
-
-  html2pdf().from(wrapper).set({
-    margin: 0,
-    filename: nota.replace(/\s+/g, "_") + ".pdf",
-    image: { type: "jpeg", quality: 0.98 },
-    html2canvas: { scale: 2, logging: true, useCORS: true },
-    jsPDF: { unit: "px", format: "a4", orientation: "portrait" },
-    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-  }).save().then(() => {
-    if (wrapper.parentNode) {
-      wrapper.parentNode.removeChild(wrapper);
-    }
-    console.log("PDF generato con successo!");
-  }).catch(error => {
-    console.error("Errore durante la generazione del PDF:", error);
-    alert("Si è verificato un errore durante la generazione del PDF. Controlla la console per i dettagli.");
-  });
-});
