@@ -20,14 +20,15 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     const descInput = box.querySelector("input[type='text']");
 
     const table = document.createElement("table");
-    table.style.width = "750px"; // ridotto per restare nei margini A4
-    table.style.height = "1060px"; // A4 in px a 96dpi ~ 1123px
-    table.style.margin = "0 auto"; // centrato orizzontalmente
+    table.style.width = "750px";
+table.style.margin = "0 auto";
+    table.style.height = "1123px";
     table.style.borderCollapse = "collapse";
     table.style.fontFamily = "Arial, sans-serif";
     table.style.textAlign = "center";
     table.style.tableLayout = "fixed";
 
+    // riga 1 - titolo
     const row1 = document.createElement("tr");
     row1.style.height = "15%";
     const cell1 = document.createElement("td");
@@ -36,6 +37,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     row1.appendChild(cell1);
     table.appendChild(row1);
 
+    // riga 2 - immagine
     const row2 = document.createElement("tr");
     row2.style.height = "65%";
     const cell2 = document.createElement("td");
@@ -63,6 +65,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     row2.appendChild(cell2);
     table.appendChild(row2);
 
+    // riga 3 - descrizione
     const row3 = document.createElement("tr");
     row3.style.height = "20%";
     const cell3 = document.createElement("td");
@@ -81,16 +84,16 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       const imgData = canvas.toDataURL("image/jpeg", 1.0);
       const imgProps = pdf.getImageProperties(imgData);
       const ratio = imgProps.width / imgProps.height;
-      let width = a4Width - 20;
+      let width = a4Width;
       let height = width / ratio;
 
-      if (height > a4Height - 20) {
-        height = a4Height - 20;
+      if (height > a4Height) {
+        height = a4Height;
         width = height * ratio;
       }
 
       const x = (a4Width - width) / 2;
-      const y = (a4Height - height) / 2;
+      const y = 0;
 
       if (i > 0) pdf.addPage();
       pdf.addImage(imgData, "JPEG", x, y, width, height);
