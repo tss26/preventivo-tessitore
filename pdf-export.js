@@ -11,40 +11,43 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     const descInput = box.querySelector("input[type='text']");
 
     const page = document.createElement("div");
-    page.style.width = "794px"; // A4 width at 96 DPI
-    page.style.height = "1123px"; // A4 height at 96 DPI
-    page.style.padding = "40px 10px"; // Modificato: padding a 40px sopra/sotto, 10px a destra/sinistra
-    page.style.boxSizing = "border-box";
+    page.style.width = "794px"; // Larghezza A4 a 96 DPI
+    page.style.height = "1123px"; // Altezza A4 a 96 DPI
+    page.style.padding = "40px"; // Padding uniforme su tutti i lati
+    page.style.boxSizing = "border-box"; // Include padding nella larghezza/altezza
     page.style.fontFamily = "Arial, sans-serif";
     page.style.display = "flex";
     page.style.flexDirection = "column";
-    page.style.justifyContent = "flex-start";
-    page.style.alignItems = "flex-start"; // Modificato: Allinea gli elementi all'inizio (sinistra)
-    page.style.overflow = "hidden";
+    page.style.justifyContent = "flex-start"; // Allinea gli elementi dall'alto
+    page.style.alignItems = "flex-start"; // Allinea gli elementi a sinistra
+    page.style.overflow = "hidden"; // Nasconde contenuto che esce dai bordi
 
     const tipoLabel = document.createElement("h2");
     tipoLabel.innerText = tipo;
-    tipoLabel.style.textAlign = "left"; // Modificato: Allinea il testo a sinistra
+    tipoLabel.style.textAlign = "left"; // Allinea il testo a sinistra
     tipoLabel.style.marginBottom = "20px";
     tipoLabel.style.color = "#007bff";
-
-    const imgWrapper = document.createElement("div");
-    imgWrapper.style.display = "flex";
-    imgWrapper.style.alignItems = "center";
-    imgWrapper.style.justifyContent = "flex-start"; // Modificato: Allinea l'immagine a sinistra
-    imgWrapper.style.maxHeight = "500px";
-    imgWrapper.style.flex = "0 0 auto";
-    imgWrapper.style.marginBottom = "20px";
-    imgWrapper.style.width = "100%";
+    tipoLabel.style.width = "100%"; // Occupa tutta la larghezza disponibile
 
     const desc = document.createElement("p");
     desc.innerText = descInput.value;
     desc.style.fontSize = "16px";
-    desc.style.textAlign = "left"; // Modificato: Allinea il testo a sinistra
+    desc.style.textAlign = "left"; // Allinea il testo a sinistra
     desc.style.lineHeight = "1.5";
-    desc.style.wordBreak = "break-word";
-    desc.style.flex = "0 0 auto";
-    desc.style.maxWidth = "700px";
+    desc.style.wordBreak = "break-word"; // Forza la rottura delle parole lunghe
+    desc.style.marginBottom = "20px";
+    desc.style.flex = "0 1 auto"; // Permette alla descrizione di restringersi se necessario
+    desc.style.maxWidth = "100%"; // Limita la larghezza al 100% del contenitore
+    desc.style.overflowWrap = "break-word"; // Per una migliore gestione delle parole
+
+    const imgWrapper = document.createElement("div");
+    imgWrapper.style.display = "flex";
+    imgWrapper.style.alignItems = "center";
+    imgWrapper.style.justifyContent = "flex-start"; // Allinea l'immagine a sinistra
+    imgWrapper.style.flex = "1 1 auto"; // Permette all'immagine di crescere e restringersi per occupare lo spazio disponibile
+    imgWrapper.style.marginBottom = "20px";
+    imgWrapper.style.width = "100%"; // Occupa tutta la larghezza disponibile
+    imgWrapper.style.overflow = "hidden"; // Importante per nascondere parti dell'immagine che superano il wrapper
 
     page.appendChild(tipoLabel);
     page.appendChild(imgWrapper);
@@ -54,9 +57,4 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     if (file) {
       await new Promise(resolve => {
         const reader = new FileReader();
-        reader.onload = () => {
-          const img = new Image();
-          img.src = reader.result;
-          img.style.maxWidth = "100%";
-          img.style.maxHeight = "500px";
-          img.style.objectFit = "contain";
+        reader
