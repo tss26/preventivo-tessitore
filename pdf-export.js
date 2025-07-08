@@ -3,105 +3,90 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
   const nota = document.getElementById("nota").value || "Preventivo";
   const uploadBoxes = document.querySelectorAll(".upload-box");
 
-  const a4Width = 210;
-  const a4Height = 297;
-  const pdf = new jsPDF("p", "mm", "a4");
+  const pages = await Promise.all(Array.from(uploadBoxes).map(box => {
+    return new Promise(resolve => {
+      const tipo = box.querySelector("h4").innerText;
+      const imgInput = box.querySelector("input[type='file']");
+      const descInput = box.querySelector("input[type='text']");
 
-  const wrapper = document.createElement("div");
-  wrapper.style.position = "absolute";
-  wrapper.style.left = "-9999px";
-  wrapper.style.top = "0";
-  document.body.appendChild(wrapper);
+      const page = document.createElement("div");
+      page.style.width = "794px";
+      page.style.padding = "40px";
+      page.style.boxSizing = "border-box";
+      page.style.fontFamily = "Arial, sans-serif";
+      page.style.display = "flex";
+      page.style.flexDirection = "column";
+      page.style.justifyContent = "space-between";
+      page.style.alignItems = "center";
+      page.style.pageBreakAfter = "always";
 
-  for (let i = 0; i < uploadBoxes.length; i++) {
-    const box = uploadBoxes[i];
-    const tipo = box.querySelector("h4").innerText;
-    const imgInput = box.querySelector("input[type='file']");
-    const descInput = box.querySelector("input[type='text']");
+      const tipoLabel = document.createElement("h2");
+      tipoLabel.innerText = tipo;
+      tipoLabel.style.textAlign = "center";
 
-    const table = document.createElement("table");
-    table.style.width = "750px";
-table.style.margin = "0 auto";
-    table.style.height = "1123px";
-    table.style.borderCollapse = "collapse";
-    table.style.fontFamily = "Arial, sans-serif";
-    table.style.textAlign = "center";
-    table.style.tableLayout = "fixed";
+      const imgWrapper = document.createElement("div");
+      imgWrapper.style.display = "flex";
+      imgWrapper.style.alignItems = "center";
+      imgWrapper.style.justifyContent = "center";
+      imgWrapper.style.margin = "20px 0";
 
-    // riga 1 - titolo
-    const row1 = document.createElement("tr");
-    row1.style.height = "15%";
-    const cell1 = document.createElement("td");
-    cell1.innerText = tipo;
-    cell1.style.fontSize = "22px";
-    row1.appendChild(cell1);
-    table.appendChild(row1);
+      const desc = document.createElement("p");
+      desc.innerText = descInput.value;
+      desc.style.fontSize = "16px";
+      desc.style.textAlign = "center";
+      desc.style.lineHeight = "1.5";
+      desc.style.wordBreak = "break-word";
 
-    // riga 2 - immagine
-    const row2 = document.createElement("tr");
-    row2.style.height = "65%";
-    const cell2 = document.createElement("td");
-
-    if (imgInput.files.length > 0) {
       const file = imgInput.files[0];
-      const reader = new FileReader();
-      await new Promise((resolve) => {
+      if (file) {
+        const reader = new FileReader();
         reader.onload = () => {
           const img = new Image();
           img.src = reader.result;
-          img.style.maxWidth = "100%";
-          img.style.maxHeight = "100%";
-          img.style.objectFit = "contain";
+          img.style.width = "312px"; // 11 cm
+          img.style.height = "auto";
           img.onload = () => {
-            cell2.appendChild(img);
-            resolve();
+            imgWrapper.appendChild(img);
+            page.appendChild(tipoLabel);
+            page.appendChild(imgWrapper);
+            page.appendChild(desc);
+            resolve(page);
           };
         };
         reader.readAsDataURL(file);
-      });
-    } else {
-      cell2.innerText = "Nessuna immagine";
-    }
-    row2.appendChild(cell2);
-    table.appendChild(row2);
-
-    // riga 3 - descrizione
-    const row3 = document.createElement("tr");
-    row3.style.height = "20%";
-    const cell3 = document.createElement("td");
-    cell3.innerText = descInput.value;
-    cell3.style.fontSize = "16px";
-    cell3.style.padding = "10px";
-    cell3.style.wordBreak = "break-word";
-    row3.appendChild(cell3);
-    table.appendChild(row3);
-
-    wrapper.appendChild(table);
-
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    await html2canvas(table, { scale: 2 }).then(canvas => {
-      const imgData = canvas.toDataURL("image/jpeg", 1.0);
-      const imgProps = pdf.getImageProperties(imgData);
-      const ratio = imgProps.width / imgProps.height;
-      let width = a4Width;
-      let height = width / ratio;
-
-      if (height > a4Height) {
-        height = a4Height;
-        width = height * ratio;
+      } else {
+        imgWrapper.innerText = "Nessuna immagine";
+        page.appendChild(tipoLabel);
+        page.appendChild(imgWrapper);
+        page.appendChild(desc);
+        resolve(page);
       }
-
-      const x = (a4Width - width) / 2;
-      const y = 0;
-
-      if (i > 0) pdf.addPage();
-      pdf.addImage(imgData, "JPEG", x, y, width, height);
     });
+  }));
 
-    wrapper.removeChild(table);
-  }
+  const wrapper = document.createElement("div");
+  wrapper.style.width = "794px";
+  wrapper.style.display = "flex";
+  wrapper.style.flexDirection = "column";
 
-  document.body.removeChild(wrapper);
-  pdf.save(nota.replace(/\s+/g, "_") + ".pdf");
+  pages.forEach(p => wrapper.appendChild(p));
+
+  const previewArea = document.createElement("div");
+  previewArea.style.position = "absolute";
+  previewArea.style.left = "-9999px";
+  previewArea.appendChild(wrapper);
+  document.body.appendChild(previewArea);
+
+  setTimeout(() => {
+    html2pdf().from(wrapper).set({
+      margin: 0,
+      filename: nota.replace(/\s+/g, "_") + ".pdf",
+      image: { type: "jpeg", quality: 1 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "px", format: "a4", orientation: "portrait" },
+      pagebreak: { mode: ["css", "legacy"] }
+    }).save().then(() => {
+      document.body.removeChild(previewArea);
+    });
+  }, 500);
 });
