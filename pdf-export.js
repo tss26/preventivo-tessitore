@@ -2,87 +2,140 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
   const nota = document.getElementById("nota").value || "Preventivo";
   const uploadBoxes = document.querySelectorAll(".upload-box");
 
-  // Array per contenere tutti i rendering delle pagine
-  const pagesToRender = [];
-
   // Se non ci sono uploadBoxes, mostra un alert e non generare il PDF
   if (uploadBoxes.length === 0) {
     alert("Nessuna personalizzazione selezionata con immagini o descrizioni. Aggiungi delle sezioni prima di generare il PDF.");
     return;
   }
 
+  // Crea un unico contenitore per tutto il contenuto che andrà nella singola pagina PDF
+  const pdfContentContainer = document.createElement("div");
+  pdfContentContainer.style.width = "794px"; // Larghezza A4 a 96 DPI
+  pdfContentContainer.style.minHeight = "1123px"; // Altezza A4 a 96 DPI, min-height per espandersi se necessario
+  pdfContentContainer.style.padding = "20px"; // Ridotto il padding generale
+  pdfContentContainer.style.boxSizing = "border-box";
+  pdfContentContainer.style.fontFamily = "Arial, sans-serif";
+  pdfContentContainer.style.display = "flex";
+  pdfContentContainer.style.flexDirection = "column";
+  pdfContentContainer.style.alignItems = "center"; // Centra orizzontalmente il contenuto
+  pdfContentContainer.style.justifyContent = "flex-start"; // Allinea in alto
+  pdfContentContainer.style.overflow = "hidden"; // Nascondi overflow, html2pdf gestirà le pagine
+
+  // Aggiungi il titolo principale del PDF, come in BOZZA PP3.pdf
+  const mainTitle = document.createElement("h1");
+  mainTitle.innerText = (nota || "Preventivo").toUpperCase(); // Prende il titolo dalla nota
+  mainTitle.style.marginBottom = "20px";
+  mainTitle.style.color = "#000";
+  mainTitle.style.textAlign = "center";
+  pdfContentContainer.appendChild(mainTitle);
+
+  // Aggiungi le informazioni sulla quantità e sconto se vuoi che appaiano nel PDF
+  const quantitaInput = document.getElementById("quantita").value;
+  const scontoInput = document.getElementById("sconto").value;
+
+  if (quantitaInput || scontoInput !== "0") { // Mostra solo se ci sono valori
+      const infoText = document.createElement("p");
+      infoText.innerText = `Quantità: ${quantitaInput} - Sconto: ${scontoInput}%`;
+      infoText.style.fontSize = "16px";
+      infoText.style.marginBottom = "15px";
+      infoText.style.textAlign = "center";
+      pdfContentContainer.appendChild(infoText);
+  }
+
+
+  // Aggiungi la tabella dei prezzi se vuoi che appaia nel PDF
+  const tableContainer = document.querySelector(".table-container");
+  if (tableContainer) {
+    const clonedTable = tableContainer.cloneNode(true);
+    clonedTable.style.marginBottom = "20px";
+    // Rimuovi eventuali larghezze fisse che potrebbero causare problemi nel PDF
+    clonedTable.style.width = "auto"; // Lascia che html2pdf gestisca la larghezza
+    clonedTable.querySelector('table').style.width = "auto";
+    pdfContentContainer.appendChild(clonedTable);
+  }
+
+
+  // Contenitore per le sezioni di personalizzazione (immagini e descrizioni)
+  const customizationsSection = document.createElement("div");
+  customizationsSection.style.display = "flex";
+  customizationsSection.style.flexDirection = "column";
+  customizationsSection.style.width = "100%"; // Occupa tutta la larghezza disponibile
+  pdfContentContainer.appendChild(customizationsSection);
+
+
   for (const box of Array.from(uploadBoxes)) {
     const tipo = box.querySelector("h4").innerText;
-    // Seleziona gli input usando gli attributi data-* come nel tuo script.js
     const imgInput = box.querySelector("input[type='file'][data-upload]");
     const descInput = box.querySelector("input[type='text'][data-desc]");
 
-    const page = document.createElement("div");
-    page.style.width = "794px"; // A4 width at 96 DPI
-    page.style.height = "1123px"; // A4 height at 96 DPI
-    page.style.padding = "40px 10px"; // Modificato: padding a 40px sopra/sotto, 10px a destra/sinistra
-    page.style.boxSizing = "border-box";
-    page.style.fontFamily = "Arial, sans-serif";
-    page.style.display = "flex";
-    page.style.flexDirection = "column";
-    page.style.justifyContent = "flex-start";
-    page.style.alignItems = "flex-start"; // Modificato: Allinea gli elementi all'inizio (sinistra)
-    page.style.overflow = "hidden";
+    const itemContainer = document.createElement("div");
+    itemContainer.style.marginBottom = "25px"; // Spazio tra le personalizzazioni
+    itemContainer.style.padding = "10px";
+    itemContainer.style.border = "1px solid #eee";
+    itemContainer.style.borderRadius = "8px";
+    itemContainer.style.backgroundColor = "#fdfdfd";
+    itemContainer.style.width = "calc(100% - 20px)"; // Per compensare il padding
 
-    const tipoLabel = document.createElement("h2");
+    const tipoLabel = document.createElement("h3"); // h3 per i titoli delle personalizzazioni
     tipoLabel.innerText = tipo;
-    tipoLabel.style.textAlign = "left"; // Modificato: Allinea il testo a sinistra
-    tipoLabel.style.marginBottom = "20px";
+    tipoLabel.style.textAlign = "left";
+    tipoLabel.style.marginBottom = "10px";
     tipoLabel.style.color = "#007bff";
+    itemContainer.appendChild(tipoLabel);
+
+    const imgAndDescWrapper = document.createElement("div");
+    imgAndDescWrapper.style.display = "flex";
+    imgAndDescWrapper.style.alignItems = "flex-start"; // Allinea immagine e descrizione in alto
+    imgAndDescWrapper.style.gap = "15px"; // Spazio tra immagine e descrizione
+    imgAndDescWrapper.style.width = "100%"; // Occupa tutta la larghezza
 
     const imgWrapper = document.createElement("div");
+    imgWrapper.style.flexShrink = "0"; // Non si restringe
+    imgWrapper.style.width = "200px"; // Larghezza fissa per l'immagine
+    imgWrapper.style.height = "200px"; // Altezza fissa per l'immagine
+    imgWrapper.style.border = "1px dashed #999";
     imgWrapper.style.display = "flex";
     imgWrapper.style.alignItems = "center";
-    imgWrapper.style.justifyContent = "flex-start"; // Modificato: Allinea l'immagine a sinistra
-    imgWrapper.style.maxHeight = "500px";
-    imgWrapper.style.flex = "0 0 auto";
-    imgWrapper.style.marginBottom = "20px";
-    imgWrapper.style.width = "100%";
-    imgWrapper.style.overflow = "hidden";
+    imgWrapper.style.justifyContent = "center";
+    imgWrapper.style.overflow = "hidden"; // Importante per tagliare l'immagine se più grande
 
     const desc = document.createElement("p");
-    // Usa il valore dell'input testuale, con un fallback per prevenire 'null'
-    desc.innerText = descInput ? descInput.value : "";
-    desc.style.fontSize = "16px";
-    desc.style.textAlign = "left"; // Modificato: Allinea il testo a sinistra
-    desc.style.lineHeight = "1.5";
+    desc.innerText = "DESCRIZIONE: " + (descInput ? descInput.value : "Nessuna descrizione.");
+    desc.style.fontSize = "14px";
+    desc.style.textAlign = "left";
+    desc.style.lineHeight = "1.4";
     desc.style.wordBreak = "break-word";
-    desc.style.flex = "0 0 auto";
-    desc.style.maxWidth = "700px";
+    desc.style.flexGrow = "1"; // Permette alla descrizione di occupare lo spazio rimanente
+    desc.style.maxWidth = "calc(100% - 215px)"; // Larghezza rimanente dopo l'immagine + gap
 
-    page.appendChild(tipoLabel);
-    page.appendChild(imgWrapper);
-    page.appendChild(desc);
+    imgAndDescWrapper.appendChild(imgWrapper);
+    imgAndDescWrapper.appendChild(desc);
+    itemContainer.appendChild(imgAndDescWrapper);
 
     const file = imgInput ? imgInput.files[0] : null;
     if (file) {
-      await new Promise((resolve, reject) => { // Aggiunto reject per la gestione errori
+      await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => {
           const img = new Image();
           img.src = reader.result;
           img.style.maxWidth = "100%";
-          img.style.maxHeight = "500px";
+          img.style.maxHeight = "100%";
           img.style.objectFit = "contain";
           img.onload = () => {
             imgWrapper.appendChild(img);
-            resolve(); // Risolve la Promise quando l'immagine è caricata
+            resolve();
           };
-          img.onerror = (e) => { // Gestione errori caricamento immagine
+          img.onerror = (e) => {
             console.error("Errore caricamento immagine:", e);
-            imgWrapper.innerHTML = `<p style="color: red;">Impossibile caricare l'immagine.</p>`;
-            resolve(); // Risolve comunque per non bloccare il PDF, ma con un messaggio di errore
+            imgWrapper.innerHTML = `<p style="color: red; font-size: 10px; text-align: center;">Errore caricamento immagine</p>`;
+            resolve();
           };
         };
-        reader.onerror = (e) => { // Gestione errori FileReader
+        reader.onerror = (e) => {
           console.error("Errore FileReader:", e);
-          imgWrapper.innerHTML = `<p style="color: red;">Errore nella lettura del file immagine.</p>`;
-          resolve(); // Risolve comunque
+          imgWrapper.innerHTML = `<p style="color: red; font-size: 10px; text-align: center;">Errore lettura file</p>`;
+          resolve();
         };
         reader.readAsDataURL(file);
       });
@@ -90,58 +143,34 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       const noImgText = document.createElement("p");
       noImgText.innerText = "Nessuna immagine allegata";
       noImgText.style.color = "#888";
-      noImgText.style.width = "100%";
-      noImgText.style.textAlign = "left";
+      noImgText.style.fontSize = "12px";
+      noImgText.style.textAlign = "center";
       imgWrapper.appendChild(noImgText);
     }
-    pagesToRender.push(page);
+    customizationsSection.appendChild(itemContainer);
   }
 
-  if (pagesToRender.length === 0) {
-    alert("Nessuna sezione con personalizzazioni trovata da esportare nel PDF.");
-    return;
-  }
-
-  // Crea un wrapper temporaneo per html2pdf per processare tutte le pagine
-  const wrapper = document.createElement("div");
-  wrapper.style.width = "794px"; // Corrisponde alla larghezza della pagina per un rendering consistente
-  wrapper.style.display = "flex";
-  wrapper.style.flexDirection = "column";
-
-  pagesToRender.forEach((p, index) => {
-    wrapper.appendChild(p);
-    // Aggiungi un'interruzione di pagina dopo ogni pagina eccetto l'ultima
-    if (index < pagesToRender.length - 1) {
-      const pageBreak = document.createElement("div");
-      pageBreak.style.pageBreakAfter = "always";
-      wrapper.appendChild(pageBreak);
-    }
-  });
-
-  // Aggiungi il wrapper al body fuori dallo schermo per il rendering di html2pdf
+  // Aggiungi il contenitore principale al body (fuori dallo schermo) per il rendering
   const previewArea = document.createElement("div");
   previewArea.style.position = "absolute";
-  previewArea.style.left = "-9999px"; // Sposta fuori dallo schermo
-  previewArea.appendChild(wrapper);
+  previewArea.style.left = "-9999px";
+  previewArea.appendChild(pdfContentContainer); // Aggiungi il container unico qui
   document.body.appendChild(previewArea);
 
-  // Usa un piccolo timeout per assicurarsi che il DOM sia aggiornato prima che html2pdf renderizzi
   setTimeout(() => {
-    html2pdf().from(wrapper).set({
-      margin: 0,
+    html2pdf().from(pdfContentContainer).set({ // Ora html2pdf renderizza l'unico contenitore
+      margin: [10, 10, 10, 10], // Margini ridotti per massimizzare lo spazio
       filename: nota.replace(/\s+/g, "_") + ".pdf",
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: { scale: 2, logging: true, useCORS: true },
       jsPDF: { unit: "px", format: "a4", orientation: "portrait" },
-      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      pagebreak: { mode: 'avoid-all', before: '.page-break-before' } // Modificato per evitare rotture non desiderate
     }).save().then(() => {
-      // Pulisci l'area di preview temporanea dopo la generazione del PDF
       if (previewArea.parentNode) {
         previewArea.parentNode.removeChild(previewArea);
       }
       console.log("PDF generato con successo!");
     }).catch(error => {
-      // Pulisci anche in caso di errore
       if (previewArea.parentNode) {
         previewArea.parentNode.removeChild(previewArea);
       }
