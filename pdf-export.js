@@ -2,70 +2,87 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
   const nota = document.getElementById("nota").value || "Preventivo";
   const uploadBoxes = document.querySelectorAll(".upload-box");
 
+  // Array per contenere tutti i rendering delle pagine
   const pagesToRender = [];
+
+  // Se non ci sono uploadBoxes, mostra un alert e non generare il PDF
+  if (uploadBoxes.length === 0) {
+    alert("Nessuna personalizzazione selezionata con immagini o descrizioni. Aggiungi delle sezioni prima di generare il PDF.");
+    return;
+  }
 
   for (const box of Array.from(uploadBoxes)) {
     const tipo = box.querySelector("h4").innerText;
-    const imgInput = box.querySelector("input[type='file']");
-    const descInput = box.querySelector("input[type='text']");
+    // Seleziona gli input usando gli attributi data-* come nel tuo script.js
+    const imgInput = box.querySelector("input[type='file'][data-upload]");
+    const descInput = box.querySelector("input[type='text'][data-desc]");
 
     const page = document.createElement("div");
-    page.style.width = "794px"; // A4 width in px at 96 DPI
-    page.style.height = "1123px"; // A4 height in px at 96 DPI
-    page.style.padding = "40px";
+    page.style.width = "794px"; // A4 width at 96 DPI
+    page.style.height = "1123px"; // A4 height at 96 DPI
+    page.style.padding = "40px 10px"; [cite_start]// Modificato: padding a 40px sopra/sotto, 10px a destra/sinistra [cite: 2]
     page.style.boxSizing = "border-box";
     page.style.fontFamily = "Arial, sans-serif";
     page.style.display = "flex";
     page.style.flexDirection = "column";
     page.style.justifyContent = "flex-start";
-    page.style.alignItems = "flex-start";
-    page.style.overflow = "hidden"; // Ensures content stays within bounds
+    page.style.alignItems = "flex-start"; [cite_start]// Modificato: Allinea gli elementi all'inizio (sinistra) [cite: 2]
+    page.style.overflow = "hidden";
 
     const tipoLabel = document.createElement("h2");
     tipoLabel.innerText = tipo;
-    tipoLabel.style.textAlign = "left";
+    tipoLabel.style.textAlign = "left"; [cite_start]// Modificato: Allinea il testo a sinistra [cite: 2]
     tipoLabel.style.marginBottom = "20px";
     tipoLabel.style.color = "#007bff";
-    tipoLabel.style.width = "100%";
-
-    const desc = document.createElement("p");
-    desc.innerText = descInput.value;
-    desc.style.fontSize = "16px";
-    desc.style.textAlign = "left";
-    desc.style.lineHeight = "1.5";
-    desc.style.wordBreak = "break-word";
-    desc.style.marginBottom = "20px";
-    desc.style.flexShrink = "1";
-    desc.style.maxWidth = "100%";
-    desc.style.overflowWrap = "break-word"; // For long words
 
     const imgWrapper = document.createElement("div");
     imgWrapper.style.display = "flex";
     imgWrapper.style.alignItems = "center";
-    imgWrapper.style.justifyContent = "flex-start";
-    imgWrapper.style.maxHeight = "700px"; // Max height for image container
+    imgWrapper.style.justifyContent = "flex-start"; [cite_start]// Modificato: Allinea l'immagine a sinistra [cite: 2]
+    [cite_start]imgWrapper.style.maxHeight = "500px"; [cite: 2]
+    imgWrapper.style.flex = "0 0 auto";
     imgWrapper.style.marginBottom = "20px";
     imgWrapper.style.width = "100%";
     imgWrapper.style.overflow = "hidden";
+
+    const desc = document.createElement("p");
+    // Usa il valore dell'input testuale, con un fallback per prevenire 'null'
+    desc.innerText = descInput ? descInput.value : "";
+    desc.style.fontSize = "16px";
+    desc.style.textAlign = "left"; [cite_start]// Modificato: Allinea il testo a sinistra [cite: 2]
+    desc.style.lineHeight = "1.5";
+    desc.style.wordBreak = "break-word";
+    desc.style.flex = "0 0 auto";
+    desc.style.maxWidth = "700px";
 
     page.appendChild(tipoLabel);
     page.appendChild(imgWrapper);
     page.appendChild(desc);
 
-    const file = imgInput.files[0];
+    const file = imgInput ? imgInput.files[0] : null;
     if (file) {
-      await new Promise(resolve => {
+      await new Promise((resolve, reject) => { // Aggiunto reject per la gestione errori
         const reader = new FileReader();
         reader.onload = () => {
           const img = new Image();
           img.src = reader.result;
           img.style.maxWidth = "100%";
-          img.style.maxHeight = "100%";
-          img.style.objectFit = "contain"; // Ensures image fits without cropping
+          [cite_start]img.style.maxHeight = "500px"; [cite: 2]
+          img.style.objectFit = "contain";
           img.onload = () => {
             imgWrapper.appendChild(img);
-            resolve();
+            resolve(); // Risolve la Promise quando l'immagine è caricata
           };
+          img.onerror = (e) => { // Gestione errori caricamento immagine
+            console.error("Errore caricamento immagine:", e);
+            imgWrapper.innerHTML = `<p style="color: red;">Impossibile caricare l'immagine.</p>`;
+            resolve(); // Risolve comunque per non bloccare il PDF, ma con un messaggio di errore
+          };
+        };
+        reader.onerror = (e) => { // Gestione errori FileReader
+          console.error("Errore FileReader:", e);
+          imgWrapper.innerHTML = `<p style="color: red;">Errore nella lettura del file immagine.</p>`;
+          resolve(); // Risolve comunque
         };
         reader.readAsDataURL(file);
       });
@@ -81,19 +98,19 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
   }
 
   if (pagesToRender.length === 0) {
-    alert("Nessuna personalizzazione selezionata o nessuna immagine/descrizione aggiunta per generare il PDF.");
+    alert("Nessuna sezione con personalizzazioni trovata da esportare nel PDF.");
     return;
   }
 
-  // Create a temporary wrapper for html2pdf to process all pages
+  // Crea un wrapper temporaneo per html2pdf per processare tutte le pagine
   const wrapper = document.createElement("div");
-  wrapper.style.width = "794px"; // Match page width for consistent rendering
+  wrapper.style.width = "794px"; // Corrisponde alla larghezza della pagina per un rendering consistente
   wrapper.style.display = "flex";
   wrapper.style.flexDirection = "column";
 
   pagesToRender.forEach((p, index) => {
     wrapper.appendChild(p);
-    // Add page break after each page except the last one
+    // Aggiungi un'interruzione di pagina dopo ogni pagina eccetto l'ultima
     if (index < pagesToRender.length - 1) {
       const pageBreak = document.createElement("div");
       pageBreak.style.pageBreakAfter = "always";
@@ -101,14 +118,14 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     }
   });
 
-  // Append wrapper to body off-screen for html2pdf to render
+  // Aggiungi il wrapper al body fuori dallo schermo per il rendering di html2pdf
   const previewArea = document.createElement("div");
   previewArea.style.position = "absolute";
-  previewArea.style.left = "-9999px"; // Move off-screen
+  previewArea.style.left = "-9999px"; // Sposta fuori dallo schermo
   previewArea.appendChild(wrapper);
   document.body.appendChild(previewArea);
 
-  // Use a small timeout to ensure the DOM is updated before html2pdf renders
+  // Usa un piccolo timeout per assicurarsi che il DOM sia aggiornato prima che html2pdf renderizzi
   setTimeout(() => {
     html2pdf().from(wrapper).set({
       margin: 0,
@@ -118,18 +135,18 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       jsPDF: { unit: "px", format: "a4", orientation: "portrait" },
       pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     }).save().then(() => {
-      // Clean up the temporary preview area after PDF generation
+      // Pulisci l'area di preview temporanea dopo la generazione del PDF
       if (previewArea.parentNode) {
         previewArea.parentNode.removeChild(previewArea);
       }
       console.log("PDF generato con successo!");
     }).catch(error => {
-      // Clean up even if there's an error
+      // Pulisci anche in caso di errore
       if (previewArea.parentNode) {
         previewArea.parentNode.removeChild(previewArea);
       }
       console.error("Errore durante la generazione del PDF:", error);
-      alert("Errore durante la generazione del PDF. Controlla la console.");
+      alert("Errore durante la generazione del PDF. Controlla la console per maggiori dettagli.");
     });
   }, 100);
 });
