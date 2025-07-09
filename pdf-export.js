@@ -111,4 +111,71 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
           img.style.maxHeight = "100%";
           img.style.objectFit = "contain";
           img.onload = () => {
-            imgWrapper.appendChild(img
+            imgWrapper.appendChild(img);
+            resolve();
+          };
+          img.onerror = (e) => {
+            console.error("Errore caricamento immagine:", e);
+            // CORREZIONE QUI (riga 126): Aggiunto apici inversi (backticks)
+            imgWrapper.innerHTML = `<p style="color: red; font-size: 8px; text-align: center;">Errore caricamento immagine</p>`;
+            resolve();
+          };
+        };
+        reader.onerror = (e) => {
+          console.error("Errore FileReader:", e);
+          // CORREZIONE QUI (riga 132): Aggiunto apici inversi (backticks)
+          imgWrapper.innerHTML = `<p style="color: red; font-size: 8px; text-align: center;">Errore lettura file</p>`;
+          resolve();
+        };
+        reader.readAsDataURL(file);
+      });
+    } else {
+      const noImgText = document.createElement("p");
+      noImgText.innerText = "Nessuna immagine allegata";
+      noImgText.style.color = "#888";
+      noImgText.style.fontSize = "12px";
+      noImgText.style.textAlign = "left";
+      imgWrapper.appendChild(noImgText);
+    }
+    pagesToRender.push(pageDiv); // Aggiungi la pagina di personalizzazione (con la sua tabella 1x1) all\'array
+  }
+
+  // Wrapper finale per html2pdf per gestire i page break tra le pagine generate
+  const finalWrapper = document.createElement("div");
+  pagesToRender.forEach((p, index) => {
+    finalWrapper.appendChild(p);
+    if (index < pagesToRender.length - 1) {
+      const pageBreak = document.createElement("div");
+      pageBreak.style.pageBreakAfter = "always";
+      finalWrapper.appendChild(pageBreak);
+    }
+  });
+
+  const previewArea = document.createElement("div");
+  previewArea.style.position = "absolute";
+  previewArea.style.left = "-9999px";
+  previewArea.appendChild(finalWrapper);
+  document.body.appendChild(previewArea);
+
+  setTimeout(() => {
+    html2pdf().from(finalWrapper).set({
+      margin: 0,
+      filename: nota.replace(/\s+/g, "_") + ".pdf",
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2, logging: true, useCORS: true },
+      jsPDF: { unit: "px", format: "a4", orientation: "portrait" },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    }).save().then(() => {
+      if (previewArea.parentNode) {
+        previewArea.parentNode.removeChild(previewArea);
+      }
+      console.log("PDF generato con successo!");
+    }).catch(error => {
+      if (previewArea.parentNode) {
+        previewArea.parentNode.removeChild(previewArea);
+      }
+      console.error("Errore durante la generazione del PDF:", error);
+      alert("Errore durante la generazione del PDF. Controlla la console per maggiori dettagli.");
+    });
+  }, 100);
+});
