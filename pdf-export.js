@@ -1,4 +1,4 @@
-document.getElementById("generaPdf").addEventListener("click", async () => {
+erdocument.getElementById("generaPdf").addEventListener("click", async () => {
   const nota = document.getElementById("nota").value || "Preventivo";
   const uploadBoxes = document.querySelectorAll(".upload-box");
 
@@ -20,7 +20,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     pageDiv.style.fontFamily = "Arial, sans-serif";
     pageDiv.style.display = "flex";
     pageDiv.style.flexDirection = "column";
-    pageDiv.style.alignItems = "left"; // Centra il contenuto orizzontalmente (la tabella)
+    pageDiv.style.alignItems = "center"; // Centra il contenuto orizzontalmente (la tabella)
     pageDiv.style.justifyContent = "flex-start"; // Il contenuto inizia dall\'alto
     pageDiv.style.overflow = "hidden";
 
