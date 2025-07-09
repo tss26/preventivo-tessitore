@@ -20,26 +20,26 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     const page = document.createElement("div");
     page.style.width = "794px"; // A4 width at 96 DPI
     page.style.height = "1123px"; // A4 height at 96 DPI
-    page.style.padding = "40px 10px"; [cite_start]// Modificato: padding a 40px sopra/sotto, 10px a destra/sinistra [cite: 2]
+    page.style.padding = "40px 10px"; // Modificato: padding a 40px sopra/sotto, 10px a destra/sinistra
     page.style.boxSizing = "border-box";
     page.style.fontFamily = "Arial, sans-serif";
     page.style.display = "flex";
     page.style.flexDirection = "column";
     page.style.justifyContent = "flex-start";
-    page.style.alignItems = "flex-start"; [cite_start]// Modificato: Allinea gli elementi all'inizio (sinistra) [cite: 2]
+    page.style.alignItems = "flex-start"; // Modificato: Allinea gli elementi all'inizio (sinistra)
     page.style.overflow = "hidden";
 
     const tipoLabel = document.createElement("h2");
     tipoLabel.innerText = tipo;
-    tipoLabel.style.textAlign = "left"; [cite_start]// Modificato: Allinea il testo a sinistra [cite: 2]
+    tipoLabel.style.textAlign = "left"; // Modificato: Allinea il testo a sinistra
     tipoLabel.style.marginBottom = "20px";
     tipoLabel.style.color = "#007bff";
 
     const imgWrapper = document.createElement("div");
     imgWrapper.style.display = "flex";
     imgWrapper.style.alignItems = "center";
-    imgWrapper.style.justifyContent = "flex-start"; [cite_start]// Modificato: Allinea l'immagine a sinistra [cite: 2]
-    [cite_start]imgWrapper.style.maxHeight = "500px"; [cite: 2]
+    imgWrapper.style.justifyContent = "flex-start"; // Modificato: Allinea l'immagine a sinistra
+    imgWrapper.style.maxHeight = "500px";
     imgWrapper.style.flex = "0 0 auto";
     imgWrapper.style.marginBottom = "20px";
     imgWrapper.style.width = "100%";
@@ -49,7 +49,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     // Usa il valore dell'input testuale, con un fallback per prevenire 'null'
     desc.innerText = descInput ? descInput.value : "";
     desc.style.fontSize = "16px";
-    desc.style.textAlign = "left"; [cite_start]// Modificato: Allinea il testo a sinistra [cite: 2]
+    desc.style.textAlign = "left"; // Modificato: Allinea il testo a sinistra
     desc.style.lineHeight = "1.5";
     desc.style.wordBreak = "break-word";
     desc.style.flex = "0 0 auto";
@@ -67,7 +67,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
           const img = new Image();
           img.src = reader.result;
           img.style.maxWidth = "100%";
-          [cite_start]img.style.maxHeight = "500px"; [cite: 2]
+          img.style.maxHeight = "500px";
           img.style.objectFit = "contain";
           img.onload = () => {
             imgWrapper.appendChild(img);
