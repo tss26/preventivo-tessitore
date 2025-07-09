@@ -175,5 +175,5 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       console.error("Errore durante la generazione del PDF:", error);
       alert("Errore durante la generazione del PDF. Controlla la console per maggiori dettagli.");
     });
-  }, 100);
+  }, 100);
 });
