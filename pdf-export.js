@@ -7,101 +7,98 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     return;
   }
 
-  const pdfContentContainer = document.createElement("div");
-  // Dimensioni in pixel per 20cm x 18cm (circa 756px x 680px a 96 DPI)
-  pdfContentContainer.style.width = "756px";
-  pdfContentContainer.style.minHeight = "680px";
-  pdfContentContainer.style.padding = "10px";
-  pdfContentContainer.style.boxSizing = "border-box";
-  pdfContentContainer.style.fontFamily = "Arial, sans-serif";
-  pdfContentContainer.style.display = "flex";
-  pdfContentContainer.style.flexDirection = "column";
-  pdfContentContainer.style.alignItems = "center";
-  pdfContentContainer.style.justifyContent = "flex-start";
-  pdfContentContainer.style.overflow = "hidden";
+  const pagesToRender = []; // Array per contenere tutti i div delle pagine
 
-  // --- Nuova logica per l'intestazione principale su una riga ---
+  // --- Contenuto della prima pagina (Intestazione + Prima personalizzazione) ---
+  const firstPageDiv = document.createElement("div");
+  firstPageDiv.style.width = "794px"; // A4 width at 96 DPI
+  firstPageDiv.style.minHeight = "1123px"; // A4 height at 96 DPI (utilizzato come minHeight per gestire contenuto)
+  firstPageDiv.style.padding = "40px"; // Padding per la pagina
+  firstPageDiv.style.boxSizing = "border-box";
+  firstPageDiv.style.fontFamily = "Arial, sans-serif";
+  firstPageDiv.style.display = "flex";
+  firstPageDiv.style.flexDirection = "column";
+  firstPageDiv.style.alignItems = "center";
+  firstPageDiv.style.justifyContent = "flex-start";
+  firstPageDiv.style.overflow = "hidden"; // Importante per html2canvas
+
+  // Intestazione principale (Preventivo, Quantità, Titolo PDF)
   const topHeaderSummary = document.createElement("div");
   topHeaderSummary.style.display = "flex";
   topHeaderSummary.style.justifyContent = "space-between";
-  topHeaderSummary.style.alignItems = "center"; // Allinea verticalmente al centro
+  topHeaderSummary.style.alignItems = "center";
   topHeaderSummary.style.width = "100%";
-  topHeaderSummary.style.marginBottom = "15px"; // Spazio sotto questa riga
+  topHeaderSummary.style.marginBottom = "20px"; // Spazio sotto l'intestazione
 
   const selectedQuantity = parseInt(document.getElementById("quantita").value);
 
   const titleAndNota = document.createElement("span");
-  titleAndNota.innerText = `Preventivo: ${nota.toUpperCase()}`; // Combina "Preventivo" con il titolo PDF
-  titleAndNota.style.fontSize = "16px";
+  titleAndNota.innerText = `Preventivo: ${nota.toUpperCase()}`;
+  titleAndNota.style.fontSize = "18px";
   titleAndNota.style.fontWeight = "bold";
   topHeaderSummary.appendChild(titleAndNota);
 
   const quantityText = document.createElement("span");
   quantityText.innerText = `Quantità: ${selectedQuantity}`;
-  quantityText.style.fontSize = "16px";
+  quantityText.style.fontSize = "18px";
   topHeaderSummary.appendChild(quantityText);
 
-  pdfContentContainer.appendChild(topHeaderSummary);
-  // --- Fine Nuova logica per l'intestazione principale ---
+  firstPageDiv.appendChild(topHeaderSummary);
 
-
-  const customizationsSection = document.createElement("div");
-  customizationsSection.style.display = "flex";
-  customizationsSection.style.flexDirection = "column";
-  customizationsSection.style.width = "100%";
-  customizationsSection.style.marginTop = "10px";
-  pdfContentContainer.appendChild(customizationsSection);
-
-  for (const box of Array.from(uploadBoxes)) {
-    const tipo = box.querySelector("h4").innerText;
-    const imgInput = box.querySelector("input[type='file'][data-upload]");
-    const descInput = box.querySelector("input[type='text'][data-desc]");
+  // --- Processa la prima personalizzazione e aggiungila alla prima pagina ---
+  if (uploadBoxes.length > 0) {
+    const firstBox = uploadBoxes[0];
+    const tipo = firstBox.querySelector("h4").innerText;
+    const imgInput = firstBox.querySelector("input[type='file'][data-upload]");
+    const descInput = firstBox.querySelector("input[type='text'][data-desc]");
 
     const itemContainer = document.createElement("div");
-    itemContainer.style.marginBottom = "10px";
-    itemContainer.style.padding = "6px";
+    itemContainer.style.width = "100%";
+    itemContainer.style.padding = "10px";
     itemContainer.style.border = "1px solid #eee";
     itemContainer.style.borderRadius = "8px";
     itemContainer.style.backgroundColor = "#fdfdfd";
-    itemContainer.style.width = "calc(100% - 12px)";
+    itemContainer.style.boxSizing = "border-box";
+    itemContainer.style.marginBottom = "10px";
 
     const tipoLabel = document.createElement("h3");
     tipoLabel.innerText = tipo;
     tipoLabel.style.textAlign = "left";
-    tipoLabel.style.marginBottom = "5px";
+    tipoLabel.style.marginBottom = "10px";
     tipoLabel.style.color = "#007bff";
-    tipoLabel.style.fontSize = "16px";
+    tipoLabel.style.fontSize = "20px";
     itemContainer.appendChild(tipoLabel);
 
     const imgAndDescWrapper = document.createElement("div");
     imgAndDescWrapper.style.display = "flex";
-    imgAndDescWrapper.style.flexDirection = "column"; // CAMBIATO: Descrizione sotto l'immagine
-    imgAndDescWrapper.style.alignItems = "flex-start"; // Allinea immagine/descrizione a sinistra
-    imgAndDescWrapper.style.gap = "5px"; // Rimpicciolito il gap tra immagine e descrizione
+    imgAndDescWrapper.style.flexDirection = "column"; // Immagine sopra la descrizione
+    imgAndDescWrapper.style.alignItems = "center"; // Centra immagine e descrizione
     imgAndDescWrapper.style.width = "100%";
+    imgAndDescWrapper.style.gap = "10px"; // Spazio tra immagine e descrizione
 
     const imgWrapper = document.createElement("div");
     imgWrapper.style.flexShrink = "0";
-    imgWrapper.style.width = "302px"; // NUOVO: Immagine di 8cm (302px)
-    imgWrapper.style.height = "302px"; // NUOVO: Immagine di 8cm (302px)
+    imgWrapper.style.width = "302px"; // Immagine di 8cm (302px)
+    imgWrapper.style.height = "302px"; // Immagine di 8cm (302px)
     imgWrapper.style.border = "1px dashed #999";
     imgWrapper.style.display = "flex";
     imgWrapper.style.alignItems = "center";
     imgWrapper.style.justifyContent = "center";
     imgWrapper.style.overflow = "hidden";
     imgWrapper.style.marginBottom = "5px"; // Spazio tra immagine e descrizione
+    imgAndDescWrapper.appendChild(imgWrapper); // L'immagine viene aggiunta prima
 
     const desc = document.createElement("p");
     desc.innerText = "DESCRIZIONE: " + (descInput ? descInput.value : "Nessuna descrizione.");
-    desc.style.fontSize = "12px";
-    desc.style.textAlign = "left";
-    desc.style.lineHeight = "1.3";
+    desc.style.fontSize = "14px";
+    desc.style.textAlign = "center"; // Centra il testo della descrizione
+    desc.style.lineHeight = "1.4";
     desc.style.wordBreak = "break-word";
-    // Rimosse flexGrow e maxWidth, la descrizione occupa ora l'intera larghezza disponibile sotto l'immagine.
+    desc.style.maxWidth = "calc(100% - 20px)"; // Limita la larghezza per il padding
+    imgAndDescWrapper.appendChild(desc); // La descrizione viene aggiunta dopo
 
-    imgAndDescWrapper.appendChild(imgWrapper);
-    imgAndDescWrapper.appendChild(desc);
     itemContainer.appendChild(imgAndDescWrapper);
+    firstPageDiv.appendChild(itemContainer); // Aggiungi il primo itemContainer alla prima pagina
 
     const file = imgInput ? imgInput.files[0] : null;
     if (file) {
@@ -134,27 +131,145 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       const noImgText = document.createElement("p");
       noImgText.innerText = "Nessuna immagine allegata";
       noImgText.style.color = "#888";
-      noImgText.style.fontSize = "10px";
+      noImgText.style.fontSize = "12px";
       noImgText.style.textAlign = "center";
       imgWrapper.appendChild(noImgText);
     }
-    customizationsSection.appendChild(itemContainer);
   }
+
+  pagesToRender.push(firstPageDiv); // Aggiungi la prima pagina all'array
+
+
+  // --- Processa le personalizzazioni successive (ogni una su una nuova pagina) ---
+  for (let i = 1; i < uploadBoxes.length; i++) { // Inizia dal secondo box
+    const box = uploadBoxes[i];
+    const tipo = box.querySelector("h4").innerText;
+    const imgInput = box.querySelector("input[type='file'][data-upload]");
+    const descInput = box.querySelector("input[type='text'][data-desc]");
+
+    const newPageDiv = document.createElement("div");
+    newPageDiv.style.width = "794px"; // A4 width at 96 DPI
+    newPageDiv.style.minHeight = "1123px"; // A4 height at 96 DPI
+    newPageDiv.style.padding = "40px";
+    newPageDiv.style.boxSizing = "border-box";
+    newPageDiv.style.fontFamily = "Arial, sans-serif";
+    newPageDiv.style.display = "flex";
+    newPageDiv.style.flexDirection = "column";
+    newPageDiv.style.alignItems = "center";
+    newPageDiv.style.justifyContent = "flex-start";
+    newPageDiv.style.overflow = "hidden";
+
+    const itemContainer = document.createElement("div");
+    itemContainer.style.width = "100%";
+    itemContainer.style.padding = "10px";
+    itemContainer.style.border = "1px solid #eee";
+    itemContainer.style.borderRadius = "8px";
+    itemContainer.style.backgroundColor = "#fdfdfd";
+    itemContainer.style.boxSizing = "border-box";
+    itemContainer.style.marginBottom = "10px";
+
+    const tipoLabel = document.createElement("h3");
+    tipoLabel.innerText = tipo;
+    tipoLabel.style.textAlign = "left";
+    tipoLabel.style.marginBottom = "10px";
+    tipoLabel.style.color = "#007bff";
+    tipoLabel.style.fontSize = "20px";
+    itemContainer.appendChild(tipoLabel);
+
+    const imgAndDescWrapper = document.createElement("div");
+    imgAndDescWrapper.style.display = "flex";
+    imgAndDescWrapper.style.flexDirection = "column"; // Immagine sopra la descrizione
+    imgAndDescWrapper.style.alignItems = "center"; // Centra immagine e descrizione
+    imgAndDescWrapper.style.width = "100%";
+    imgAndDescWrapper.style.gap = "10px";
+
+    const imgWrapper = document.createElement("div");
+    imgWrapper.style.flexShrink = "0";
+    imgWrapper.style.width = "302px"; // Immagine di 8cm (302px)
+    imgWrapper.style.height = "302px"; // Immagine di 8cm (302px)
+    imgWrapper.style.border = "1px dashed #999";
+    imgWrapper.style.display = "flex";
+    imgWrapper.style.alignItems = "center";
+    imgWrapper.style.justifyContent = "center";
+    imgWrapper.style.overflow = "hidden";
+    imgWrapper.style.marginBottom = "5px";
+    imgAndDescWrapper.appendChild(imgWrapper);
+
+    const desc = document.createElement("p");
+    desc.innerText = "DESCRIZIONE: " + (descInput ? descInput.value : "Nessuna descrizione.");
+    desc.style.fontSize = "14px";
+    desc.style.textAlign = "center";
+    desc.style.lineHeight = "1.4";
+    desc.style.wordBreak = "break-word";
+    desc.style.maxWidth = "calc(100% - 20px)";
+    imgAndDescWrapper.appendChild(desc);
+
+    itemContainer.appendChild(imgAndDescWrapper);
+    newPageDiv.appendChild(itemContainer); // Aggiungi il itemContainer alla nuova pagina
+
+    const file = imgInput ? imgInput.files[0] : null;
+    if (file) {
+      await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = new Image();
+          img.src = reader.result;
+          img.style.maxWidth = "100%";
+          img.style.maxHeight = "100%";
+          img.style.objectFit = "contain";
+          img.onload = () => {
+            imgWrapper.appendChild(img);
+            resolve();
+          };
+          img.onerror = (e) => {
+            console.error("Errore caricamento immagine:", e);
+            imgWrapper.innerHTML = `<p style="color: red; font-size: 8px; text-align: center;">Errore caricamento immagine</p>`;
+            resolve();
+          };
+        };
+        reader.onerror = (e) => {
+          console.error("Errore FileReader:", e);
+          imgWrapper.innerHTML = `<p style="color: red; font-size: 8px; text-align: center;">Errore lettura file</p>`;
+          resolve();
+        };
+        reader.readAsDataURL(file);
+      });
+    } else {
+      const noImgText = document.createElement("p");
+      noImgText.innerText = "Nessuna immagine allegata";
+      noImgText.style.color = "#888";
+      noImgText.style.fontSize = "12px";
+      noImgText.style.textAlign = "center";
+      imgWrapper.appendChild(noImgText);
+    }
+    pagesToRender.push(newPageDiv); // Aggiungi la nuova pagina all'array
+  }
+
+  // Wrapper finale per html2pdf per gestire i page break
+  const finalWrapper = document.createElement("div");
+  pagesToRender.forEach((p, index) => {
+    finalWrapper.appendChild(p);
+    if (index < pagesToRender.length - 1) {
+      const pageBreak = document.createElement("div");
+      pageBreak.style.pageBreakAfter = "always";
+      finalWrapper.appendChild(pageBreak);
+    }
+  });
 
   const previewArea = document.createElement("div");
   previewArea.style.position = "absolute";
   previewArea.style.left = "-9999px";
-  previewArea.appendChild(pdfContentContainer);
+  previewArea.appendChild(finalWrapper);
   document.body.appendChild(previewArea);
 
   setTimeout(() => {
-    html2pdf().from(pdfContentContainer).set({
-      margin: [5, 5, 5, 5],
+    html2pdf().from(finalWrapper).set({
+      margin: 0, // I margini sono gestiti dal padding dei div delle pagine
       filename: nota.replace(/\s+/g, "_") + ".pdf",
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: { scale: 2, logging: true, useCORS: true },
-      jsPDF: { unit: "mm", format: [200, 180], orientation: "portrait" }, // 200mm base x 180mm altezza
-      pagebreak: { mode: 'avoid-all', before: '.page-break-before' }
+      jsPDF: { unit: "px", format: "a4", orientation: "portrait" }, // Formato A4 standard
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     }).save().then(() => {
       if (previewArea.parentNode) {
         previewArea.parentNode.removeChild(previewArea);
