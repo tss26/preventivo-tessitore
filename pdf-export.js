@@ -35,7 +35,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     td.innerText = `Contenuto Riga ${i}`; // Testo di esempio per ogni riga
     td.style.border = "4px solid #ADD8E6"; // Bordo di 1mm (circa 4px) colore celeste
     td.style.padding = "15px"; // Padding interno della cella
-    td.style.textAlign = "center"; // Centra il testo nella cella
+    td.style.textAlign = "left"; // Centra il testo nella cella
     td.style.fontSize = "18px"; // Dimensione del font
     tr.appendChild(td);
     tbody.appendChild(tr);
@@ -57,7 +57,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     pageDiv.style.fontFamily = "Arial, sans-serif";
     pageDiv.style.display = "flex";
     pageDiv.style.flexDirection = "column";
-    pageDiv.style.alignItems = "center"; // Centra il contenuto orizzontalmente
+    pageDiv.style.alignItems = "left"; // Centra il contenuto orizzontalmente
     pageDiv.style.justifyContent = "flex-start"; // Il contenuto inizia dall'alto
     pageDiv.style.overflow = "hidden";
 
@@ -85,7 +85,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     const imgAndDescWrapper = document.createElement("div");
     imgAndDescWrapper.style.display = "flex";
     imgAndDescWrapper.style.flexDirection = "column"; // Immagine sopra la descrizione
-    imgAndDescWrapper.style.alignItems = "center"; // Centra immagine e descrizione
+    imgAndDescWrapper.style.alignItems = "left"; // Centra immagine e descrizione
     imgAndDescWrapper.style.width = "100%"; // Adatta al 100% del contenitore padre
     imgAndDescWrapper.style.gap = "10px";
 
@@ -95,8 +95,8 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     imgWrapper.style.height = "auto"; // L'altezza si adatta al contenuto
     imgWrapper.style.border = "1px dashed #999";
     imgWrapper.style.display = "flex";
-    imgWrapper.style.alignItems = "center";
-    imgWrapper.style.justifyContent = "center";
+    imgWrapper.style.alignItems = "left";
+    imgWrapper.style.justifyContent = "left";
     imgWrapper.style.overflow = "hidden";
     imgWrapper.style.marginBottom = "5px";
     imgAndDescWrapper.appendChild(imgWrapper);
@@ -104,7 +104,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     const desc = document.createElement("p");
     desc.innerText = "DESCRIZIONE: " + (descInput ? descInput.value : "Nessuna descrizione.");
     desc.style.fontSize = "14px";
-    desc.style.textAlign = "center";
+    desc.style.textAlign = "left";
     desc.style.lineHeight = "1.4";
     desc.style.wordBreak = "break-word";
     desc.style.width = "100%"; // Adatta al 100% del contenitore padre
@@ -146,7 +146,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       noImgText.innerText = "Nessuna immagine allegata";
       noImgText.style.color = "#888";
       noImgText.style.fontSize = "12px";
-      noImgText.style.textAlign = "center";
+      noImgText.style.textAlign = "left";
       imgWrapper.appendChild(noImgText);
     }
     pagesToRender.push(pageDiv); // Aggiungi la pagina di personalizzazione all'array
