@@ -18,7 +18,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
   tablePageDiv.style.fontFamily = "Arial, sans-serif";
   tablePageDiv.style.display = "flex";
   tablePageDiv.style.flexDirection = "column";
-  tablePageDiv.style.alignItems = "center"; // Centra il contenuto orizzontalmente
+  tablePageDiv.style.alignItems = "left"; // Centra il contenuto orizzontalmente
   tablePageDiv.style.justifyContent = "flex-start";
   tablePageDiv.style.overflow = "hidden";
 
