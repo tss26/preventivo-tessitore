@@ -116,13 +116,13 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
           };
           img.onerror = (e) => {
             console.error("Errore caricamento immagine:", e);
-            imgWrapper.innerHTML = <p style="color: red; font-size: 8px; text-align: center;">Errore caricamento immagine</p>;
+            imgWrapper.innerHTML = `<p style="color: red; font-size: 8px; text-align: center;">Errore caricamento immagine</p>`; // Correzione qui
             resolve();
           };
         };
         reader.onerror = (e) => {
           console.error("Errore FileReader:", e);
-          imgWrapper.innerHTML = <p style="color: red; font-size: 8px; text-align: center;">Errore lettura file</p>;
+          imgWrapper.innerHTML = `<p style="color: red; font-size: 8px; text-align: center;">Errore lettura file</p>`; // Correzione qui
           resolve();
         };
         reader.readAsDataURL(file);
@@ -175,5 +175,5 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       console.error("Errore durante la generazione del PDF:", error);
       alert("Errore durante la generazione del PDF. Controlla la console per maggiori dettagli.");
     });
-  }, 100);
+  }, 100);
 });
