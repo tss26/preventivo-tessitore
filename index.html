@@ -1,97 +1,161 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Preventivo Abbigliamento</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#009dff">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generatore PDF Personalizzato</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #0056b3;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"],
+        input[type="file"] {
+            display: block;
+            width: calc(100% - 22px); /* Account for padding */
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Include padding in width */
+        }
+        input[type="file"] {
+            padding: 5px; /* Adjust padding for file input */
+        }
+        .upload-box {
+            border: 1px solid #a0d4f5;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            background-color: #eaf6fc;
+            position: relative; /* For remove button positioning */
+        }
+        .upload-box h4 {
+            margin-top: 0;
+            color: #007bff;
+            border-bottom: 1px solid #cce5ff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            color: white;
+        }
+        button#generaPdf {
+            background-color: #007bff;
+        }
+        button#generaPdf:hover {
+            background-color: #0056b3;
+        }
+        button#addUploadBox {
+            background-color: #28a745;
+        }
+        button#addUploadBox:hover {
+            background-color: #218838;
+        }
+        .remove-box-btn {
+            background-color: #dc3545;
+            color: white;
+            padding: 6px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            transition: background-color 0.2s ease;
+        }
+        .remove-box-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
 </head>
 <body>
-  <h1>Preventivo Abbigliamento</h1>
+    <div class="container">
+        <h1>Crea il tuo PDF</h1>
 
-  <div class="form-section">
-    <label>Codice interno:</label>
-    <input type="number" id="codiceInterno" step="0.01"/>
+        <label for="nota">Nome del file PDF (es. Preventivo_Cliente):</label>
+        <input type="text" id="nota" value="Documento_Personalizzato">
 
-    <label>Quantità:</label>
-    <input type="number" id="quantita" min="1" value="1"/>
+        <div id="uploadBoxesContainer">
+            <div class="upload-box">
+                <button type="button" class="remove-box-btn" onclick="this.closest('.upload-box').remove()">Rimuovi Sezione</button>
+                <h4>Sezione 1</h4>
+                <label for="imgInput_1">Seleziona Immagine:</label>
+                <input type="file" id="imgInput_1" accept="image/*">
+                <label for="descInput_1">Descrizione:</label>
+                <input type="text" id="descInput_1" placeholder="Inserisci la descrizione per questa sezione">
+            </div>
+        </div>
 
-    <label>Sconto:</label>
-    <select id="sconto">
-      <option value="0">Nessuno</option>
-      <option value="5">5%</option>
-      <option value="10">10%</option>
-      <option value="15">15%</option>
-      <option value="20">20%</option>
-    </select>
-
-    <label>Nota (Titolo PDF):</label>
-    <input type="text" id="nota" placeholder="Inserisci una nota (facoltativa)"/>
-  </div>
-
-  <h2>Personalizzazioni</h2>
-
-  <div class="custom-section">
-    <h3>Ricami</h3>
-    <div class="button-group" id="ricami">
-      <button data-key="K6">Ricamo lato cuore</button>
-      <button data-key="K7">Ricamo lato opposto</button>
-      <button data-key="K8">Ricamo manica SX</button>
-      <button data-key="K9">Ricamo manica DX</button>
-      <button data-key="K10">Ricamo sottocollo</button>
-      <button data-key="K11">Ricamo spalle</button>
-      <button data-key="M6">Nome ricamato</button>
+        <div class="button-group">
+            <button type="button" id="addUploadBox">Aggiungi Nuova Sezione</button>
+            <button type="button" id="generaPdf">Genera PDF</button>
+        </div>
     </div>
-  </div>
 
-  <div class="custom-section">
-    <h3>Stampe</h3>
-    <div class="button-group" id="stampe">
-      <button data-key="K14">Stampa fronte A4</button>
-      <button data-key="M14">Stampa fronte A3</button>
-      <button data-key="K15">Stampa lato cuore</button>
-      <button data-key="K16">Stampa manica SX</button>
-      <button data-key="K17">Stampa manica DX</button>
-      <button data-key="K18">Stampa sottocollo</button>
-      <button data-key="K19">Stampa spalle A4</button>
-      <button data-key="M19">Stampa spalle A3</button>
-      <button data-key="M15">Stampa nome</button>
-    </div>
-  </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="pdf-export.js"></script>
 
-  <div id="uploadContainer"></div>
+    <script>
+        document.getElementById("addUploadBox").addEventListener("click", () => {
+            const container = document.getElementById("uploadBoxesContainer");
+            // Trova l'indice più alto esistente per assicurare ID unici
+            let maxIndex = 0;
+            document.querySelectorAll('.upload-box').forEach(box => {
+                const h4Text = box.querySelector('h4').innerText;
+                const match = h4Text.match(/Sezione (\d+)/);
+                if (match && parseInt(match[1]) > maxIndex) {
+                    maxIndex = parseInt(match[1]);
+                }
+            });
+            const newIndex = maxIndex + 1; // Nuovo indice per la sezione
 
-  <h2>Prezzi unitari</h2>
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr id="quantitaRow">
-          <th>Quantità</th>
-          <th>5</th><th>12</th><th>20</th><th>25</th><th>30</th>
-          <th>50</th><th>75</th><th>100</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr id="prezzoBaseRow"><td>Prezzo base</td></tr>
-        <tr id="prezzoScontatoRow"><td>Prezzo scontato</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <button id="generaPdf">Genera PDF</button>
-
-  <script src="script.js"></script>
-  <script src="https://unpkg.com/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
-  <script src="pdf-export.js"></script>
-
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(() => console.log("Service Worker registrato!"))
-        .catch(e => console.error("Errore SW:", e));
-    }
-  </script>
+            const newBox = document.createElement("div");
+            newBox.className = "upload-box";
+            newBox.innerHTML = `
+                <button type="button" class="remove-box-btn" onclick="this.closest('.upload-box').remove()">Rimuovi Sezione</button>
+                <h4>Sezione ${newIndex}</h4>
+                <label for="imgInput_${newIndex}">Seleziona Immagine:</label>
+                <input type="file" id="imgInput_${newIndex}" accept="image/*">
+                <label for="descInput_${newIndex}">Descrizione:</label>
+                <input type="text" id="descInput_${newIndex}" placeholder="Inserisci la descrizione per questa sezione">
+            `;
+            container.appendChild(newBox);
+        });
+    </script>
 </body>
 </html>
