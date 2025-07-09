@@ -116,13 +116,13 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
           };
           img.onerror = (e) => {
             console.error("Errore caricamento immagine:", e);
-            imgWrapper.innerHTML = `<p style="color: red; font-size: 8px; text-align: center;">Errore caricamento immagine</p>`; // Correzione qui
+            imgWrapper.innerHTML = `<p style="color: red; font-size: 8px; text-align: center;">Errore caricamento immagine</p>`; // <-- CORREZIONE QUI
             resolve();
           };
         };
         reader.onerror = (e) => {
           console.error("Errore FileReader:", e);
-          imgWrapper.innerHTML = `<p style="color: red; font-size: 8px; text-align: center;">Errore lettura file</p>`; // Correzione qui
+          imgWrapper.innerHTML = `<p style="color: red; font-size: 8px; text-align: center;">Errore lettura file</p>`; // <-- CORREZIONE QUI
           resolve();
         };
         reader.readAsDataURL(file);
