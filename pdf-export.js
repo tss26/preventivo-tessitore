@@ -9,48 +9,23 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
 
   const pagesToRender = []; // Array per contenere tutti i div delle pagine
 
-  // --- Contenuto della prima pagina (Intestazione + Prima personalizzazione) ---
-  const firstPageDiv = document.createElement("div");
-  firstPageDiv.style.width = "794px"; // A4 width at 96 DPI
-  firstPageDiv.style.minHeight = "1123px"; // A4 height at 96 DPI (utilizzato come minHeight per gestire contenuto)
-  firstPageDiv.style.padding = "40px"; // Padding per la pagina
-  firstPageDiv.style.boxSizing = "border-box";
-  firstPageDiv.style.fontFamily = "Arial, sans-serif";
-  firstPageDiv.style.display = "flex";
-  firstPageDiv.style.flexDirection = "column";
-  firstPageDiv.style.alignItems = "center";
-  firstPageDiv.style.justifyContent = "flex-start";
-  firstPageDiv.style.overflow = "hidden"; // Importante per html2canvas
+  for (const box of Array.from(uploadBoxes)) {
+    // Crea un nuovo div per ogni pagina A4
+    const pageDiv = document.createElement("div");
+    pageDiv.style.width = "794px"; // Larghezza A4 a 96 DPI
+    pageDiv.style.minHeight = "1123px"; // Altezza A4 a 96 DPI
+    pageDiv.style.padding = "40px"; // Padding per la pagina
+    pageDiv.style.boxSizing = "border-box";
+    pageDiv.style.fontFamily = "Arial, sans-serif";
+    pageDiv.style.display = "flex";
+    pageDiv.style.flexDirection = "column";
+    pageDiv.style.alignItems = "center"; // Centra il contenuto orizzontalmente
+    pageDiv.style.justifyContent = "flex-start"; // Il contenuto inizia dall'alto
+    pageDiv.style.overflow = "hidden"; // Importante per html2canvas
 
-  // Intestazione principale (Preventivo, Quantità, Titolo PDF)
-  const topHeaderSummary = document.createElement("div");
-  topHeaderSummary.style.display = "flex";
-  topHeaderSummary.style.justifyContent = "space-between";
-  topHeaderSummary.style.alignItems = "center";
-  topHeaderSummary.style.width = "100%";
-  topHeaderSummary.style.marginBottom = "20px"; // Spazio sotto l'intestazione
-
-  const selectedQuantity = parseInt(document.getElementById("quantita").value);
-
-  const titleAndNota = document.createElement("span");
-  titleAndNota.innerText = `Preventivo: ${nota.toUpperCase()}`;
-  titleAndNota.style.fontSize = "18px";
-  titleAndNota.style.fontWeight = "bold";
-  topHeaderSummary.appendChild(titleAndNota);
-
-  const quantityText = document.createElement("span");
-  quantityText.innerText = `Quantità: ${selectedQuantity}`;
-  quantityText.style.fontSize = "18px";
-  topHeaderSummary.appendChild(quantityText);
-
-  firstPageDiv.appendChild(topHeaderSummary);
-
-  // --- Processa la prima personalizzazione e aggiungila alla prima pagina ---
-  if (uploadBoxes.length > 0) {
-    const firstBox = uploadBoxes[0];
-    const tipo = firstBox.querySelector("h4").innerText;
-    const imgInput = firstBox.querySelector("input[type='file'][data-upload]");
-    const descInput = firstBox.querySelector("input[type='text'][data-desc]");
+    const tipo = box.querySelector("h4").innerText;
+    const imgInput = box.querySelector("input[type='file'][data-upload]");
+    const descInput = box.querySelector("input[type='text'][data-desc]");
 
     const itemContainer = document.createElement("div");
     itemContainer.style.width = "100%";
@@ -59,7 +34,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     itemContainer.style.borderRadius = "8px";
     itemContainer.style.backgroundColor = "#fdfdfd";
     itemContainer.style.boxSizing = "border-box";
-    itemContainer.style.marginBottom = "10px";
+    itemContainer.style.marginBottom = "10px"; // Mantiene un piccolo margine in caso di futuri layout più complessi
 
     const tipoLabel = document.createElement("h3");
     tipoLabel.innerText = tipo;
@@ -98,7 +73,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     imgAndDescWrapper.appendChild(desc); // La descrizione viene aggiunta dopo
 
     itemContainer.appendChild(imgAndDescWrapper);
-    firstPageDiv.appendChild(itemContainer); // Aggiungi il primo itemContainer alla prima pagina
+    pageDiv.appendChild(itemContainer); // Aggiungi l'itemContainer alla pagina
 
     const file = imgInput ? imgInput.files[0] : null;
     if (file) {
@@ -135,117 +110,10 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       noImgText.style.textAlign = "center";
       imgWrapper.appendChild(noImgText);
     }
+    pagesToRender.push(pageDiv); // Aggiungi la pagina all'array
   }
 
-  pagesToRender.push(firstPageDiv); // Aggiungi la prima pagina all'array
-
-
-  // --- Processa le personalizzazioni successive (ogni una su una nuova pagina) ---
-  for (let i = 1; i < uploadBoxes.length; i++) { // Inizia dal secondo box
-    const box = uploadBoxes[i];
-    const tipo = box.querySelector("h4").innerText;
-    const imgInput = box.querySelector("input[type='file'][data-upload]");
-    const descInput = box.querySelector("input[type='text'][data-desc]");
-
-    const newPageDiv = document.createElement("div");
-    newPageDiv.style.width = "794px"; // A4 width at 96 DPI
-    newPageDiv.style.minHeight = "1123px"; // A4 height at 96 DPI
-    newPageDiv.style.padding = "40px";
-    newPageDiv.style.boxSizing = "border-box";
-    newPageDiv.style.fontFamily = "Arial, sans-serif";
-    newPageDiv.style.display = "flex";
-    newPageDiv.style.flexDirection = "column";
-    newPageDiv.style.alignItems = "center";
-    newPageDiv.style.justifyContent = "flex-start";
-    newPageDiv.style.overflow = "hidden";
-
-    const itemContainer = document.createElement("div");
-    itemContainer.style.width = "100%";
-    itemContainer.style.padding = "10px";
-    itemContainer.style.border = "1px solid #eee";
-    itemContainer.style.borderRadius = "8px";
-    itemContainer.style.backgroundColor = "#fdfdfd";
-    itemContainer.style.boxSizing = "border-box";
-    itemContainer.style.marginBottom = "10px";
-
-    const tipoLabel = document.createElement("h3");
-    tipoLabel.innerText = tipo;
-    tipoLabel.style.textAlign = "left";
-    tipoLabel.style.marginBottom = "10px";
-    tipoLabel.style.color = "#007bff";
-    tipoLabel.style.fontSize = "20px";
-    itemContainer.appendChild(tipoLabel);
-
-    const imgAndDescWrapper = document.createElement("div");
-    imgAndDescWrapper.style.display = "flex";
-    imgAndDescWrapper.style.flexDirection = "column"; // Immagine sopra la descrizione
-    imgAndDescWrapper.style.alignItems = "center"; // Centra immagine e descrizione
-    imgAndDescWrapper.style.width = "100%";
-    imgAndDescWrapper.style.gap = "10px";
-
-    const imgWrapper = document.createElement("div");
-    imgWrapper.style.flexShrink = "0";
-    imgWrapper.style.width = "302px"; // Immagine di 8cm (302px)
-    imgWrapper.style.height = "302px"; // Immagine di 8cm (302px)
-    imgWrapper.style.border = "1px dashed #999";
-    imgWrapper.style.display = "flex";
-    imgWrapper.style.alignItems = "center";
-    imgWrapper.style.justifyContent = "center";
-    imgWrapper.style.overflow = "hidden";
-    imgWrapper.style.marginBottom = "5px";
-    imgAndDescWrapper.appendChild(imgWrapper);
-
-    const desc = document.createElement("p");
-    desc.innerText = "DESCRIZIONE: " + (descInput ? descInput.value : "Nessuna descrizione.");
-    desc.style.fontSize = "14px";
-    desc.style.textAlign = "center";
-    desc.style.lineHeight = "1.4";
-    desc.style.wordBreak = "break-word";
-    desc.style.maxWidth = "calc(100% - 20px)";
-    imgAndDescWrapper.appendChild(desc);
-
-    itemContainer.appendChild(imgAndDescWrapper);
-    newPageDiv.appendChild(itemContainer); // Aggiungi il itemContainer alla nuova pagina
-
-    const file = imgInput ? imgInput.files[0] : null;
-    if (file) {
-      await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const img = new Image();
-          img.src = reader.result;
-          img.style.maxWidth = "100%";
-          img.style.maxHeight = "100%";
-          img.style.objectFit = "contain";
-          img.onload = () => {
-            imgWrapper.appendChild(img);
-            resolve();
-          };
-          img.onerror = (e) => {
-            console.error("Errore caricamento immagine:", e);
-            imgWrapper.innerHTML = `<p style="color: red; font-size: 8px; text-align: center;">Errore caricamento immagine</p>`;
-            resolve();
-          };
-        };
-        reader.onerror = (e) => {
-          console.error("Errore FileReader:", e);
-          imgWrapper.innerHTML = `<p style="color: red; font-size: 8px; text-align: center;">Errore lettura file</p>`;
-          resolve();
-        };
-        reader.readAsDataURL(file);
-      });
-    } else {
-      const noImgText = document.createElement("p");
-      noImgText.innerText = "Nessuna immagine allegata";
-      noImgText.style.color = "#888";
-      noImgText.style.fontSize = "12px";
-      noImgText.style.textAlign = "center";
-      imgWrapper.appendChild(noImgText);
-    }
-    pagesToRender.push(newPageDiv); // Aggiungi la nuova pagina all'array
-  }
-
-  // Wrapper finale per html2pdf per gestire i page break
+  // Wrapper finale per html2pdf per gestire i page break tra le pagine generate
   const finalWrapper = document.createElement("div");
   pagesToRender.forEach((p, index) => {
     finalWrapper.appendChild(p);
