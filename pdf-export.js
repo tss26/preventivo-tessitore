@@ -12,9 +12,9 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
   for (const box of Array.from(uploadBoxes)) {
     // Crea un nuovo div per ogni pagina A4
     const pageDiv = document.createElement("div");
-    pageDiv.style.width = "794px"; // Larghezza A4 a 96 DPI
+    pageDiv.style.width = "794px"; // Larghezza A4 a 96 DPI (21 cm)
     pageDiv.style.minHeight = "1123px"; // Altezza A4 a 96 DPI
-    pageDiv.style.padding = "40px"; // Padding per la pagina
+    pageDiv.style.padding = "40px 19px"; // NUOVO: Padding verticale 40px, orizzontale 19px per lato
     pageDiv.style.boxSizing = "border-box";
     pageDiv.style.fontFamily = "Arial, sans-serif";
     pageDiv.style.display = "flex";
@@ -28,7 +28,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     const descInput = box.querySelector("input[type='text'][data-desc]");
 
     const itemContainer = document.createElement("div");
-    itemContainer.style.width = "100%";
+    itemContainer.style.width = "756px"; // NUOVO: Larghezza massima 20cm (756px)
     itemContainer.style.padding = "10px";
     itemContainer.style.border = "1px solid #eee";
     itemContainer.style.borderRadius = "8px";
@@ -48,7 +48,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     imgAndDescWrapper.style.display = "flex";
     imgAndDescWrapper.style.flexDirection = "column"; // Immagine sopra la descrizione
     imgAndDescWrapper.style.alignItems = "center"; // Centra immagine e descrizione
-    imgAndDescWrapper.style.width = "100%";
+    imgAndDescWrapper.style.width = "100%"; // Occupa il 100% della larghezza del itemContainer (20cm)
     imgAndDescWrapper.style.gap = "10px"; // Spazio tra immagine e descrizione
 
     const imgWrapper = document.createElement("div");
@@ -69,7 +69,8 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     desc.style.textAlign = "center"; // Centra il testo della descrizione
     desc.style.lineHeight = "1.4";
     desc.style.wordBreak = "break-word";
-    desc.style.maxWidth = "calc(100% - 20px)"; // Limita la larghezza per il padding
+    // desc.style.maxWidth = "calc(100% - 20px)"; // Rimosso o non necessario se itemContainer ha larghezza fissa e padding interno gestito
+    desc.style.width = "100%"; // Occupa la larghezza disponibile del imgAndDescWrapper
     imgAndDescWrapper.appendChild(desc); // La descrizione viene aggiunta dopo
 
     itemContainer.appendChild(imgAndDescWrapper);
