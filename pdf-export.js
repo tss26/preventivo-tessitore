@@ -1,66 +1,67 @@
+
 document.getElementById("generaPdf").addEventListener("click", async () => {
-  const nota = document.getElementById("nota").value || "Preventivo";
+  const nota = document.getElementById("nota").value || "Titolo PDF";
   const uploadBoxes = document.querySelectorAll(".upload-box");
 
-  const pagesToRender = [];
+  const a4Width = 210;
+  const a4Height = 297;
+  const maxImgWidthPx = 560;
+  const maxImgHeightPx = 597;
 
-  for (const box of Array.from(uploadBoxes)) {
+  const pdf = new jsPDF("p", "mm", "a4");
+  const pxToMm = (px) => px * 0.264583;
+
+  for (const box of uploadBoxes) {
     const tipo = box.querySelector("h4").innerText;
     const imgInput = box.querySelector("input[type='file']");
     const descInput = box.querySelector("input[type='text']");
 
     const page = document.createElement("div");
-    page.style.width = "794px"; // A4 width at 96 DPI
-    page.style.height = "1123px"; // A4 height at 96 DPI
-    page.style.padding = "40px"; // Padding uniforme su tutti i lati
-    page.style.boxSizing = "border-box"; // Include padding nella larghezza/altezza
-    page.style.fontFamily = "Arial, sans-serif";
+    page.style.width = "794px";
+    page.style.height = "1123px";
     page.style.display = "flex";
     page.style.flexDirection = "column";
-    page.style.justifyContent = "flex-start"; // Allinea gli elementi dall'alto
-    page.style.alignItems = "flex-start"; // Allinea gli elementi a sinistra
-    page.style.overflow = "hidden"; // Nasconde contenuto che esce dai bordi
+    page.style.alignItems = "center";
+    page.style.justifyContent = "flex-start";
+    page.style.padding = "40px";
+    page.style.fontFamily = "Arial, sans-serif";
+    page.style.boxSizing = "border-box";
+    page.style.backgroundColor = "#fff";
 
-    const tipoLabel = document.createElement("h2");
-    tipoLabel.innerText = tipo;
-    tipoLabel.style.textAlign = "left"; // Allinea il testo a sinistra
-    tipoLabel.style.marginBottom = "20px";
-    tipoLabel.style.color = "#007bff";
-    tipoLabel.style.width = "100%"; // Occupa tutta la larghezza disponibile
+    const title = document.createElement("h2");
+    title.innerText = nota.toUpperCase();
+    title.style.marginBottom = "20px";
+    title.style.color = "#000";
+    title.style.textAlign = "center";
+    page.appendChild(title);
 
     const desc = document.createElement("p");
-    desc.innerText = descInput.value;
-    desc.style.fontSize = "16px";
-    desc.style.textAlign = "left"; // Allinea il testo a sinistra
-    desc.style.lineHeight = "1.5";
-    desc.style.wordBreak = "break-word"; // Forza la rottura delle parole lunghe
+    desc.innerText = "DESCRIZIONE: " + descInput.value;
     desc.style.marginBottom = "20px";
-    desc.style.flex = "0 1 auto"; // Permette alla descrizione di restringersi se necessario
-    desc.style.maxWidth = "100%"; // Limita la larghezza al 100% del contenitore
-    desc.style.overflowWrap = "break-word"; // Per una migliore gestione delle parole
-
-    const imgWrapper = document.createElement("div");
-    imgWrapper.style.display = "flex";
-    imgWrapper.style.alignItems = "center";
-    imgWrapper.style.justifyContent = "flex-start"; // Allinea l'immagine a sinistra
-    imgWrapper.style.flex = "1 1 auto"; // Permette all'immagine di crescere e restringersi per occupare lo spazio disponibile
-    imgWrapper.style.marginBottom = "20px";
-    imgWrapper.style.width = "100%"; // Occupa tutta la larghezza disponibile
-    imgWrapper.style.overflow = "hidden"; // Importante per nascondere parti dell'immagine che superano il wrapper
-
-    page.appendChild(tipoLabel);
-    page.appendChild(imgWrapper);
+    desc.style.fontSize = "16px";
+    desc.style.textAlign = "left";
+    desc.style.maxWidth = "100%";
+    desc.style.wordBreak = "break-word";
     page.appendChild(desc);
 
-    const file = imgInput.files[0];
-    if (file) {
-      await new Promise(resolve => {
-        const reader = new FileReader();
+    const imgWrapper = document.createElement("div");
+    imgWrapper.style.width = maxImgWidthPx + "px";
+    imgWrapper.style.height = maxImgHeightPx + "px";
+    imgWrapper.style.border = "1px dashed #999";
+    imgWrapper.style.display = "flex";
+    imgWrapper.style.alignItems = "center";
+    imgWrapper.style.justifyContent = "center";
+    imgWrapper.style.overflow = "hidden";
+
+    if (imgInput.files.length > 0) {
+      const file = imgInput.files[0];
+      const reader = new FileReader();
+      await new Promise((resolve) => {
         reader.onload = () => {
           const img = new Image();
           img.src = reader.result;
           img.style.maxWidth = "100%";
-          img.style.maxHeight = "calc(100% - 120px)"; // Stima di 120px per titolo e descrizione, potrebbe richiedere aggiustamenti
+          img.style.maxHeight = "100%";
           img.style.objectFit = "contain";
           img.onload = () => {
             imgWrapper.appendChild(img);
@@ -70,66 +71,42 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
         reader.readAsDataURL(file);
       });
     } else {
-      const noImgText = document.createElement("p");
-      noImgText.innerText = "Nessuna immagine allegata";
-      noImgText.style.color = "#888";
-      noImgText.style.width = "100%";
-      noImgText.style.textAlign = "left";
-      imgWrapper.appendChild(noImgText);
+      const fallback = document.createElement("span");
+      fallback.innerText = "Nessuna immagine allegata";
+      fallback.style.color = "#888";
+      imgWrapper.appendChild(fallback);
     }
-    pagesToRender.push(page);
+
+    page.appendChild(imgWrapper);
+
+    const hiddenWrapper = document.createElement("div");
+    hiddenWrapper.style.position = "absolute";
+    hiddenWrapper.style.left = "-9999px";
+    hiddenWrapper.appendChild(page);
+    document.body.appendChild(hiddenWrapper);
+
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    const canvas = await html2canvas(page, { scale: 2 });
+    const imgData = canvas.toDataURL("image/jpeg", 1.0);
+    const imgProps = pdf.getImageProperties(imgData);
+    const ratio = imgProps.width / imgProps.height;
+    let width = a4Width;
+    let height = width / ratio;
+
+    if (height > a4Height) {
+      height = a4Height;
+      width = height * ratio;
+    }
+
+    const x = (a4Width - width) / 2;
+    const y = (a4Height - height) / 2;
+
+    if (pdf.internal.getNumberOfPages() > 0) pdf.addPage();
+    pdf.addImage(imgData, "JPEG", x, y, width, height);
+
+    document.body.removeChild(hiddenWrapper);
   }
 
-  if (pagesToRender.length === 0) {
-    alert("Nessuna personalizzazione selezionata o nessuna immagine/descrizione aggiunta per generare il PDF.");
-    return;
-  }
-
-  const wrapper = document.createElement("div");
-  wrapper.style.width = "794px";
-  wrapper.style.display = "flex";
-  wrapper.style.flexDirection = "column";
-
-  // Aggiungi le pagine al wrapper
-  pagesToRender.forEach((p, index) => {
-    wrapper.appendChild(p);
-    // Aggiungi un page break tra le pagine, tranne l'ultima
-    if (index < pagesToRender.length - 1) {
-      const pageBreak = document.createElement("div");
-      pageBreak.style.pageBreakAfter = "always";
-      wrapper.appendChild(pageBreak);
-    }
-  });
-
-  // Reintroduci l'area di anteprima temporanea
-  const previewArea = document.createElement("div");
-  previewArea.style.position = "absolute";
-  previewArea.style.left = "-9999px"; // Sposta fuori schermo
-  previewArea.appendChild(wrapper);
-  document.body.appendChild(previewArea); // Aggiungi al body
-
-  // Aggiungi un piccolo ritardo per assicurare l'aggiornamento del DOM
-  setTimeout(() => {
-    html2pdf().from(wrapper).set({
-      margin: 0,
-      filename: nota.replace(/\s+/g, "_") + ".pdf",
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2, logging: true, useCORS: true },
-      jsPDF: { unit: "px", format: "a4", orientation: "portrait" },
-      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-    }).save().then(() => {
-      // Pulisci l'elemento temporaneo
-      if (previewArea.parentNode) {
-        previewArea.parentNode.removeChild(previewArea);
-      }
-      console.log("PDF generato con successo!");
-    }).catch(error => {
-      // Pulisci anche in caso di errore
-      if (previewArea.parentNode) {
-        previewArea.parentNode.removeChild(previewArea);
-      }
-      console.error("Errore durante la generazione del PDF:", error);
-      alert("Si è verificato un errore durante la generazione del PDF. Controlla la console per i dettagli.");
-    });
-  }, 100); // Ritardo di 100ms
+  pdf.save(nota.replace(/\s+/g, "_") + ".pdf");
 });
