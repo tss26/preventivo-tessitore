@@ -11,7 +11,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
 
   // --- Crea la pagina con la tabella ---
   const tablePageDiv = document.createElement("div");
-  tablePageDiv.style.width = "79px"; // Larghezza A4 a 96 DPI (21 cm)
+  tablePageDiv.style.width = "794px"; // Larghezza A4 a 96 DPI (21 cm)
   tablePageDiv.style.minHeight = "1123px"; // Altezza A4 a 96 DPI
   tablePageDiv.style.padding = "40px 19px"; // Padding come le pagine di personalizzazione
   tablePageDiv.style.boxSizing = "border-box";
