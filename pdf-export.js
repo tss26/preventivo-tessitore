@@ -18,13 +18,13 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
   tablePageDiv.style.fontFamily = "Arial, sans-serif";
   tablePageDiv.style.display = "flex";
   tablePageDiv.style.flexDirection = "column";
-  tablePageDiv.style.alignItems = "center";
+  tablePageDiv.style.alignItems = "center"; // Centra il contenuto orizzontalmente
   tablePageDiv.style.justifyContent = "flex-start";
   tablePageDiv.style.overflow = "hidden";
 
   const table = document.createElement("table");
   table.style.borderCollapse = "collapse"; // Per unire i bordi
-  table.style.width = "378px"; // NUOVO: Larghezza dimezzata (20cm / 2 = 10cm effettivi)
+  table.style.width = "392.5px"; // Larghezza desiderata (785px / 2 per il fattore di scala)
   table.style.marginTop = "50px"; // Margine superiore per allontanarla dal bordo della pagina
 
   const tbody = document.createElement("tbody");
@@ -66,7 +66,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     const descInput = box.querySelector("input[type='text'][data-desc]");
 
     const itemContainer = document.createElement("div");
-    itemContainer.style.width = "378px"; // NUOVO: Larghezza dimezzata anche per il riquadro personalizzazione
+    itemContainer.style.width = "392.5px"; // Larghezza desiderata (785px / 2)
     itemContainer.style.padding = "10px";
     itemContainer.style.border = "1px solid #eee";
     itemContainer.style.borderRadius = "8px";
@@ -86,13 +86,13 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     imgAndDescWrapper.style.display = "flex";
     imgAndDescWrapper.style.flexDirection = "column"; // Immagine sopra la descrizione
     imgAndDescWrapper.style.alignItems = "center"; // Centra immagine e descrizione
-    imgAndDescWrapper.style.width = "100%";
+    imgAndDescWrapper.style.width = "100%"; // Adatta al 100% del contenitore padre
     imgAndDescWrapper.style.gap = "10px";
 
     const imgWrapper = document.createElement("div");
     imgWrapper.style.flexShrink = "0";
-    imgWrapper.style.width = "302px"; // Immagine di 8cm (302px)
-    imgWrapper.style.height = "302px"; // Immagine di 8cm (302px)
+    imgWrapper.style.width = "100%"; // Adatta al 100% del contenitore padre
+    imgWrapper.style.height = "auto"; // L'altezza si adatta al contenuto
     imgWrapper.style.border = "1px dashed #999";
     imgWrapper.style.display = "flex";
     imgWrapper.style.alignItems = "center";
@@ -107,7 +107,8 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     desc.style.textAlign = "center";
     desc.style.lineHeight = "1.4";
     desc.style.wordBreak = "break-word";
-    desc.style.width = "100%";
+    desc.style.width = "100%"; // Adatta al 100% del contenitore padre
+    desc.style.maxWidth = "100%"; // NUOVO: Rimuove il limite fisso, si adatta al 100%
     imgAndDescWrapper.appendChild(desc);
 
     itemContainer.appendChild(imgAndDescWrapper);
@@ -148,7 +149,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       noImgText.style.textAlign = "center";
       imgWrapper.appendChild(noImgText);
     }
-    pagesToRender.push(pageDiv);
+    pagesToRender.push(pageDiv); // Aggiungi la pagina di personalizzazione all'array
   }
 
   // Wrapper finale per html2pdf per gestire i page break tra le pagine generate
@@ -170,11 +171,11 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
 
   setTimeout(() => {
     html2pdf().from(finalWrapper).set({
-      margin: 0,
+      margin: 0, // I margini sono gestiti dal padding dei div delle pagine
       filename: nota.replace(/\s+/g, "_") + ".pdf",
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: { scale: 2, logging: true, useCORS: true },
-      jsPDF: { unit: "px", format: "a4", orientation: "portrait" },
+      jsPDF: { unit: "px", format: "a4", orientation: "portrait" }, // Formato A4 standard
       pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     }).save().then(() => {
       if (previewArea.parentNode) {
