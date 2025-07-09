@@ -1,4 +1,4 @@
-erdocument.getElementById("generaPdf").addEventListener("click", async () => {
+document.getElementById("generaPdf").addEventListener("click", async () => {
   const nota = document.getElementById("nota").value || "Preventivo";
   const uploadBoxes = document.querySelectorAll(".upload-box");
 
@@ -116,13 +116,15 @@ erdocument.getElementById("generaPdf").addEventListener("click", async () => {
           };
           img.onerror = (e) => {
             console.error("Errore caricamento immagine:", e);
-            imgWrapper.innerHTML = `<p style="color: red; font-size: 8px; text-align: center;">Errore caricamento immagine</p>`; // <-- CORREZIONE QUI
+            // CORREZIONE QUI: Aggiunto apici inversi (backticks)
+            imgWrapper.innerHTML = `<p style="color: red; font-size: 8px; text-align: center;">Errore caricamento immagine</p>`;
             resolve();
           };
         };
         reader.onerror = (e) => {
           console.error("Errore FileReader:", e);
-          imgWrapper.innerHTML = `<p style="color: red; font-size: 8px; text-align: center;">Errore lettura file</p>`; // <-- CORREZIONE QUI
+          // CORREZIONE QUI: Aggiunto apici inversi (backticks)
+          imgWrapper.innerHTML = `<p style="color: red; font-size: 8px; text-align: center;">Errore lettura file</p>`;
           resolve();
         };
         reader.readAsDataURL(file);
