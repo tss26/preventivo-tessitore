@@ -7,22 +7,66 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
     return;
   }
 
+  // Funzione per ridimensionare l'immagine
+  async function resizeImage(file, maxWidth, maxHeight) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+
+          // Calcola le nuove dimensioni mantenendo le proporzioni
+          if (width > maxWidth) {
+            height *= maxWidth / width;
+            width = maxWidth;
+          }
+          if (height > maxHeight) {
+            width *= maxHeight / height;
+            height = maxHeight;
+          }
+
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Ottieni l'immagine ridimensionata in base64
+          const resizedDataUrl = canvas.toDataURL("image/jpeg", 0.9); // Qualità JPEG 0.9
+          resolve(resizedDataUrl);
+        };
+        img.onerror = (error) => {
+          console.error("Errore nel caricamento dell'immagine per ridimensionamento:", error);
+          reject(new Error("Errore nel caricamento dell'immagine."));
+        };
+      };
+      reader.onerror = (error) => {
+        console.error("Errore FileReader durante il ridimensionamento:", error);
+        reject(new Error("Errore nella lettura del file."));
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
   const pagesToRender = []; // Array per contenere tutti i div delle pagine
 
-  // --- Processa le personalizzazioni, ORA CIASCUNA ALL\'INTERNO DI UNA TABELLA 1X1 SULLA PROPRIA PAGINA ---
+  // --- Processa le personalizzazioni, ORA CIASCUNA ALL'INTERNO DI UNA TABELLA 1X1 SULLA PROPRIA PAGINA ---
   for (const box of Array.from(uploadBoxes)) {
     // Crea un nuovo div per ogni pagina A4
     const pageDiv = document.createElement("div");
     pageDiv.style.width = "794px"; // Larghezza A4 a 96 DPI (21 cm)
     pageDiv.style.minHeight = "1123px"; // Altezza A4 a 96 DPI
     pageDiv.style.paddingBottom = "10px";
-    pageDiv.style.paddingLeft = "10px";// Padding verticale 40px, orizzontale 19px per lato
+    pageDiv.style.paddingLeft = "10px"; // Padding verticale 40px, orizzontale 19px per lato
     pageDiv.style.boxSizing = "border-box";
     pageDiv.style.fontFamily = "Arial, sans-serif";
     pageDiv.style.display = "flex";
     pageDiv.style.flexDirection = "column";
     pageDiv.style.alignItems = "left"; // Centra il contenuto orizzontalmente (la tabella)
-    pageDiv.style.justifyContent = "flex-start"; // Il contenuto inizia dall\'alto
+    pageDiv.style.justifyContent = "flex-start"; // Il contenuto inizia dall'alto
     pageDiv.style.overflow = "hidden";
 
     // --- Crea la tabella 1x1 per questa personalizzazione ---
@@ -41,8 +85,8 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
 
     // --- Crea il box di personalizzazione (itemContainer) ---
     const tipo = box.querySelector("h4").innerText;
-    const imgInput = box.querySelector("input[type=\'file\'][data-upload]");
-    const descInput = box.querySelector("input[type=\'text\'][data-desc]");
+    const imgInput = box.querySelector("input[type='file'][data-upload]");
+    const descInput = box.querySelector("input[type='text'][data-desc]");
 
     const itemContainer = document.createElement("div");
     itemContainer.style.width = "100%"; // Occupa tutta la larghezza della cella della tabella
@@ -103,33 +147,25 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
 
     const file = imgInput ? imgInput.files[0] : null;
     if (file) {
-      await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const img = new Image();
-          img.src = reader.result;
-          img.style.maxWidth = "100%";
-          img.style.maxHeight = "100%";
-          img.style.objectFit = "contain";
-          img.onload = () => {
-            imgWrapper.appendChild(img);
-            resolve();
-          };
-          img.onerror = (e) => {
-            console.error("Errore caricamento immagine:", e);
-            // CORREZIONE QUI (riga 126): Aggiunto apici inversi (backticks)
-            imgWrapper.innerHTML = `<p style="color: red; font-size: 8px; text-align: center;">Errore caricamento immagine</p>`;
-            resolve();
-          };
-        };
-        reader.onerror = (e) => {
-          console.error("Errore FileReader:", e);
-          // CORREZIONE QUI (riga 132): Aggiunto apici inversi (backticks)
-          imgWrapper.innerHTML = `<p style="color: red; font-size: 8px; text-align: center;">Errore lettura file</p>`;
-          resolve();
-        };
-        reader.readAsDataURL(file);
-      });
+      try {
+        // Definisci le dimensioni massime desiderate per l'immagine nel PDF
+        // Considerando che la cella della tabella ha una larghezza di 392.5px (circa 10.3 cm a 96 DPI)
+        // e un padding di 15px per lato, l'area disponibile per l'immagine è 392.5 - (15*2) = 362.5px.
+        // Per l'altezza, consideriamo un valore conservativo per lasciare spazio alla descrizione.
+        const maxImageWidth = 360; // Max larghezza in pixel all'interno della cella (circa 9.5 cm)
+        const maxImageHeight = 400; // Max altezza in pixel (circa 10.5 cm)
+
+        const resizedImageDataUrl = await resizeImage(file, maxImageWidth, maxImageHeight);
+        const img = new Image();
+        img.src = resizedImageDataUrl;
+        img.style.maxWidth = "100%";
+        img.style.maxHeight = "100%";
+        img.style.objectFit = "contain"; // Mantiene le proporzioni e si adatta
+        imgWrapper.appendChild(img);
+      } catch (e) {
+        console.error("Errore durante il ridimensionamento o caricamento immagine:", e);
+        imgWrapper.innerHTML = `<p style="color: red; font-size: 8px; text-align: center;">Errore caricamento immagine</p>`;
+      }
     } else {
       const noImgText = document.createElement("p");
       noImgText.innerText = "Nessuna immagine allegata";
@@ -138,7 +174,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
       noImgText.style.textAlign = "left";
       imgWrapper.appendChild(noImgText);
     }
-    pagesToRender.push(pageDiv); // Aggiungi la pagina di personalizzazione (con la sua tabella 1x1) all\'array
+    pagesToRender.push(pageDiv); // Aggiungi la pagina di personalizzazione (con la sua tabella 1x1) all'array
   }
 
   // Wrapper finale per html2pdf per gestire i page break tra le pagine generate
