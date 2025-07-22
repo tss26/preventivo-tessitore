@@ -65,7 +65,6 @@ h1, h2, h3 {
   color: #007bff;
 }
 */
-
 /* style.css */
 
 body {
@@ -149,8 +148,9 @@ h1, h2, h3 {
 
 /* Stile per il logo all'interno del gruppo */
 .logo-in-group {
-    max-width: 80px; /* Larghezza del logo nel gruppo (regola a piacere) */
-    height: auto; /* Mantiene le proporzioni */
+    max-width: 57px; /* Circa 1.5 cm (1.5cm * 37.8px/cm) */
+    max-height: 57px; /* Per mantenere le proporzioni come quadrato */
+    height: auto; /* Mantiene le proporzioni se l'immagine originale non è quadrata */
     display: block; /* Importante per i margini e la centratura in flexbox */
 }
 
@@ -178,11 +178,8 @@ h1, h2, h3 {
         gap: 3px; /* Riduci lo spazio tra logo e bottone su schermi piccoli */
     }
     .logo-in-group {
-        max-width: 60px; /* Riduci la dimensione del logo su schermi piccoli */
-    }
-    .home-button-in-group {
-        padding: 6px 10px;
-        font-size: 12px;
+        max-width: 45px; /* Un po' più piccolo su mobile, es. circa 1.2 cm */
+        max-height: 45px;
     }
     /* Aumenta il padding superiore del body per non far sovrapporre il contenuto
        con il gruppo header-right-group, che è posizionato in modo assoluto. */
