@@ -18,12 +18,12 @@ document.addEventListener("DOMContentLoaded", function () {
   // Nota: I valori 'rivenditore' qui non sono usati per il calcolo finale del totale rivenditore,
   // che ora è derivato dal totale pubblico scontato. Rimangono per completezza.
   const workingPrices = {
-    FIN_ASOLA: { pubblico: 1.50, rivenditore: 1.00 }, 
-    FIN_RINFORZO: { pubblico: 2.00, rivenditore: 0.00 }, 
-    FIN_ANELLI: { pubblico: 0.60, rivenditore: 0.00 }, 
-    FIN_OCCHIELLO: { pubblico: 0.50, rivenditore: 0.00 }, 
-    FIN_CUCITURA: { pubblico: 0.50, rivenditore: 0.00 }, 
-    FIN_LACCETTO: { pubblico: 1.00, rivenditore: 0.70 } 
+    FIN_ASOLA: { pubblico: 1.50, rivenditore: 1.50 }, 
+    FIN_RINFORZO: { pubblico: 2.00, rivenditore: 2.00 }, 
+    FIN_ANELLI: { pubblico: 0.60, rivenditore: 0.60 }, 
+    FIN_OCCHIELLO: { pubblico: 0.60, rivenditore: 0.60 }, 
+    FIN_CUCITURA: { pubblico: 0.50, rivenditore: 0.50 }, 
+    FIN_LACCETTO: { pubblico: 1.00, rivenditore: 1.00 } 
   };
 
   // Lavorazioni per le quali NON deve essere creato un upload box
