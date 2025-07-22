@@ -16,12 +16,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Costi delle lavorazioni: PUBBLICO e RIVENDITORE (ORA CORRETTI SECONDO EXCEL)
   const workingPrices = {
-    FIN_ASOLA: { pubblico: 1.50, rivenditore: 1.00 }, // Corretto
-    FIN_RINFORZO: { pubblico: 2.00, rivenditore: 0.00 }, // Corretto
-    FIN_ANELLI: { publico: 0.60, rivenditore: 0.00 }, // Corretto
-    FIN_OCCHIELLO: { pubblico: 0.50, rivenditore: 0.00 }, // Corretto
-    FIN_CUCITURA: { pubblico: 0.50, rivenditore: 0.00 }, // Corretto
-    FIN_LACCETTO: { pubblico: 1.00, rivenditore: 0.70 } // Corretto
+    FIN_ASOLA: { pubblico: 1.50, rivenditore: 1.50 }, // Corretto
+    FIN_RINFORZO: { pubblico: 2.00, rivenditore: 2.00 }, // Corretto
+    FIN_ANELLI: { publico: 0.60, rivenditore: 0.60 }, // Corretto
+    FIN_OCCHIELLO: { pubblico: 0.60, rivenditore: 0.60 }, // Corretto
+    FIN_CUCITURA: { pubblico: 0.50, rivenditore: 0.50 }, // Corretto
+    FIN_LACCETTO: { pubblico: 1.00, rivenditore: 1.00 } // Corretto
   };
 
   // Lavorazioni per le quali NON deve essere creato un upload box
