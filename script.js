@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", function () {
     K1: "Ricamo Centro Petto",
     K8: "Ricamo manica SX",
     K9: "Ricamo manica DX",
+    K4: "Ricamo Coscia SX",
+    K5: "Ricamo Coscia DX",
     K10: "Ricamo sottocollo",
     K11: "Ricamo spalle",
     M6: "Nome ricamato",
@@ -23,8 +25,8 @@ document.addEventListener("DOMContentLoaded", function () {
     K19: "Stampa spalle A4",
     M19: "Stampa spalle A3",
     M15: "Stampa nome",
-    K22: "Stampa Stampa Coscia SX",
-    K23: "Stampa Stampa Coscia DX"
+    K22: "Stampa Coscia SX",
+    K23: "Stampa Coscia DX"
   };
 
   function creaUploadBox(key, label) {
@@ -54,6 +56,8 @@ document.addEventListener("DOMContentLoaded", function () {
     let costo = 0;
     const prezzi = {
       K1: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3],
+      K4: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3],
+      K5: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3],
       K6: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3],
       K7: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3],
       K8: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3],
