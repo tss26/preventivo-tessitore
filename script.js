@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const labelMap = {
     K6: "Ricamo lato cuore",
     K7: "Ricamo lato opposto",
+    K1: "Ricamo Centro Petto",
     K8: "Ricamo manica SX",
     K9: "Ricamo manica DX",
     K10: "Ricamo sottocollo",
