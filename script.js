@@ -16,12 +16,15 @@ document.addEventListener("DOMContentLoaded", function () {
     K14: "Stampa fronte A4",
     M14: "Stampa fronte A3",
     K15: "Stampa lato cuore",
+    K21: "Stampa Centro Petto",
     K16: "Stampa manica SX",
     K17: "Stampa manica DX",
     K18: "Stampa sottocollo",
     K19: "Stampa spalle A4",
     M19: "Stampa spalle A3",
-    M15: "Stampa nome"
+    M15: "Stampa nome",
+    K22: "Stampa Stampa Coscia SX",
+    K23: "Stampa Stampa Coscia DX"
   };
 
   function creaUploadBox(key, label) {
@@ -50,6 +53,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function getCostoPersonalizzazioni(qty) {
     let costo = 0;
     const prezzi = {
+      K1: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3],
       K6: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3],
       K7: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3],
       K8: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3],
@@ -58,6 +62,9 @@ document.addEventListener("DOMContentLoaded", function () {
       K11: [10, 10, 10, 8.5, 8.3, 7.5, 8, 8],
       M6: [3.5, 3.2, 3, 2.8, 2.6, 2.4, 2.2, 2],
       K14: [4.5, 4, 3.25, 3, 2.5, 2.3, 2, 1.35],
+      K21: [4.5, 4, 3.25, 3, 2.5, 2.3, 2, 1.35],
+      K22: [4.5, 4, 3.25, 3, 2.5, 2.3, 2, 1.35],
+      K23: [4.5, 4, 3.25, 3, 2.5, 2.3, 2, 1.35],
       K15: [4.5, 4, 3.25, 3, 2.5, 2.3, 2, 1.35],
       K16: [4.5, 4, 3.25, 3, 2.5, 2.3, 2, 1.35],
       K17: [4.5, 4, 3.25, 3, 2.5, 2.3, 2, 1.35],
