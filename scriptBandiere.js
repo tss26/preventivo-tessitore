@@ -15,10 +15,12 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   // Costi delle lavorazioni: PUBBLICO e RIVENDITORE
+  // Nota: I valori 'rivenditore' qui non sono usati per il calcolo finale del totale rivenditore,
+  // che ora è derivato dal totale pubblico scontato. Rimangono per completezza.
   const workingPrices = {
     FIN_ASOLA: { pubblico: 1.50, rivenditore: 1.00 }, 
     FIN_RINFORZO: { pubblico: 2.00, rivenditore: 0.00 }, 
-    FIN_ANELLI: { pubblico: 0.60, rivenditore: 0.00 }, // Correzione precedente già inclusa
+    FIN_ANELLI: { pubblico: 0.60, rivenditore: 0.00 }, 
     FIN_OCCHIELLO: { pubblico: 0.50, rivenditore: 0.00 }, 
     FIN_CUCITURA: { pubblico: 0.50, rivenditore: 0.00 }, 
     FIN_LACCETTO: { pubblico: 1.00, rivenditore: 0.70 } 
@@ -43,7 +45,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const larghezzaCm = parseFloat(document.getElementById("larghezzaCm").value) || 0;
     const altezzaCm = parseFloat(document.getElementById("altezzaCm").value) || 0;
     const quantita = parseFloat(document.getElementById("quantita").value) || 1;
-    const scontoApplicato = parseFloat(document.getElementById("scontoRivenditore").value) || 0; // Rinominato per chiarezza
+    const scontoPercentuale = parseFloat(document.getElementById("scontoRivenditore").value) || 0; 
 
     const larghezzaM = larghezzaCm / 100;
     const altezzaM = altezzaCm / 100;
@@ -51,26 +53,23 @@ document.addEventListener("DOMContentLoaded", function () {
     const perimetroM = 2 * (larghezzaM + altezzaM); // Perimetro in metri
 
     const dettagli = [];
-    let totalePubblico = 0;
-    let totaleRivenditore = 0;
+    let totalePubblicoNonScontato = 0; // Totale per il pubblico senza sconto
 
     // 1. Costo Materiale Base (Bandiera)
     const materialeButton = document.querySelector('#materialeBandiera button.active');
     if (materialeButton) {
       const prezzoMqPubblico = parseFloat(materialeButton.dataset.prezzomqPubblico) || 0;
-      const prezzoMqRivenditore = parseFloat(materialeButton.dataset.prezzomqRivenditore) || 0;
+      // Il prezzoMqRivenditore non è più usato per il calcolo diretto del rivenditore
 
       const costoPubblicoMateriale = areaMq * prezzoMqPubblico;
-      const costoRivenditoreMateriale = areaMq * prezzoMqRivenditore;
 
-      if (costoPubblicoMateriale > 0 || costoRivenditoreMateriale > 0) { 
+      if (costoPubblicoMateriale > 0) { 
         dettagli.push({
           desc: labelMap[materialeButton.dataset.key],
           pubblico: costoPubblicoMateriale * quantita,
-          rivenditore: costoRivenditoreMateriale * quantita
+          rivenditore: 0 // Placeholder, verrà calcolato in seguito
         });
-        totalePubblico += costoPubblicoMateriale * quantita;
-        totaleRivenditore += costoRivenditoreMateriale * quantita;
+        totalePubblicoNonScontato += costoPubblicoMateriale * quantita;
       }
     }
 
@@ -80,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const inputValue = parseFloat(inputField.value) || 0; 
       const key = inputField.dataset.key;
       const unit = inputField.dataset.unit;
-      const prices = workingPrices[key];
+      const prices = workingPrices[key]; // Usiamo solo prices.pubblico per il calcolo base
 
       let valoreBasePerCalcolo; 
 
@@ -94,23 +93,19 @@ document.addEventListener("DOMContentLoaded", function () {
       
       if (valoreBasePerCalcolo > 0 && prices) { 
           let costoPubblicoLavorazione = 0;
-          let costoRivenditoreLavorazione = 0;
           
           if (unit === "meter") {
             costoPubblicoLavorazione = prices.pubblico * valoreBasePerCalcolo;
-            costoRivenditoreLavorazione = prices.rivenditore * valoreBasePerCalcolo;
           } else if (unit === "piece") {
             costoPubblicoLavorazione = prices.pubblico * valoreBasePerCalcolo;
-            costoRivenditoreLavorazione = prices.rivenditore * valoreBasePerCalcolo;
           }
 
           dettagli.push({
             desc: `${labelMap[key]} (${valoreBasePerCalcolo.toFixed(2)} ${unit === 'meter' ? 'Mt' : 'Pz'})`,
             pubblico: costoPubblicoLavorazione * quantita,
-            rivenditore: costoRivenditoreLavorazione * quantita
+            rivenditore: 0 // Placeholder, verrà calcolato in seguito
           });
-          totalePubblico += costoPubblicoLavorazione * quantita;
-          totaleRivenditore += costoRivenditoreLavorazione * quantita;
+          totalePubblicoNonScontato += costoPubblicoLavorazione * quantita;
 
           if (!noUploadBoxKeys.includes(key) && !document.getElementById(`upload-${key}`)) {
             const box = creaUploadBox(key, labelMap[key]);
@@ -125,13 +120,17 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
 
-    // Applica lo sconto solo al totale Pubblico
-    const totalePubblicoScontato = totalePubblico * (1 - (scontoApplicato / 100));
+    // Calcola il prezzo al rivenditore per ogni dettaglio e per il totale, derivandolo dal prezzo pubblico
+    dettagli.forEach(item => {
+        item.rivenditore = item.pubblico * (1 - (scontoPercentuale / 100));
+    });
+
+    const totaleRivenditoreFinale = totalePubblicoNonScontato * (1 - (scontoPercentuale / 100));
 
     return {
       dettagli: dettagli,
-      totalePubblico: totalePubblicoScontato, // Ora include lo sconto
-      totaleRivenditore: totaleRivenditore // Rimane senza sconto
+      totalePubblico: totalePubblicoNonScontato, // Il prezzo pubblico è ora sempre non scontato
+      totaleRivenditore: totaleRivenditoreFinale // Il prezzo rivenditore è il pubblico scontato
     };
   }
 
