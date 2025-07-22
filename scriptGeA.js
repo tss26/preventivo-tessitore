@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", function () {
   const quantitaList = [5, 12, 20, 25, 30, 50, 75, 100];
   const personalizzazioni = {};
@@ -36,14 +35,18 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function getMargine(qty) {
-    if (qty <= 5) return 0.9;
-    if (qty <= 12) return 0.75;
-    if (qty <= 20) return 0.5;
-    if (qty <= 25) return 0.4;
-    if (qty <= 30) return 0.35;
-    if (qty <= 50) return 0.32;
-    if (qty <= 75) return 0.31;
-    return 0.3;
+    let margine;
+    if (qty <= 5) margine = 0.9;
+    else if (qty <= 12) margine = 0.75;
+    else if (qty <= 20) margine = 0.5;
+    else if (qty <= 25) margine = 0.4;
+    else if (qty <= 30) margine = 0.35;
+    else if (qty <= 50) margine = 0.32;
+    else if (qty <= 75) margine = 0.31;
+    else margine = 0.3;
+
+    // Moltiplica il margine per 2 per i gadget/accessori
+    return margine * 2;
   }
 
   function getCostoPersonalizzazioni(qty) {
