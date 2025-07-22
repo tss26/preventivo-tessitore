@@ -3,15 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Preventivo Abbigliamento</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Preventivo Gadget e Accessori</title> <link rel="stylesheet" href="style.css" />
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#009dff">
 </head>
 <body>
-  <h1>Preventivo Abbigliamento</h1>
-
-  <div class="form-section">
+  <h1>Preventivo Gadget e Accessori</h1> <div class="form-section">
     <label>Codice interno:</label>
     <input type="number" id="codiceInterno" step="0.01"/>
 
@@ -54,16 +51,14 @@
     <div class="button-group" id="stampe">
       <button data-key="K14">Stampa fronte A4</button>
       <button data-key="M14">Stampa fronte A3</button>
-      <button data-key="K15">Stampa lato cuore</button>
-      <button data-key="K15">Stampa Centro Petto</button>
-      <button data-key="K16">Stampa manica SX</button>
-      <button data-key="K17">Stampa manica DX</button>
-      <button data-key="K18">Stampa sottocollo</button>
-      <button data-key="K19">Stampa spalle A4</button>
-      <button data-key="M19">Stampa spalle A3</button>
+      <button data-key="K15">Stampa dim lato cuore</button>
+      <button data-key="K16">Stampa lato SX</button>
+      <button data-key="K17">Stampa lato DX</button>
+      
+      <button data-key="K19">Stampa Retro A4</button>
+      <button data-key="M19">Stampa Retro A3</button>
       <button data-key="M15">Stampa nome</button>
-      <button data-key="K15">Stampa Coscia SX</button>
-      <button data-key="K15">Stampa Coscia DX</button>
+      
     </div>
   </div>
 
@@ -88,8 +83,7 @@
 
   <button id="generaPdf">Genera PDF</button>
 
-  <script src="script.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="scriptGeA.js"></script> <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="pdf-export.js"></script>
 
   <script>
