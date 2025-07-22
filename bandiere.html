@@ -11,18 +11,25 @@
   <h1>Preventivo Bandiere</h1>
 
   <div class="form-section">
-    <label for="larghezzaCm">Larghezza (cm):</label>
-    <input type="number" id="larghezzaCm" min="10" value="150"/>
-
-    <label for="altezzaCm">Altezza (cm):</label>
-    <input type="number" id="altezzaCm" min="10" value="100"/>
-
-    <label for="quantita">Quantità:</label>
-    <input type="number" id="quantita" min="1" value="1"/>
+    <div class="form-grid">
+      <div>
+        <label for="larghezzaCm">Larghezza (cm):</label>
+        <input type="number" id="larghezzaCm" min="10" value="150"/>
+      </div>
+      <div>
+        <label for="altezzaCm">Altezza (cm):</label>
+        <input type="number" id="altezzaCm" min="10" value="100"/>
+      </div>
+      <div>
+        <label for="quantita">Quantità:</label>
+        <input type="number" id="quantita" min="1" value="1"/>
+      </div>
+      <div>
+        <label for="scontoRivenditore">Sconto (%) sul Totale Rivenditore:</label>
+        <input type="number" id="scontoRivenditore" value="35" min="0" max="100" readonly/> 
+      </div>
+    </div>
     
-    <label for="scontoRivenditore">Sconto (%) sul Totale Rivenditore:</label>
-    <input type="number" id="scontoRivenditore" value="35" min="0" max="100" readonly/> 
-
     <label for="nota">Nota (Titolo PDF):</label>
     <input type="text" id="nota" placeholder="Inserisci una nota (facoltativa)"/>
   </div>
@@ -38,31 +45,33 @@
 
   <div class="custom-section" id="lavorazioniBandiera">
     <h3>Lavorazioni</h3>
-    <div class="working-item">
-      <label for="asolaValue">Asola (€/mt)</label>
-      <input type="number" id="asolaValue" class="working-value" data-key="FIN_ASOLA" data-unit="meter" placeholder="Mt" value="0" min="0">
+    <div class="lavorazioni-grid">
+      <div class="working-item">
+        <label for="asolaValue">Asola (€/mt)</label>
+        <input type="number" id="asolaValue" class="working-value" data-key="FIN_ASOLA" data-unit="meter" placeholder="Mt" value="0" min="0">
+      </div>
+      <div class="working-item">
+        <label for="rinforzoValue">Rinforzo laterale (€/mt)</label>
+        <input type="number" id="rinforzoValue" class="working-value" data-key="FIN_RINFORZO" data-unit="meter" placeholder="Mt" value="0" min="0">
+      </div>
+      <div class="working-item">
+        <label for="anelliValue">Anelli D-ring ferro (€/pz cad.)</label>
+        <input type="number" id="anelliValue" class="working-value" data-key="FIN_ANELLI" data-unit="piece" placeholder="Pz" value="0" min="0">
+      </div>
+      <div class="working-item">
+        <label for="occhielloValue">Occhiello (€/pz cad.)</label>
+        <input type="number" id="occhielloValue" class="working-value" data-key="FIN_OCCHIELLO" data-unit="piece" placeholder="Pz" value="0" min="0">
+      </div>
+      <div class="working-item">
+        <label for="cucituraValue">Cucitura perimetrale (€/mt)</label>
+        <input type="number" id="cucituraValue" class="working-value" data-key="FIN_CUCITURA" data-unit="meter" placeholder="Mt" value="0" min="0">
+      </div>
+      <div class="working-item">
+        <label for="laccettoValue">Laccetto (€/mt)</label>
+        <input type="number" id="laccettoValue" class="working-value" data-key="FIN_LACCETTO" data-unit="meter" placeholder="Mt" value="0" min="0">
+      </div>
     </div>
-    <div class="working-item">
-      <label for="rinforzoValue">Rinforzo laterale (€/mt)</label>
-      <input type="number" id="rinforzoValue" class="working-value" data-key="FIN_RINFORZO" data-unit="meter" placeholder="Mt" value="0" min="0">
-    </div>
-    <div class="working-item">
-      <label for="anelliValue">Anelli D-ring ferro (€/pz cad.)</label>
-      <input type="number" id="anelliValue" class="working-value" data-key="FIN_ANELLI" data-unit="piece" placeholder="Pz" value="0" min="0">
-    </div>
-    <div class="working-item">
-      <label for="occhielloValue">Occhiello (€/pz cad.)</label>
-      <input type="number" id="occhielloValue" class="working-value" data-key="FIN_OCCHIELLO" data-unit="piece" placeholder="Pz" value="0" min="0">
-    </div>
-    <div class="working-item">
-      <label for="cucituraValue">Cucitura perimetrale (€/mt)</label>
-      <input type="number" id="cucituraValue" class="working-value" data-key="FIN_CUCITURA" data-unit="meter" placeholder="Mt" value="0" min="0">
-    </div>
-    <div class="working-item">
-      <label for="laccettoValue">Laccetto (€/mt)</label>
-      <input type="number" id="laccettoValue" class="working-value" data-key="FIN_LACCETTO" data-unit="meter" placeholder="Mt" value="0" min="0">
-    </div>
-    </div>
+  </div>
 
   <div id="uploadContainer"></div>
 
