@@ -1,4 +1,4 @@
-/* style.css */
+/* style.css 
 
 body {
   background-color: white;
@@ -63,4 +63,130 @@ h1, h2, h3 {
 .upload-box h4 {
   margin-top: 0;
   color: #007bff;
+}
+*/
+
+/* style.css */
+
+body {
+  background-color: white;
+  font-family: sans-serif;
+  margin: 20px; /* Mantieni il margine generale per il contenuto */
+  color: #333;
+}
+
+h1, h2, h3 {
+  color: #007bff;
+}
+
+.form-section, .custom-section {
+  margin-bottom: 20px;
+}
+
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.button-group button {
+  background-color: #009dff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button-group button.active {
+  background-color: #0070c0;
+}
+
+.table-container table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.table-container th,
+.table-container td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+
+#quantitaRow th {
+  background-color: #e0f3ff;
+}
+
+.upload-box {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+.upload-box h4 {
+  margin-top: 0;
+  color: #007bff;
+}
+
+/* --- NUOVI STILI PER IL GRUPPO HEADER (LOGO + BOTTONE HOME) --- */
+
+/* Container per il gruppo Logo + Bottone HOME */
+.header-right-group {
+    position: absolute; /* Posizionamento assoluto rispetto al body */
+    top: 15px; /* Spazio dal bordo superiore */
+    right: 15px; /* Spazio dal bordo destro */
+    z-index: 1000; /* Assicura che sia sopra gli altri elementi */
+    display: flex; /* Usa flexbox per impilare verticalmente */
+    flex-direction: column; /* Impila verticalmente: logo sopra, bottone sotto */
+    align-items: center; /* Centra orizzontalmente gli elementi figli (logo e bottone) */
+    gap: 5px; /* Spazio di 5px tra il logo e il bottone */
+}
+
+/* Stile per il logo all'interno del gruppo */
+.logo-in-group {
+    max-width: 80px; /* Larghezza del logo nel gruppo (regola a piacere) */
+    height: auto; /* Mantiene le proporzioni */
+    display: block; /* Importante per i margini e la centratura in flexbox */
+}
+
+/* Stile per il pulsante "Torna alla HOME" all'interno del gruppo */
+.home-button-in-group {
+    background-color: #007bff; /* Colore di sfondo blu */
+    color: white; /* Colore del testo bianco */
+    padding: 8px 12px; /* Spaziatura interna */
+    border-radius: 5px; /* Bordi arrotondati */
+    text-decoration: none; /* Rimuove la sottolineatura dal link */
+    font-size: 14px; /* Dimensione del testo */
+    transition: background-color 0.3s ease; /* Effetto di transizione al passaggio del mouse */
+    white-space: nowrap; /* Evita che il testo del bottone vada a capo */
+}
+
+.home-button-in-group:hover {
+    background-color: #0056b3; /* Colore di sfondo più scuro al passaggio del mouse */
+}
+
+/* Media query per schermi più piccoli (es. cellulari) */
+@media (max-width: 768px) {
+    .header-right-group {
+        top: 10px;
+        right: 10px;
+        gap: 3px; /* Riduci lo spazio tra logo e bottone su schermi piccoli */
+    }
+    .logo-in-group {
+        max-width: 60px; /* Riduci la dimensione del logo su schermi piccoli */
+    }
+    .home-button-in-group {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+    /* Aumenta il padding superiore del body per non far sovrapporre il contenuto
+       con il gruppo header-right-group, che è posizionato in modo assoluto. */
+    body {
+        padding-top: 80px; /* Assicurati che ci sia abbastanza spazio per il gruppo */
+    }
 }
