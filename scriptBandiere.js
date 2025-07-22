@@ -48,13 +48,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const larghezzaM = larghezzaCm / 100;
     const altezzaM = altezzaCm / 100;
     const areaMq = larghezzaM * altezzaM; // Area in metri quadri
-    // const perimetroM = 2 * (larghezzaM + altezzaM); // Non più usato per calcolo cucitura, ma mantenuto se servisse altrove
+    const perimetroM = 2 * (larghezzaM + altezzaM); // Perimetro in metri
 
     const dettagli = [];
     let totalePubblico = 0;
     let totaleRivenditore = 0;
 
-    // 1. Costo Materiale Base (Bandiera)
+    // 1. Costo Materiale Base (Bandiera) - Questo dovrebbe sempre apparire se ci sono dimensioni valide
     const materialeButton = document.querySelector('#materialeBandiera button.active');
     if (materialeButton) {
       const prezzoMqPubblico = parseFloat(materialeButton.dataset.prezzomqPubblico) || 0;
@@ -63,16 +63,18 @@ document.addEventListener("DOMContentLoaded", function () {
       const costoPubblicoMateriale = areaMq * prezzoMqPubblico;
       const costoRivenditoreMateriale = areaMq * prezzoMqRivenditore;
 
-      dettagli.push({
-        desc: labelMap[materialeButton.dataset.key],
-        pubblico: costoPubblicoMateriale * quantita,
-        rivenditore: costoRivenditoreMateriale * quantita
-      });
-      totalePubblico += costoPubblicoMateriale * quantita;
-      totaleRivenditore += costoRivenditoreMateriale * quantita;
+      if (costoPubblicoMateriale > 0 || costoRivenditoreMateriale > 0) { // Aggiunto controllo per assicurarsi che non siano zero
+        dettagli.push({
+          desc: labelMap[materialeButton.dataset.key],
+          pubblico: costoPubblicoMateriale * quantita,
+          rivenditore: costoRivenditoreMateriale * quantita
+        });
+        totalePubblico += costoPubblicoMateriale * quantita;
+        totaleRivenditore += costoRivenditoreMateriale * quantita;
+      }
     }
 
-    // 2. Costi delle Lavorazioni (leggendo direttamente il valore del campo input)
+    // 2. Costi delle Lavorazioni (leggendo i valori dei campi input o calcolandoli)
     document.querySelectorAll('#lavorazioniBandiera .working-item').forEach(item => {
       const inputField = item.querySelector('.working-value');
       const inputValue = parseFloat(inputField.value) || 0; // Il valore inserito dall'utente
@@ -80,8 +82,15 @@ document.addEventListener("DOMContentLoaded", function () {
       const unit = inputField.dataset.unit;
       const prices = workingPrices[key];
 
-      // Ora valoreBasePerCalcolo è sempre inputValue, senza logiche speciali
-      const valoreBasePerCalcolo = inputValue; 
+      let valoreBasePerCalcolo = inputValue; // Default: usa il valore inserito dall'utente
+
+      // **LOGICA SPECIALE PER CUCITURA PERIMETRALE: CALCOLO AUTOMATICO E AGGIORNAMENTO CAMPO**
+      if (key === "FIN_CUCITURA") {
+        valoreBasePerCalcolo = perimetroM; // Sovrascrive l'input utente con il perimetro calcolato
+        inputField.value = perimetroM.toFixed(2); // Aggiorna il valore visualizzato nel campo input
+        // Se larghezza o altezza sono 0, il perimetro sarà 0.
+        // In questo caso, consideriamo la lavorazione non attiva se il perimetro è 0.
+      }
       
       if (valoreBasePerCalcolo > 0 && prices) { // Considera la lavorazione attiva solo se il valore per il calcolo è > 0
           let costoPubblicoLavorazione = 0;
@@ -110,11 +119,13 @@ document.addEventListener("DOMContentLoaded", function () {
             uploadContainer.appendChild(box);
           }
       } else {
-        // Se il valore è 0 o negativo, rimuovi l'upload box se presente
+        // Se il valore è 0 o negativo, o se la lavorazione non è attiva, rimuovi l'upload box se presente
         const existing = document.getElementById(`upload-${key}`);
         if (existing) existing.remove();
-        // Reset del valore dell'input a 0 se la lavorazione non è attiva
-        inputField.value = 0;
+        // Reset del valore dell'input a 0 solo se non è la cucitura perimetrale (perché quella ha un valore calcolato)
+        if (key !== "FIN_CUCITURA") {
+             inputField.value = 0;
+        }
       }
     });
 
@@ -168,10 +179,18 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("quantita").addEventListener("input", aggiornaTabella);
   
   // Listener per tutti i campi delle lavorazioni (input numerici)
-  // Rimosso il controllo specifico per FIN_CUCITURA, ora tutti triggerano l'aggiornamento manualmente
+  // Non c'è più un listener specifico per cucitura, perché il suo valore è gestito internamente
+  // Il listener sui cambiamenti di larghezza/altezza già aggiorna la cucitura.
   document.querySelectorAll('#lavorazioniBandiera .working-item .working-value').forEach(input => {
-    input.addEventListener('input', aggiornaTabella); // Aggiornamento in tempo reale
+    // Aggiungi un listener solo se non è il campo della cucitura perimetrale (gestito automaticamente dalle dimensioni)
+    if (input.dataset.key !== "FIN_CUCITURA") {
+        input.addEventListener('input', aggiornaTabella); // Aggiornamento in tempo reale per gli altri campi
+    } else {
+        // Disabilita l'editing manuale per il campo cucitura se si desidera sia solo un display
+        // input.readOnly = true; // Rimuovi il commento se vuoi che il campo non sia modificabile
+    }
   });
+
 
   // Listener per il pulsante materiale (selezione singola)
   document.querySelectorAll('#materialeBandiera button').forEach(button => {
