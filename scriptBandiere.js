@@ -1,69 +1,51 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const uploadContainer = document.getElementById("uploadContainer");
-  const prezziDettaglioBody = document.getElementById("prezziDettaglioBody");
-  const prezziTotaliFoot = document.getElementById("prezziTotaliFoot");
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Preventivo Bandiere</title>
+  <link rel="stylesheet" href="style.css" /> <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#009dff">
+</head>
+<body>
+  <h1>Preventivo Bandiere</h1>
 
-  // Mappa delle descrizioni per i PDF/UI
-  const labelMap = {
-    MAT_FLAG110GR: "Bandiera Base (FLAG 110GR | Raso Spalmato 600D)",
-    FIN_ASOLA: "Asola",
-    FIN_RINFORZO: "Rinforzo laterale",
-    FIN_ANELLI: "Anelli D-ring ferro",
-    FIN_OCCHIELLO: "Occhiello",
-    FIN_CUCITURA: "Cucitura perimetrale",
-    FIN_LACCETTO: "Laccetto"
-  };
+  <div class="form-section">
+    <div class="form-grid">
+      <div>
+        <label for="larghezzaCm">Larghezza (cm):</label>
+        <input type="number" id="larghezzaCm" min="10" value="150"/>
+      </div>
+      <div>
+        <label for="altezzaCm">Altezza (cm):</label>
+        <input type="number" id="altezzaCm" min="10" value="100"/>
+      </div>
+      <div>
+        <label for="quantita">Quantità:</label>
+        <input type="number" id="quantita" min="1" value="1"/>
+      </div>
+      <div>
+        <label for="scontoRivenditore">Sconto (%) applicato:</label>
+        <input type="number" id="scontoRivenditore" value="35" min="0" max="100" readonly/> 
+      </div>
+    </div>
+    
+    <label for="nota">Nota (Titolo PDF):</label>
+    <input type="text" id="nota" placeholder="Inserisci una nota (facoltativa)"/>
+  </div>
 
-  // Costi delle lavorazioni: PUBBLICO e RIVENDITORE (ORA CORRETTI SECONDO EXCEL)
-  const workingPrices = {
-    FIN_ASOLA: { pubblico: 1.50, rivenditore: 1.00 }, 
-    FIN_RINFORZO: { pubblico: 2.00, rivenditore: 0.00 }, 
-    FIN_ANELLI: { pubblico: 0.60, rivenditore: 0.00 }, // CORRETTO: da 'publico' a 'pubblico'
-    FIN_OCCHIELLO: { pubblico: 0.50, rivenditore: 0.00 }, 
-    FIN_CUCITURA: { pubblico: 0.50, rivenditore: 0.00 }, 
-    FIN_LACCETTO: { pubblico: 1.00, rivenditore: 0.70 } 
-  };
+  <h2>Opzioni Bandiera e Lavorazioni</h2>
 
-  // Lavorazioni per le quali NON deve essere creato un upload box
-  const noUploadBoxKeys = ["FIN_CUCITURA"]; 
+  <div class="custom-section">
+    <h3>Materiale</h3>
+    <div class="button-group" id="materialeBandiera">
+      <button data-key="MAT_FLAG110GR" data-prezzomq-pubblico="12.6" data-prezzomq-rivenditore="14.885" class="active">FLAG 110GR | Raso Spalmato 600D</button>
+      </div>
+  </div>
 
-  function creaUploadBox(key, label) {
-    const box = document.createElement("div");
-    box.className = "upload-box";
-    box.id = `upload-${key}`;
-    box.innerHTML = `
-      <h4>${label}</h4>
-      <label>Immagine: <input type="file" accept="image/*" data-upload="${key}"></label><br>
-      <label>Descrizione: <input type="text" placeholder="Inserisci descrizione" data-desc="${key}"></label>
-    `;
-    return box;
-  }
-
-  function calcolaDettagliPrezzi() {
-    const larghezzaCm = parseFloat(document.getElementById("larghezzaCm").value) || 0;
-    const altezzaCm = parseFloat(document.getElementById("altezzaCm").value) || 0;
-    const quantita = parseFloat(document.getElementById("quantita").value) || 1;
-    const scontoRivenditore = parseFloat(document.getElementById("scontoRivenditore").value) || 0;
-
-    const larghezzaM = larghezzaCm / 100;
-    const altezzaM = altezzaCm / 100;
-    const areaMq = larghezzaM * altezzaM; // Area in metri quadri
-    const perimetroM = 2 * (larghezzaM + altezzaM); // Perimetro in metri
-
-    const dettagli = [];
-    let totalePubblico = 0;
-    let totaleRivenditore = 0;
-
-    // 1. Costo Materiale Base (Bandiera)
-    const materialeButton = document.querySelector('#materialeBandiera button.active');
-    if (materialeButton) {
-      const prezzoMqPubblico = parseFloat(materialeButton.dataset.prezzomqPubblico) || 0;
-      const prezzoMqRivenditore = parseFloat(materialeButton.dataset.prezzomqRivenditore) || 0;
-
-      const costoPubblicoMateriale = areaMq * prezzoMqPubblico;
-      const costoRivenditoreMateriale = areaMq * prezzoMqRivenditore;
-
-      if (costoPubblicoMateriale > 0 || costoRivenditoreMateriale > 0) { 
-        dettagli.push({
-          desc: labelMap[materialeButton.dataset.key],
-          pubblico: costoPubblicoMateriale *
+  <div class="custom-section" id="lavorazioniBandiera">
+    <h3>Lavorazioni</h3>
+    <div class="lavorazioni-grid">
+      <div class="working-item">
+        <label for="asolaValue">Asola (€/mt)</label>
+        <input type="number" id="asolaValue" class="working-value" data-key="FIN_ASOLA" data-
