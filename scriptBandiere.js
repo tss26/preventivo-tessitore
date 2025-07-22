@@ -1,26 +1,27 @@
-
 document.addEventListener("DOMContentLoaded", function () {
-  const quantitaList = [5, 12, 20, 25, 30, 50, 75, 100];
-  const personalizzazioni = {};
   const uploadContainer = document.getElementById("uploadContainer");
+  const prezziDettaglioBody = document.getElementById("prezziDettaglioBody");
+  const prezziTotaliFoot = document.getElementById("prezziTotaliFoot");
 
+  // Mappa delle descrizioni per i PDF/UI
   const labelMap = {
-    K6: "Ricamo lato cuore",
-    K7: "Ricamo lato opposto",
-    K8: "Ricamo manica SX",
-    K9: "Ricamo manica DX",
-    K10: "Ricamo sottocollo",
-    K11: "Ricamo spalle",
-    M6: "Nome ricamato",
-    K14: "Stampa fronte A4",
-    M14: "Stampa fronte A3",
-    K15: "Stampa lato cuore",
-    K16: "Stampa manica SX",
-    K17: "Stampa manica DX",
-    K18: "Stampa sottocollo",
-    K19: "Stampa spalle A4",
-    M19: "Stampa spalle A3",
-    M15: "Stampa nome"
+    MAT_FLAG110GR: "Bandiera Base (FLAG 110GR | Raso Spalmato 600D)",
+    FIN_ASOLA: "Asola",
+    FIN_RINFORZO: "Rinforzo laterale",
+    FIN_ANELLI: "Anelli D-ring ferro",
+    FIN_OCCHIELLO: "Occhiello",
+    FIN_CUCITURA: "Cucitura perimetrale",
+    FIN_LACCETTO: "Laccetto"
+  };
+
+  // Costi delle lavorazioni: PUBBLICO e RIVENDITORE sono uguali per ogni lavorazione.
+  const workingPrices = {
+    FIN_ASOLA: { pubblico: 1.50, rivenditore: 1.50 },
+    FIN_RINFORZO: { pubblico: 2.00, rivenditore: 2.00 },
+    FIN_ANELLI: { pubblico: 0.60, rivenditore: 0.60 },
+    FIN_OCCHIELLO: { pubblico: 0.50, rivenditore: 0.50 },
+    FIN_CUCITURA: { pubblico: 0.50, rivenditore: 0.50 },
+    FIN_LACCETTO: { pubblico: 1.00, rivenditore: 1.00 }
   };
 
   function creaUploadBox(key, label) {
@@ -35,89 +36,153 @@ document.addEventListener("DOMContentLoaded", function () {
     return box;
   }
 
-  function getMargine(qty) {
-    if (qty <= 5) return 0.9;
-    if (qty <= 12) return 0.75;
-    if (qty <= 20) return 0.5;
-    if (qty <= 25) return 0.4;
-    if (qty <= 30) return 0.35;
-    if (qty <= 50) return 0.32;
-    if (qty <= 75) return 0.31;
-    return 0.3;
-  }
+  function calcolaDettagliPrezzi() {
+    const larghezzaCm = parseFloat(document.getElementById("larghezzaCm").value) || 0;
+    const altezzaCm = parseFloat(document.getElementById("altezzaCm").value) || 0;
+    const quantita = parseFloat(document.getElementById("quantita").value) || 1;
+    const scontoRivenditore = parseFloat(document.getElementById("scontoRivenditore").value) || 0;
 
-  function getCostoPersonalizzazioni(qty) {
-    let costo = 0;
-    const prezzi = {
-      K6: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3],
-      K7: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3],
-      K8: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3],
-      K9: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3],
-      K10: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3],
-      K11: [10, 10, 10, 8.5, 8.3, 7.5, 8, 8],
-      M6: [3.5, 3.2, 3, 2.8, 2.6, 2.4, 2.2, 2],
-      K14: [4.5, 4, 3.25, 3, 2.5, 2.3, 2, 1.35],
-      K15: [4.5, 4, 3.25, 3, 2.5, 2.3, 2, 1.35],
-      K16: [4.5, 4, 3.25, 3, 2.5, 2.3, 2, 1.35],
-      K17: [4.5, 4, 3.25, 3, 2.5, 2.3, 2, 1.35],
-      K18: [4.5, 4, 3.25, 3, 2.5, 2.3, 2, 1.35],
-      K19: [4, 3.5, 2.9, 2, 1.7, 1.6, 1.5, 1.4],
-      M19: [6, 4.8, 4.2, 3.2, 2.9, 2.5, 2.5, 2.5],
-      M14: [4.8, 4.3, 3.5, 3.25, 2.75, 2.5, 2.2, 1.45],
-      M15: [1.7, 1.6, 1.5, 1.4, 1.3, 1.2, 1.1, 1]
-    };
+    const larghezzaM = larghezzaCm / 100;
+    const altezzaM = altezzaCm / 100;
+    const areaMq = larghezzaM * altezzaM; // Area in metri quadri
+    const perimetroM = 2 * (larghezzaM + altezzaM); // Perimetro in metri
 
-    let i = quantitaList.findIndex(v => qty <= v);
-    if (i === -1) i = quantitaList.length - 1;
+    const dettagli = [];
+    let totalePubblico = 0;
+    let totaleRivenditore = 0;
 
-    for (const key in personalizzazioni) {
-      if (personalizzazioni[key] && prezzi[key]) {
-        costo += prezzi[key][i];
-      }
+    // 1. Costo Materiale Base (Bandiera)
+    const materialeButton = document.querySelector('#materialeBandiera button.active');
+    if (materialeButton) {
+      const prezzoMqPubblico = parseFloat(materialeButton.dataset.prezzomqPubblico) || 0;
+      const prezzoMqRivenditore = parseFloat(materialeButton.dataset.prezzomqRivenditore) || 0;
+
+      const costoPubblicoMateriale = areaMq * prezzoMqPubblico;
+      const costoRivenditoreMateriale = areaMq * prezzoMqRivenditore;
+
+      dettagli.push({
+        desc: labelMap[materialeButton.dataset.key],
+        pubblico: costoPubblicoMateriale * quantita,
+        rivenditore: costoRivenditoreMateriale * quantita
+      });
+      totalePubblico += costoPubblicoMateriale * quantita;
+      totaleRivenditore += costoRivenditoreMateriale * quantita;
     }
-    return costo;
-  }
 
-  function getPrezzoBase(prezzoUnit) {
-    return quantitaList.map(q => (prezzoUnit * (1 + getMargine(q)) + getCostoPersonalizzazioni(q)).toFixed(2));
-  }
+    // 2. Costi delle Lavorazioni (leggendo direttamente il valore del campo input)
+    document.querySelectorAll('#lavorazioniBandiera .working-item').forEach(item => {
+      const inputField = item.querySelector('.working-value');
+      const inputValue = parseFloat(inputField.value) || 0; // Il valore inserito dall'utente
 
-  function getPrezzoScontato(prezzi, sconto) {
-    return prezzi.map(p => (p - (p * (sconto / 100))).toFixed(2));
-  }
+      if (inputValue > 0) { // Considera la lavorazione attiva solo se l'input è > 0
+        const key = inputField.dataset.key;
+        const unit = inputField.dataset.unit;
+        const prices = workingPrices[key];
 
-  function aggiornaTabella() {
-    const prezzoUnit = parseFloat(document.getElementById("codiceInterno").value) || 0;
-    const sconto = parseFloat(document.getElementById("sconto").value) || 0;
-    const base = getPrezzoBase(prezzoUnit);
-    const scontato = getPrezzoScontato(base, sconto);
+        if (prices) {
+          let costoPubblicoLavorazione = 0;
+          let costoRivenditoreLavorazione = 0;
+          let valoreBasePerCalcolo = inputValue; // Default: usa il valore inserito dall'utente
 
-    const baseRow = document.getElementById("prezzoBaseRow");
-    const scontoRow = document.getElementById("prezzoScontatoRow");
+          // **LOGICA SPECIALE PER CUCITURA PERIMETRALE**
+          if (key === "FIN_CUCITURA") {
+            valoreBasePerCalcolo = perimetroM; // Ignora l'input utente, usa il perimetro calcolato
+          }
 
-    baseRow.innerHTML = "<td>Prezzo base</td>" + base.map(p => `<td>${p}€</td>`).join("");
-    scontoRow.innerHTML = "<td>Prezzo scontato</td>" + scontato.map(p => `<td>${p}€</td>`).join("");
-  }
+          if (unit === "meter") {
+            costoPubblicoLavorazione = prices.pubblico * valoreBasePerCalcolo;
+            costoRivenditoreLavorazione = prices.rivenditore * valoreBasePerCalcolo;
+          } else if (unit === "piece") {
+            costoPubblicoLavorazione = prices.pubblico * valoreBasePerCalcolo;
+            costoRivenditoreLavorazione = prices.rivenditore * valoreBasePerCalcolo;
+          }
 
-  // Attiva bottoni + upload box
-  document.querySelectorAll(".button-group button").forEach(button => {
-    const key = button.dataset.key;
-    button.addEventListener("click", () => {
-      button.classList.toggle("active");
-      personalizzazioni[key] = button.classList.contains("active");
+          // La descrizione mostra il valore effettivo usato per il calcolo
+          dettagli.push({
+            desc: `${labelMap[key]} (${valoreBasePerCalcolo.toFixed(2)} ${unit === 'meter' ? 'Mt' : 'Pz'})`,
+            pubblico: costoPubblicoLavorazione * quantita,
+            rivenditore: costoRivenditoreLavorazione * quantita
+          });
+          totalePubblico += costoPubblicoLavorazione * quantita;
+          totaleRivenditore += costoRivenditoreLavorazione * quantita;
 
-      if (personalizzazioni[key]) {
-        const box = creaUploadBox(key, labelMap[key] || key);
-        uploadContainer.appendChild(box);
+          // Gestione upload box
+          if (!document.getElementById(`upload-${key}`)) {
+            const box = creaUploadBox(key, labelMap[key]);
+            uploadContainer.appendChild(box);
+          }
+        }
       } else {
+        // Se il valore è 0 o negativo, rimuovi l'upload box se presente
+        const key = inputField.dataset.key;
         const existing = document.getElementById(`upload-${key}`);
         if (existing) existing.remove();
       }
+    });
 
-      aggiornaTabella();
+    // Applica lo sconto al Prezzo al Rivenditore Totale
+    const totaleRivenditoreScontato = totaleRivenditore * (1 - (scontoRivenditore / 100));
+
+    return {
+      dettagli: dettagli,
+      totalePubblico: totalePubblico,
+      totaleRivenditore: totaleRivenditoreScontato
+    };
+  }
+
+  function aggiornaTabella() {
+    const datiCalcolati = calcolaDettagliPrezzi();
+    
+    // Pulisci le tabelle
+    prezziDettaglioBody.innerHTML = '';
+    prezziTotaliFoot.innerHTML = '';
+
+    // Popola i dettagli
+    if (datiCalcolati.dettagli.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td colspan="3">Nessun dettaglio da mostrare. Inserisci dimensioni e/o lavorazioni.</td>`;
+        prezziDettaglioBody.appendChild(row);
+    } else {
+        datiCalcolati.dettagli.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.desc}</td>
+                <td>${item.pubblico.toFixed(2)}€</td>
+                <td>${item.rivenditore.toFixed(2)}€</td>
+            `;
+            prezziDettaglioBody.appendChild(row);
+        });
+    }
+
+    // Popola i totali
+    const totalRow = document.createElement('tr');
+    totalRow.innerHTML = `
+      <td>TOTALE</td>
+      <td>${datiCalcolati.totalePubblico.toFixed(2)}€</td>
+      <td>${datiCalcolati.totaleRivenditore.toFixed(2)}€</td>
+    `;
+    prezziTotaliFoot.appendChild(totalRow);
+  }
+
+  // Event Listeners per aggiornare la tabella
+  document.getElementById("larghezzaCm").addEventListener("input", aggiornaTabella);
+  document.getElementById("altezzaCm").addEventListener("input", aggiornaTabella);
+  document.getElementById("quantita").addEventListener("input", aggiornaTabella);
+  
+  // Listener per i campi delle lavorazioni (solo input numerici)
+  document.querySelectorAll('#lavorazioniBandiera .working-item .working-value').forEach(input => {
+    input.addEventListener('input', aggiornaTabella); // Aggiornamento in tempo reale
+  });
+
+  // Listener per il pulsante materiale (selezione singola)
+  document.querySelectorAll('#materialeBandiera button').forEach(button => {
+    button.addEventListener('click', () => {
+      document.querySelectorAll('#materialeBandiera button').forEach(btn => btn.classList.remove('active'));
+      button.classList.add('active');
+      aggiornaTabella(); // Aggiorna quando cambia il materiale
     });
   });
 
-  document.getElementById("codiceInterno").addEventListener("input", aggiornaTabella);
-  document.getElementById("sconto").addEventListener("change", aggiornaTabella);
+  // Aggiorna la tabella al caricamento iniziale
+  aggiornaTabella();
 });
