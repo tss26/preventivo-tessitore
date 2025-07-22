@@ -1,51 +1,192 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Preventivo Bandiere</title>
-  <link rel="stylesheet" href="style.css" /> <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#009dff">
-</head>
-<body>
-  <h1>Preventivo Bandiere</h1>
+document.addEventListener("DOMContentLoaded", function () {
+  const uploadContainer = document.getElementById("uploadContainer");
+  const prezziDettaglioBody = document.getElementById("prezziDettaglioBody");
+  const prezziTotaliFoot = document.getElementById("prezziTotaliFoot");
 
-  <div class="form-section">
-    <div class="form-grid">
-      <div>
-        <label for="larghezzaCm">Larghezza (cm):</label>
-        <input type="number" id="larghezzaCm" min="10" value="150"/>
-      </div>
-      <div>
-        <label for="altezzaCm">Altezza (cm):</label>
-        <input type="number" id="altezzaCm" min="10" value="100"/>
-      </div>
-      <div>
-        <label for="quantita">Quantità:</label>
-        <input type="number" id="quantita" min="1" value="1"/>
-      </div>
-      <div>
-        <label for="scontoRivenditore">Sconto (%) applicato:</label>
-        <input type="number" id="scontoRivenditore" value="35" min="0" max="100" readonly/> 
-      </div>
-    </div>
+  // Mappa delle descrizioni per i PDF/UI
+  const labelMap = {
+    MAT_FLAG110GR: "Bandiera Base (FLAG 110GR | Raso Spalmato 600D)",
+    FIN_ASOLA: "Asola",
+    FIN_RINFORZO: "Rinforzo laterale",
+    FIN_ANELLI: "Anelli D-ring ferro",
+    FIN_OCCHIELLO: "Occhiello",
+    FIN_CUCITURA: "Cucitura perimetrale",
+    FIN_LACCETTO: "Laccetto"
+  };
+
+  // Costi delle lavorazioni: PUBBLICO e RIVENDITORE
+  const workingPrices = {
+    FIN_ASOLA: { pubblico: 1.50, rivenditore: 1.00 }, 
+    FIN_RINFORZO: { pubblico: 2.00, rivenditore: 0.00 }, 
+    FIN_ANELLI: { pubblico: 0.60, rivenditore: 0.00 }, // Correzione precedente già inclusa
+    FIN_OCCHIELLO: { pubblico: 0.50, rivenditore: 0.00 }, 
+    FIN_CUCITURA: { pubblico: 0.50, rivenditore: 0.00 }, 
+    FIN_LACCETTO: { pubblico: 1.00, rivenditore: 0.70 } 
+  };
+
+  // Lavorazioni per le quali NON deve essere creato un upload box
+  const noUploadBoxKeys = ["FIN_CUCITURA"]; 
+
+  function creaUploadBox(key, label) {
+    const box = document.createElement("div");
+    box.className = "upload-box";
+    box.id = `upload-${key}`;
+    box.innerHTML = `
+      <h4>${label}</h4>
+      <label>Immagine: <input type="file" accept="image/*" data-upload="${key}"></label><br>
+      <label>Descrizione: <input type="text" placeholder="Inserisci descrizione" data-desc="${key}"></label>
+    `;
+    return box;
+  }
+
+  function calcolaDettagliPrezzi() {
+    const larghezzaCm = parseFloat(document.getElementById("larghezzaCm").value) || 0;
+    const altezzaCm = parseFloat(document.getElementById("altezzaCm").value) || 0;
+    const quantita = parseFloat(document.getElementById("quantita").value) || 1;
+    const scontoApplicato = parseFloat(document.getElementById("scontoRivenditore").value) || 0; // Rinominato per chiarezza
+
+    const larghezzaM = larghezzaCm / 100;
+    const altezzaM = altezzaCm / 100;
+    const areaMq = larghezzaM * altezzaM; // Area in metri quadri
+    const perimetroM = 2 * (larghezzaM + altezzaM); // Perimetro in metri
+
+    const dettagli = [];
+    let totalePubblico = 0;
+    let totaleRivenditore = 0;
+
+    // 1. Costo Materiale Base (Bandiera)
+    const materialeButton = document.querySelector('#materialeBandiera button.active');
+    if (materialeButton) {
+      const prezzoMqPubblico = parseFloat(materialeButton.dataset.prezzomqPubblico) || 0;
+      const prezzoMqRivenditore = parseFloat(materialeButton.dataset.prezzomqRivenditore) || 0;
+
+      const costoPubblicoMateriale = areaMq * prezzoMqPubblico;
+      const costoRivenditoreMateriale = areaMq * prezzoMqRivenditore;
+
+      if (costoPubblicoMateriale > 0 || costoRivenditoreMateriale > 0) { 
+        dettagli.push({
+          desc: labelMap[materialeButton.dataset.key],
+          pubblico: costoPubblicoMateriale * quantita,
+          rivenditore: costoRivenditoreMateriale * quantita
+        });
+        totalePubblico += costoPubblicoMateriale * quantita;
+        totaleRivenditore += costoRivenditoreMateriale * quantita;
+      }
+    }
+
+    // 2. Costi delle Lavorazioni 
+    document.querySelectorAll('#lavorazioniBandiera .working-item').forEach(item => {
+      const inputField = item.querySelector('.working-value');
+      const inputValue = parseFloat(inputField.value) || 0; 
+      const key = inputField.dataset.key;
+      const unit = inputField.dataset.unit;
+      const prices = workingPrices[key];
+
+      let valoreBasePerCalcolo; 
+
+      // LOGICA SPECIALE PER CUCITURA PERIMETRALE: CALCOLO AUTOMATICO E AGGIORNAMENTO CAMPO DI SOLA LETTURA
+      if (key === "FIN_CUCITURA") {
+        valoreBasePerCalcolo = perimetroM; 
+        inputField.value = perimetroM.toFixed(2); // Aggiorna il valore visualizzato nel campo di sola lettura
+      } else {
+        valoreBasePerCalcolo = inputValue; 
+      }
+      
+      if (valoreBasePerCalcolo > 0 && prices) { 
+          let costoPubblicoLavorazione = 0;
+          let costoRivenditoreLavorazione = 0;
+          
+          if (unit === "meter") {
+            costoPubblicoLavorazione = prices.pubblico * valoreBasePerCalcolo;
+            costoRivenditoreLavorazione = prices.rivenditore * valoreBasePerCalcolo;
+          } else if (unit === "piece") {
+            costoPubblicoLavorazione = prices.pubblico * valoreBasePerCalcolo;
+            costoRivenditoreLavorazione = prices.rivenditore * valoreBasePerCalcolo;
+          }
+
+          dettagli.push({
+            desc: `${labelMap[key]} (${valoreBasePerCalcolo.toFixed(2)} ${unit === 'meter' ? 'Mt' : 'Pz'})`,
+            pubblico: costoPubblicoLavorazione * quantita,
+            rivenditore: costoRivenditoreLavorazione * quantita
+          });
+          totalePubblico += costoPubblicoLavorazione * quantita;
+          totaleRivenditore += costoRivenditoreLavorazione * quantita;
+
+          if (!noUploadBoxKeys.includes(key) && !document.getElementById(`upload-${key}`)) {
+            const box = creaUploadBox(key, labelMap[key]);
+            uploadContainer.appendChild(box);
+          }
+      } else {
+        const existing = document.getElementById(`upload-${key}`);
+        if (existing) existing.remove();
+        if (key !== "FIN_CUCITURA") {
+             inputField.value = 0;
+        }
+      }
+    });
+
+    // Applica lo sconto solo al totale Pubblico
+    const totalePubblicoScontato = totalePubblico * (1 - (scontoApplicato / 100));
+
+    return {
+      dettagli: dettagli,
+      totalePubblico: totalePubblicoScontato, // Ora include lo sconto
+      totaleRivenditore: totaleRivenditore // Rimane senza sconto
+    };
+  }
+
+  function aggiornaTabella() {
+    const datiCalcolati = calcolaDettagliPrezzi();
     
-    <label for="nota">Nota (Titolo PDF):</label>
-    <input type="text" id="nota" placeholder="Inserisci una nota (facoltativa)"/>
-  </div>
+    prezziDettaglioBody.innerHTML = '';
+    prezziTotaliFoot.innerHTML = '';
 
-  <h2>Opzioni Bandiera e Lavorazioni</h2>
+    if (datiCalcolati.dettagli.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td colspan="3">Nessun dettaglio da mostrare. Inserisci dimensioni e/o lavorazioni.</td>`;
+        prezziDettaglioBody.appendChild(row);
+    } else {
+        datiCalcolati.dettagli.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.desc}</td>
+                <td>${item.pubblico.toFixed(2)}€</td>
+                <td>${item.rivenditore.toFixed(2)}€</td>
+            `;
+            prezziDettaglioBody.appendChild(row);
+        });
+    }
 
-  <div class="custom-section">
-    <h3>Materiale</h3>
-    <div class="button-group" id="materialeBandiera">
-      <button data-key="MAT_FLAG110GR" data-prezzomq-pubblico="12.6" data-prezzomq-rivenditore="14.885" class="active">FLAG 110GR | Raso Spalmato 600D</button>
-      </div>
-  </div>
+    const totalRow = document.createElement('tr');
+    totalRow.innerHTML = `
+      <td>TOTALE</td>
+      <td>${datiCalcolati.totalePubblico.toFixed(2)}€</td>
+      <td>${datiCalcolati.totaleRivenditore.toFixed(2)}€</td>
+    `;
+    prezziTotaliFoot.appendChild(totalRow);
+  }
 
-  <div class="custom-section" id="lavorazioniBandiera">
-    <h3>Lavorazioni</h3>
-    <div class="lavorazioni-grid">
-      <div class="working-item">
-        <label for="asolaValue">Asola (€/mt)</label>
-        <input type="number" id="asolaValue" class="working-value" data-key="FIN_ASOLA" data-
+  // Event Listeners per aggiornare la tabella
+  document.getElementById("larghezzaCm").addEventListener("input", aggiornaTabella);
+  document.getElementById("altezzaCm").addEventListener("input", aggiornaTabella);
+  document.getElementById("quantita").addEventListener("input", aggiornaTabella);
+  
+  // Listener per i campi delle lavorazioni (input numerici) che sono ancora modificabili
+  document.querySelectorAll('#lavorazioniBandiera .working-item .working-value').forEach(input => {
+    if (input.dataset.key !== "FIN_CUCITURA") { 
+        input.addEventListener('input', aggiornaTabella); 
+    }
+  });
+
+  // Listener per il pulsante materiale (selezione singola)
+  document.querySelectorAll('#materialeBandiera button').forEach(button => {
+    button.addEventListener('click', () => {
+      document.querySelectorAll('#materialeBandiera button').forEach(btn => btn.classList.remove('active'));
+      button.classList.add('active');
+      aggiornaTabella(); 
+    });
+  });
+
+  // Aggiorna la tabella al caricamento iniziale
+  aggiornaTabella();
+});
