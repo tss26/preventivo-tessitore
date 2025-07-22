@@ -20,9 +20,12 @@ document.addEventListener("DOMContentLoaded", function () {
     FIN_RINFORZO: { pubblico: 2.00, rivenditore: 2.00 },
     FIN_ANELLI: { pubblico: 0.60, rivenditore: 0.60 },
     FIN_OCCHIELLO: { pubblico: 0.50, rivenditore: 0.50 },
-    FIN_CUCITURA: { pubblico: 0.50, rivenditore: 0.50 },
+    FIN_CUCITURA: { pubblico: 0.50, rivenditore: 0.50 }, // Il prezzo unitario è ancora qui, ma il valore 'Mt' sarà calcolato
     FIN_LACCETTO: { pubblico: 1.00, rivenditore: 1.00 }
   };
+
+  // Lavorazioni per le quali NON deve essere creato un upload box
+  const noUploadBoxKeys = ["FIN_CUCITURA"]; // Aggiungi qui altre chiavi se necessario in futuro
 
   function creaUploadBox(key, label) {
     const box = document.createElement("div");
@@ -73,22 +76,25 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll('#lavorazioniBandiera .working-item').forEach(item => {
       const inputField = item.querySelector('.working-value');
       const inputValue = parseFloat(inputField.value) || 0; // Il valore inserito dall'utente
+      const key = inputField.dataset.key;
+      const unit = inputField.dataset.unit;
+      const prices = workingPrices[key];
 
-      if (inputValue > 0) { // Considera la lavorazione attiva solo se l'input è > 0
-        const key = inputField.dataset.key;
-        const unit = inputField.dataset.unit;
-        const prices = workingPrices[key];
+      let valoreBasePerCalcolo = inputValue; // Default: usa il valore inserito dall'utente
 
-        if (prices) {
+      // **LOGICA SPECIALE PER CUCITURA PERIMETRALE**
+      if (key === "FIN_CUCITURA") {
+        valoreBasePerCalcolo = perimetroM; // Sovrascrive l'input utente con il perimetro calcolato
+        // Imposta il valore nel campo input della cucitura in modo che l'utente veda il valore calcolato
+        // Questo non lo rende editabile, ma mostra il dato usato.
+        // Se vuoi che il campo sia sempre vuoto o solo visivo, puoi rimuovere questa riga.
+        inputField.value = perimetroM.toFixed(2);
+      }
+
+      if (valoreBasePerCalcolo > 0 && prices) { // Considera la lavorazione attiva solo se il valore per il calcolo è > 0
           let costoPubblicoLavorazione = 0;
           let costoRivenditoreLavorazione = 0;
-          let valoreBasePerCalcolo = inputValue; // Default: usa il valore inserito dall'utente
-
-          // **LOGICA SPECIALE PER CUCITURA PERIMETRALE**
-          if (key === "FIN_CUCITURA") {
-            valoreBasePerCalcolo = perimetroM; // Ignora l'input utente, usa il perimetro calcolato
-          }
-
+          
           if (unit === "meter") {
             costoPubblicoLavorazione = prices.pubblico * valoreBasePerCalcolo;
             costoRivenditoreLavorazione = prices.rivenditore * valoreBasePerCalcolo;
@@ -106,83 +112,21 @@ document.addEventListener("DOMContentLoaded", function () {
           totalePubblico += costoPubblicoLavorazione * quantita;
           totaleRivenditore += costoRivenditoreLavorazione * quantita;
 
-          // Gestione upload box
-          if (!document.getElementById(`upload-${key}`)) {
+          // Gestione upload box: crea solo se la chiave NON è nella lista noUploadBoxKeys
+          if (!noUploadBoxKeys.includes(key) && !document.getElementById(`upload-${key}`)) {
             const box = creaUploadBox(key, labelMap[key]);
             uploadContainer.appendChild(box);
           }
-        }
       } else {
-        // Se il valore è 0 o negativo, rimuovi l'upload box se presente
-        const key = inputField.dataset.key;
+        // Se il valore è 0 o negativo, o se la lavorazione non è attiva, rimuovi l'upload box se presente
         const existing = document.getElementById(`upload-${key}`);
         if (existing) existing.remove();
+        // Reset del valore dell'input se non è la cucitura perimetrale (perché quella ha un valore calcolato)
+        if (key !== "FIN_CUCITURA") {
+             inputField.value = 0;
+        }
       }
     });
 
     // Applica lo sconto al Prezzo al Rivenditore Totale
-    const totaleRivenditoreScontato = totaleRivenditore * (1 - (scontoRivenditore / 100));
-
-    return {
-      dettagli: dettagli,
-      totalePubblico: totalePubblico,
-      totaleRivenditore: totaleRivenditoreScontato
-    };
-  }
-
-  function aggiornaTabella() {
-    const datiCalcolati = calcolaDettagliPrezzi();
-    
-    // Pulisci le tabelle
-    prezziDettaglioBody.innerHTML = '';
-    prezziTotaliFoot.innerHTML = '';
-
-    // Popola i dettagli
-    if (datiCalcolati.dettagli.length === 0) {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td colspan="3">Nessun dettaglio da mostrare. Inserisci dimensioni e/o lavorazioni.</td>`;
-        prezziDettaglioBody.appendChild(row);
-    } else {
-        datiCalcolati.dettagli.forEach(item => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${item.desc}</td>
-                <td>${item.pubblico.toFixed(2)}€</td>
-                <td>${item.rivenditore.toFixed(2)}€</td>
-            `;
-            prezziDettaglioBody.appendChild(row);
-        });
-    }
-
-    // Popola i totali
-    const totalRow = document.createElement('tr');
-    totalRow.innerHTML = `
-      <td>TOTALE</td>
-      <td>${datiCalcolati.totalePubblico.toFixed(2)}€</td>
-      <td>${datiCalcolati.totaleRivenditore.toFixed(2)}€</td>
-    `;
-    prezziTotaliFoot.appendChild(totalRow);
-  }
-
-  // Event Listeners per aggiornare la tabella
-  document.getElementById("larghezzaCm").addEventListener("input", aggiornaTabella);
-  document.getElementById("altezzaCm").addEventListener("input", aggiornaTabella);
-  document.getElementById("quantita").addEventListener("input", aggiornaTabella);
-  
-  // Listener per i campi delle lavorazioni (solo input numerici)
-  document.querySelectorAll('#lavorazioniBandiera .working-item .working-value').forEach(input => {
-    input.addEventListener('input', aggiornaTabella); // Aggiornamento in tempo reale
-  });
-
-  // Listener per il pulsante materiale (selezione singola)
-  document.querySelectorAll('#materialeBandiera button').forEach(button => {
-    button.addEventListener('click', () => {
-      document.querySelectorAll('#materialeBandiera button').forEach(btn => btn.classList.remove('active'));
-      button.classList.add('active');
-      aggiornaTabella(); // Aggiorna quando cambia il materiale
-    });
-  });
-
-  // Aggiorna la tabella al caricamento iniziale
-  aggiornaTabella();
-});
+    const totaleRivend
