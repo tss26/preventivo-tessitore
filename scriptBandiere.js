@@ -14,14 +14,14 @@ document.addEventListener("DOMContentLoaded", function () {
     FIN_LACCETTO: "Laccetto"
   };
 
-  // Costi delle lavorazioni: PUBBLICO e RIVENDITORE sono uguali per ogni lavorazione.
+  // Costi delle lavorazioni: PUBBLICO e RIVENDITORE (ORA CORRETTI SECONDO EXCEL)
   const workingPrices = {
-    FIN_ASOLA: { pubblico: 1.50, rivenditore: 1.50 },
-    FIN_RINFORZO: { pubblico: 2.00, rivenditore: 2.00 },
-    FIN_ANELLI: { publico: 0.60, rivenditore: 0.60 },
-    FIN_OCCHIELLO: { pubblico: 0.50, rivenditore: 0.50 },
-    FIN_CUCITURA: { pubblico: 0.50, rivenditore: 0.50 }, 
-    FIN_LACCETTO: { pubblico: 1.00, rivenditore: 1.00 }
+    FIN_ASOLA: { pubblico: 1.50, rivenditore: 1.00 }, // Corretto
+    FIN_RINFORZO: { pubblico: 2.00, rivenditore: 0.00 }, // Corretto
+    FIN_ANELLI: { publico: 0.60, rivenditore: 0.00 }, // Corretto
+    FIN_OCCHIELLO: { pubblico: 0.50, rivenditore: 0.00 }, // Corretto
+    FIN_CUCITURA: { pubblico: 0.50, rivenditore: 0.00 }, // Corretto
+    FIN_LACCETTO: { pubblico: 1.00, rivenditore: 0.70 } // Corretto
   };
 
   // Lavorazioni per le quali NON deve essere creato un upload box
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let totalePubblico = 0;
     let totaleRivenditore = 0;
 
-    // 1. Costo Materiale Base (Bandiera) - Questo dovrebbe sempre apparire se ci sono dimensioni valide
+    // 1. Costo Materiale Base (Bandiera)
     const materialeButton = document.querySelector('#materialeBandiera button.active');
     if (materialeButton) {
       const prezzoMqPubblico = parseFloat(materialeButton.dataset.prezzomqPubblico) || 0;
@@ -74,22 +74,22 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
-    // 2. Costi delle Lavorazioni (leggendo i valori dei campi input o calcolandoli)
+    // 2. Costi delle Lavorazioni 
     document.querySelectorAll('#lavorazioniBandiera .working-item').forEach(item => {
       const inputField = item.querySelector('.working-value');
-      const inputValue = parseFloat(inputField.value) || 0; // Il valore inserito dall'utente (per i campi modificabili)
+      const inputValue = parseFloat(inputField.value) || 0; 
       const key = inputField.dataset.key;
       const unit = inputField.dataset.unit;
       const prices = workingPrices[key];
 
       let valoreBasePerCalcolo; 
 
-      // **LOGICA SPECIALE PER CUCITURA PERIMETRALE: CALCOLO AUTOMATICO E AGGIORNAMENTO CAMPO DI SOLA LETTURA**
+      // LOGICA SPECIALE PER CUCITURA PERIMETRALE: CALCOLO AUTOMATICO E AGGIORNAMENTO CAMPO DI SOLA LETTURA
       if (key === "FIN_CUCITURA") {
         valoreBasePerCalcolo = perimetroM; 
         inputField.value = perimetroM.toFixed(2); // Aggiorna il valore visualizzato nel campo di sola lettura
       } else {
-        valoreBasePerCalcolo = inputValue; // Per tutti gli altri campi, usa il valore inserito dall'utente
+        valoreBasePerCalcolo = inputValue; 
       }
       
       if (valoreBasePerCalcolo > 0 && prices) { 
@@ -119,7 +119,6 @@ document.addEventListener("DOMContentLoaded", function () {
       } else {
         const existing = document.getElementById(`upload-${key}`);
         if (existing) existing.remove();
-        // Reset del valore dell'input a 0 solo se non è la cucitura perimetrale (gestita dal calcolo)
         if (key !== "FIN_CUCITURA") {
              inputField.value = 0;
         }
@@ -173,7 +172,7 @@ document.addEventListener("DOMContentLoaded", function () {
   
   // Listener per i campi delle lavorazioni (input numerici) che sono ancora modificabili
   document.querySelectorAll('#lavorazioniBandiera .working-item .working-value').forEach(input => {
-    if (input.dataset.key !== "FIN_CUCITURA") { // Il campo cucitura non ha più un listener manuale
+    if (input.dataset.key !== "FIN_CUCITURA") { 
         input.addEventListener('input', aggiornaTabella); 
     }
   });
