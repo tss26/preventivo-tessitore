@@ -5,7 +5,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Mappa delle descrizioni per i PDF/UI
   const labelMap = {
-    MAT_FLAG110GR: "Bandiera Base (FLAG 110GR | Raso Spalmato 600D)",
+    // Descrizione modificata
+    MAT_FLAG110GR: " FLAG 110GR ",
+    // Nuovo materiale aggiunto
+    MAT_RASO600D: "Raso Spalmato 600D",
     FIN_ASOLA: "Asola",
     FIN_RINFORZO: "Rinforzo laterale",
     FIN_ANELLI: "Anelli D-ring ferro",
@@ -15,8 +18,6 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   // Costi delle lavorazioni: PUBBLICO
-  // Nota: I valori 'rivenditore' non sono più usati per il calcolo diretto delle lavorazioni,
-  // ma il prezzo al rivenditore finale è derivato dal totale pubblico scontato.
   const workingPrices = {
     FIN_ASOLA: { pubblico: 1.50 },
     FIN_RINFORZO: { pubblico: 2.00 },
@@ -65,8 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // 2. Costi delle Lavorazioni - Calcola per unità
     document.querySelectorAll('#lavorazioniBandiera .working-item').forEach(item => {
       const inputField = item.querySelector('.working-value');
-      // Uso parseFloat per convertire il valore, se vuoto sarà NaN e || 0 lo renderà 0
-      const inputValue = parseFloat(inputField.value) || 0;
+      const inputValue = parseFloat(inputField.value) || 0; // Se vuoto, sarà 0
       const key = inputField.dataset.key;
       const unit = inputField.dataset.unit;
       const prices = workingPrices[key];
