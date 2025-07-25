@@ -4,21 +4,17 @@ document.addEventListener("DOMContentLoaded", function () {
   const uploadContainer = document.getElementById("uploadContainer");
 
   const labelMap = {
-    K6: "Ricamo lato cuore",
-    K7: "Ricamo lato opposto",
-    K8: "Ricamo manica SX",
-    K9: "Ricamo manica DX",
-    K10: "Ricamo sottocollo",
-    K11: "Ricamo spalle",
+    K6: "Ricamo Fronte max 12 cm",
+    K8: "Ricamo lato SX",
+    K9: "Ricamo lato DX",
     M6: "Nome ricamato",
     K14: "Stampa fronte A4",
     M14: "Stampa fronte A3",
-    K15: "Stampa lato cuore",
-    K16: "Stampa manica SX",
-    K17: "Stampa manica DX",
-    K18: "Stampa sottocollo",
-    K19: "Stampa spalle A4",
-    M19: "Stampa spalle A3",
+    K15: "Stampa dim lato cuore",
+    K16: "Stampa lato SX",
+    K17: "Stampa lato DX",
+    K19: "Stampa Retro A4",
+    M19: "Stampa Retro A3",
     M15: "Stampa nome"
   };
 
