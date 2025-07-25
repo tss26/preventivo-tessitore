@@ -47,9 +47,9 @@ document.addEventListener("DOMContentLoaded", function () {
     if (qty <= 20) return 0.5;
     if (qty <= 25) return 0.4;
     if (qty <= 30) return 0.35;
-    if (qty <= 50) return 0.32;
-    if (qty <= 75) return 0.31;
-    return 0.3;
+    if (qty <= 50) return 0.33;
+    if (qty <= 75) return 0.32;
+    return 0.31;
   }
 
   function getCostoPersonalizzazioni(qty) {
