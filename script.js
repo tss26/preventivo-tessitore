@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function getMargine(qty) {
     if (qty <= 5) return 0.9;
     if (qty <= 12) return 0.75;
-    if (qty <= 20) return 0.5;
+    if (qty <= 20) return 0.47;
     if (qty <= 25) return 0.4;
     if (qty <= 30) return 0.35;
     if (qty <= 50) return 0.33;
