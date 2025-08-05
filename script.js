@@ -28,15 +28,10 @@ document.addEventListener("DOMContentLoaded", function () {
     K23: "Stampa Coscia DX"
   };
 
-  // Elenco aggiornato delle chiavi delle personalizzazioni di stampa
-  const stampaKeys = [
-    "K14", "M14", "K15", "K21", "K16", "K17", "K18", "K19", "M19", "M15", "K22", "K23"
-  ];
-
   function creaUploadBox(key, label) {
     const box = document.createElement("div");
     box.className = "upload-box";
-    box.id = `upload-${key}`;
+    box.id = upload-${key};
     box.innerHTML = `
       <h4>${label}</h4>
       <label>Immagine: <input type="file" accept="image/*" data-upload="${key}"></label><br>
@@ -105,23 +100,14 @@ document.addEventListener("DOMContentLoaded", function () {
   function aggiornaTabella() {
     const prezzoUnit = parseFloat(document.getElementById("codiceInterno").value) || 0;
     const sconto = parseFloat(document.getElementById("sconto").value) || 0;
-    
-    const stampeSelezionateCount = stampaKeys.filter(key => personalizzazioni[key]).length;
-
-    let base = getPrezzoBase(prezzoUnit);
-    let scontoTotale = sconto;
-
-    if (stampeSelezionateCount >= 2) {
-      scontoTotale += 15;
-    }
-    
-    const scontato = getPrezzoScontato(base, scontoTotale);
+    const base = getPrezzoBase(prezzoUnit);
+    const scontato = getPrezzoScontato(base, sconto);
 
     const baseRow = document.getElementById("prezzoBaseRow");
     const scontoRow = document.getElementById("prezzoScontatoRow");
 
-    baseRow.innerHTML = "<td>Prezzo base</td>" + base.map(p => `<td>${p}€</td>`).join("");
-    scontoRow.innerHTML = "<td>Prezzo scontato</td>" + scontato.map(p => `<td>${p}€</td>`).join("");
+    baseRow.innerHTML = "<td>Prezzo base</td>" + base.map(p => <td>${p}€</td>).join("");
+    scontoRow.innerHTML = "<td>Prezzo scontato</td>" + scontato.map(p => <td>${p}€</td>).join("");
   }
 
   // Attiva bottoni + upload box
@@ -135,7 +121,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const box = creaUploadBox(key, labelMap[key] || key);
         uploadContainer.appendChild(box);
       } else {
-        const existing = document.getElementById(`upload-${key}`);
+        const existing = document.getElementById(upload-${key});
         if (existing) existing.remove();
       }
 
