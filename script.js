@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", function () {
   const quantitaList = [5, 12, 20, 25, 30, 50, 75, 100];
   const personalizzazioni = {};
@@ -28,6 +27,11 @@ document.addEventListener("DOMContentLoaded", function () {
     K22: "Stampa Coscia SX",
     K23: "Stampa Coscia DX"
   };
+
+  // Elenco aggiornato delle chiavi delle personalizzazioni di stampa
+  const stampaKeys = [
+    "K14", "M14", "K15", "K21", "K16", "K17", "K18", "K19", "M19", "M15", "K22", "K23"
+  ];
 
   function creaUploadBox(key, label) {
     const box = document.createElement("div");
@@ -101,8 +105,17 @@ document.addEventListener("DOMContentLoaded", function () {
   function aggiornaTabella() {
     const prezzoUnit = parseFloat(document.getElementById("codiceInterno").value) || 0;
     const sconto = parseFloat(document.getElementById("sconto").value) || 0;
-    const base = getPrezzoBase(prezzoUnit);
-    const scontato = getPrezzoScontato(base, sconto);
+    
+    const stampeSelezionateCount = stampaKeys.filter(key => personalizzazioni[key]).length;
+
+    let base = getPrezzoBase(prezzoUnit);
+    let scontoTotale = sconto;
+
+    if (stampeSelezionateCount >= 2) {
+      scontoTotale += 15;
+    }
+    
+    const scontato = getPrezzoScontato(base, scontoTotale);
 
     const baseRow = document.getElementById("prezzoBaseRow");
     const scontoRow = document.getElementById("prezzoScontatoRow");
