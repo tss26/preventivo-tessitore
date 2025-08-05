@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", function () {
   const quantitaList = [5, 12, 20, 25, 30, 50, 75, 100];
   const personalizzazioni = {};
@@ -31,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function creaUploadBox(key, label) {
     const box = document.createElement("div");
     box.className = "upload-box";
-    box.id = upload-${key};
+    box.id = `upload-${key}`;
     box.innerHTML = `
       <h4>${label}</h4>
       <label>Immagine: <input type="file" accept="image/*" data-upload="${key}"></label><br>
@@ -43,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function getMargine(qty) {
     if (qty <= 5) return 0.9;
     if (qty <= 12) return 0.75;
-    if (qty <= 20) return 0.47;
+    if (qty <= 20) return 0.5;
     if (qty <= 25) return 0.4;
     if (qty <= 30) return 0.35;
     if (qty <= 50) return 0.33;
@@ -62,9 +63,9 @@ document.addEventListener("DOMContentLoaded", function () {
       K8: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3],
       K9: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3],
       K10: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3],
-      K11: [10, 10, 10, 8.5, 8.3, 7.9, 7.8, 7.7],
+      K11: [10, 10, 10, 8.5, 8.3, 7.5, 8, 8],
       M6: [3.5, 3.2, 3, 2.8, 2.6, 2.4, 2.2, 2],
-      K14: [4.5, 4, 2.9, 2.7, 2.3, 2, 1.7, 1.35],
+      K14: [4.5, 4, 3.25, 3, 2.5, 2.3, 2, 1.6],
       K21: [4.5, 4, 3.25, 3, 2.5, 2.3, 2, 1.6],
       K22: [4.5, 4, 3.25, 3, 2.5, 2.3, 2, 1.6],
       K23: [4.5, 4, 3.25, 3, 2.5, 2.3, 2, 1.6],
@@ -72,8 +73,8 @@ document.addEventListener("DOMContentLoaded", function () {
       K16: [4.5, 4, 3.25, 3, 2.5, 2.3, 2, 1.6],
       K17: [4.5, 4, 3.25, 3, 2.5, 2.3, 2, 1.6],
       K18: [4.5, 4, 3.25, 3, 2.5, 2.3, 2, 1.6],
-      K19: [4.5, 4, 3, 2.85, 2.25, 2.15, 1.85, 1.5],
-      M19: [6, 4.8, 4.2, 3.2, 2.9, 2.5, 2.5, 2.3],
+      K19: [4, 3.5, 2.9, 2, 1.7, 1.6, 1.5, 1.45],
+      M19: [6, 4.8, 4.2, 3.2, 2.9, 2.5, 2.5, 2.5],
       M14: [4.8, 4.3, 3.5, 3.25, 2.75, 2.5, 2.2, 1.55],
       M15: [1.7, 1.6, 1.5, 1.4, 1.3, 1.2, 1.1, 1]
     };
@@ -106,8 +107,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const baseRow = document.getElementById("prezzoBaseRow");
     const scontoRow = document.getElementById("prezzoScontatoRow");
 
-    baseRow.innerHTML = "<td>Prezzo base</td>" + base.map(p => <td>${p}€</td>).join("");
-    scontoRow.innerHTML = "<td>Prezzo scontato</td>" + scontato.map(p => <td>${p}€</td>).join("");
+    baseRow.innerHTML = "<td>Prezzo base</td>" + base.map(p => `<td>${p}€</td>`).join("");
+    scontoRow.innerHTML = "<td>Prezzo scontato</td>" + scontato.map(p => `<td>${p}€</td>`).join("");
   }
 
   // Attiva bottoni + upload box
@@ -121,7 +122,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const box = creaUploadBox(key, labelMap[key] || key);
         uploadContainer.appendChild(box);
       } else {
-        const existing = document.getElementById(upload-${key});
+        const existing = document.getElementById(`upload-${key}`);
         if (existing) existing.remove();
       }
 
