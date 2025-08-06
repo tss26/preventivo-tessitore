@@ -120,7 +120,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
     // Controlla la condizione: 1 stampa e 0 ricami
     if (numStampa === 1 && numRicamo === 0) {
-      return 0.15; // 15%
+      return 0.12; // 12%
     }
     return 0; // Nessun sovrapprezzo
   }
