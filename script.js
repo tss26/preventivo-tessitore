@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", function () {
   const quantitaList = [5, 12, 20, 25, 30, 50, 75, 100];
   const personalizzazioni = {};
@@ -26,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
     M19: "Stampa spalle A3",
     M15: "Stampa nome",
     K22: "Stampa Coscia SX",
-    K23: "Stampa Coscia DX"
+    K23: "Stampa Coscia DX",
   };
 
   function creaUploadBox(key, label) {
@@ -76,10 +75,10 @@ document.addEventListener("DOMContentLoaded", function () {
       K19: [4, 3.5, 2.9, 2, 1.7, 1.6, 1.5, 1.45],
       M19: [6, 4.8, 4.2, 3.2, 2.9, 2.5, 2.5, 2.5],
       M14: [4.8, 4.3, 3.5, 3.25, 2.75, 2.5, 2.2, 1.55],
-      M15: [1.7, 1.6, 1.5, 1.4, 1.3, 1.2, 1.1, 1]
+      M15: [1.7, 1.6, 1.5, 1.4, 1.3, 1.2, 1.1, 1],
     };
 
-    let i = quantitaList.findIndex(v => qty <= v);
+    let i = quantitaList.findIndex((v) => qty <= v);
     if (i === -1) i = quantitaList.length - 1;
 
     for (const key in personalizzazioni) {
@@ -90,12 +89,61 @@ document.addEventListener("DOMContentLoaded", function () {
     return costo;
   }
 
+  // --- NUOVA FUNZIONE per contare i ricami ---
+  function contaPersonalizzazioniRicamo() {
+    let conteggioRicamo = 0;
+    for (const key in personalizzazioni) {
+      const label = labelMap[key] || "";
+      if (personalizzazioni[key] && label.includes("Ricamo")) {
+        conteggioRicamo++;
+      }
+    }
+    return conteggioRicamo;
+  }
+
+  // Funzione esistente per contare le stampe
+  function contaPersonalizzazioniStampa() {
+    let conteggioStampa = 0;
+    for (const key in personalizzazioni) {
+      const label = labelMap[key] || "";
+      if (personalizzazioni[key] && label.includes("Stampa")) {
+        conteggioStampa++;
+      }
+    }
+    return conteggioStampa;
+  }
+
+  // --- NUOVA FUNZIONE per calcolare il sovrapprezzo ---
+  function calcolaSovrapprezzo() {
+    const numStampa = contaPersonalizzazioniStampa();
+    const numRicamo = contaPersonalizzazioniRicamo();
+    
+    // Controlla la condizione: 1 stampa e 0 ricami
+    if (numStampa === 1 && numRicamo === 0) {
+      return 0.15; // 15%
+    }
+    return 0; // Nessun sovrapprezzo
+  }
+
+  // Funzione aggiornata per includere il sovrapprezzo
   function getPrezzoBase(prezzoUnit) {
-    return quantitaList.map(q => (prezzoUnit * (1 + getMargine(q)) + getCostoPersonalizzazioni(q)).toFixed(2));
+    const sovrapprezzo = calcolaSovrapprezzo();
+    return quantitaList.map((q) => {
+      const costoPerPersonalizzazioni = getCostoPersonalizzazioni(q);
+      const prezzoConMargine = prezzoUnit * (1 + getMargine(q));
+      
+      // Calcola il prezzo base prima di aggiungere il sovrapprezzo
+      const prezzoBase = prezzoConMargine + costoPerPersonalizzazioni;
+      
+      // Applica il sovrapprezzo se la condizione è verificata
+      const prezzoFinale = prezzoBase * (1 + sovrapprezzo);
+      
+      return prezzoFinale.toFixed(2);
+    });
   }
 
   function getPrezzoScontato(prezzi, sconto) {
-    return prezzi.map(p => (p - (p * (sconto / 100))).toFixed(2));
+    return prezzi.map((p) => (p - p * (sconto / 100)).toFixed(2));
   }
 
   function aggiornaTabella() {
@@ -107,12 +155,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const baseRow = document.getElementById("prezzoBaseRow");
     const scontoRow = document.getElementById("prezzoScontatoRow");
 
-    baseRow.innerHTML = "<td>Prezzo base</td>" + base.map(p => `<td>${p}€</td>`).join("");
-    scontoRow.innerHTML = "<td>Prezzo scontato</td>" + scontato.map(p => `<td>${p}€</td>`).join("");
+    baseRow.innerHTML = "<td>Prezzo base</td>" + base.map((p) => `<td>${p}€</td>`).join("");
+    scontoRow.innerHTML = "<td>Prezzo scontato</td>" + scontato.map((p) => `<td>${p}€</td>`).join("");
+
+    // Esempio di log per debug
+    console.log("Numero personalizzazioni stampa:", contaPersonalizzazioniStampa());
+    console.log("Numero personalizzazioni ricamo:", contaPersonalizzazioniRicamo());
+    console.log("Sovrapprezzo applicato:", calcolaSovrapprezzo() > 0 ? "Sì" : "No");
   }
 
-  // Attiva bottoni + upload box
-  document.querySelectorAll(".button-group button").forEach(button => {
+  document.querySelectorAll(".button-group button").forEach((button) => {
     const key = button.dataset.key;
     button.addEventListener("click", () => {
       button.classList.toggle("active");
