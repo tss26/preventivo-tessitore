@@ -131,12 +131,16 @@ document.addEventListener("DOMContentLoaded", function () {
     return quantitaList.map((q) => {
       const costoPerPersonalizzazioni = getCostoPersonalizzazioni(q);
       const prezzoConMargine = prezzoUnit * (1 + getMargine(q));
+
+
+      // --- COSTANTE: Margine globale per l'aumento dei prezzi ---
+  const margineGlobale = 0.03; // Esempio: 3% di aumento. Modifica questo valore per aggiornare i prezzi.
       
       // Calcola il prezzo base prima di aggiungere il sovrapprezzo
       const prezzoBase = prezzoConMargine + costoPerPersonalizzazioni;
       
       // Applica il sovrapprezzo se la condizione è verificata
-      const prezzoFinale = prezzoBase * (1 + sovrapprezzo);
+      const prezzoFinale = prezzoBase * (1 + sovrapprezzo) * (1 + margineGlobale);
       
       return prezzoFinale.toFixed(2);
     });
