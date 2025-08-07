@@ -124,23 +124,21 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     return 0; // Nessun sovrapprezzo
   }
-
+// --- COSTANTE: Margine globale per l'aumento dei prezzi ---
+  const margineGlobale = 0.03; // Esempio: 3% di aumento. Modifica questo valore per aggiornare i prezzi.
+  
   // Funzione aggiornata per includere il sovrapprezzo
   function getPrezzoBase(prezzoUnit) {
     const sovrapprezzo = calcolaSovrapprezzo();
     return quantitaList.map((q) => {
       const costoPerPersonalizzazioni = getCostoPersonalizzazioni(q);
-      const prezzoConMargine = prezzoUnit * (1 + getMargine(q));
-
-
-      // --- COSTANTE: Margine globale per l'aumento dei prezzi ---
-  const margineGlobale = 0.03; // Esempio: 3% di aumento. Modifica questo valore per aggiornare i prezzi.
+      const prezzoConMargine = (prezzoUnit * (1 + getMargine(q))) * (1 + margineGlobale) ;
       
       // Calcola il prezzo base prima di aggiungere il sovrapprezzo
       const prezzoBase = prezzoConMargine + costoPerPersonalizzazioni;
       
       // Applica il sovrapprezzo se la condizione è verificata
-      const prezzoFinale = prezzoBase * (1 + sovrapprezzo) * (1 + margineGlobale);
+      const prezzoFinale = prezzoBase * (1 + sovrapprezzo);
       
       return prezzoFinale.toFixed(2);
     });
