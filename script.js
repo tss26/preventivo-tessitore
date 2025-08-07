@@ -3,6 +3,9 @@ Document.addEventListener("DOMContentLoaded", function () {
   const personalizzazioni = {};
   const uploadContainer = document.getElementById("uploadContainer");
 
+  // --- COSTANTE: Margine globale per l'aumento dei prezzi ---
+  const margineGlobale = 0.03; // Esempio: 3% di aumento. Modifica questo valore per aggiornare i prezzi.
+
   const labelMap = {
     K6: "Ricamo lato cuore",
     K7: "Ricamo lato opposto",
@@ -129,19 +132,15 @@ Document.addEventListener("DOMContentLoaded", function () {
       
       const prezzoBase = prezzoConMargine + costoPerPersonalizzazioni;
       
-      // Applica il sovrapprezzo
-      const prezzoFinale = prezzoBase * (1 + sovrapprezzo);
+      // Applica il sovrapprezzo e il margine globale al prezzo finale
+      const prezzoFinale = prezzoBase * (1 + sovrapprezzo) * (1 + margineGlobale);
       
       return prezzoFinale.toFixed(2);
     });
   }
 
   function getPrezzoScontato(prezzi, sconto) {
-    const margineGlobale = 0.03; // Definita qui
-    return prezzi.map((p) => {
-      const prezzoConMargine = p * (1 + margineGlobale);
-      return (prezzoConMargine - prezzoConMargine * (sconto / 100)).toFixed(2);
-    });
+    return prezzi.map((p) => (p - p * (sconto / 100)).toFixed(2));
   }
 
   function aggiornaTabella() {
