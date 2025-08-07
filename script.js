@@ -1,7 +1,10 @@
-document.addEventListener("DOMContentLoaded", function () {
+Document.addEventListener("DOMContentLoaded", function () {
   const quantitaList = [5, 12, 20, 25, 30, 50, 75, 100];
   const personalizzazioni = {};
   const uploadContainer = document.getElementById("uploadContainer");
+
+  // --- NUOVA COSTANTE: Margine globale per aggiustamento prezzi ---
+  const margineGlobale = 0.00; // Esempio: 3% di aumento impodts ls vsriabile a 0.03. Puoi impostarlo a 0 se non vuoi applicare aumenti.
 
   const labelMap = {
     K6: "Ricamo lato cuore",
@@ -89,7 +92,6 @@ document.addEventListener("DOMContentLoaded", function () {
     return costo;
   }
 
-  // --- NUOVA FUNZIONE per contare i ricami ---
   function contaPersonalizzazioniRicamo() {
     let conteggioRicamo = 0;
     for (const key in personalizzazioni) {
@@ -101,7 +103,6 @@ document.addEventListener("DOMContentLoaded", function () {
     return conteggioRicamo;
   }
 
-  // Funzione esistente per contare le stampe
   function contaPersonalizzazioniStampa() {
     let conteggioStampa = 0;
     for (const key in personalizzazioni) {
@@ -113,30 +114,26 @@ document.addEventListener("DOMContentLoaded", function () {
     return conteggioStampa;
   }
 
-  // --- NUOVA FUNZIONE per calcolare il sovrapprezzo per prova scrivo queste parole---
   function calcolaSovrapprezzo() {
     const numStampa = contaPersonalizzazioniStampa();
     const numRicamo = contaPersonalizzazioniRicamo();
     
-    // Controlla la condizione: 1 stampa e 0 ricami
     if (numStampa === 1 && numRicamo === 0) {
-      return 0.12; // 12%
+      return 0.12;
     }
-    return 0; // Nessun sovrapprezzo
+    return 0;
   }
 
-  // Funzione aggiornata per includere il sovrapprezzo
   function getPrezzoBase(prezzoUnit) {
     const sovrapprezzo = calcolaSovrapprezzo();
     return quantitaList.map((q) => {
       const costoPerPersonalizzazioni = getCostoPersonalizzazioni(q);
       const prezzoConMargine = prezzoUnit * (1 + getMargine(q));
       
-      // Calcola il prezzo base prima di aggiungere il sovrapprezzo
       const prezzoBase = prezzoConMargine + costoPerPersonalizzazioni;
       
-      // Applica il sovrapprezzo se la condizione è verificata
-      const prezzoFinale = prezzoBase * (1 + sovrapprezzo);
+      // Applica il sovrapprezzo e il margine globale
+      const prezzoFinale = prezzoBase * (1 + sovrapprezzo) * (1 + margineGlobale);
       
       return prezzoFinale.toFixed(2);
     });
@@ -158,7 +155,6 @@ document.addEventListener("DOMContentLoaded", function () {
     baseRow.innerHTML = "<td>Prezzo base</td>" + base.map((p) => `<td>${p}€</td>`).join("");
     scontoRow.innerHTML = "<td>Prezzo scontato</td>" + scontato.map((p) => `<td>${p}€</td>`).join("");
 
-    // Esempio di log per debug
     console.log("Numero personalizzazioni stampa:", contaPersonalizzazioniStampa());
     console.log("Numero personalizzazioni ricamo:", contaPersonalizzazioniRicamo());
     console.log("Sovrapprezzo applicato:", calcolaSovrapprezzo() > 0 ? "Sì" : "No");
