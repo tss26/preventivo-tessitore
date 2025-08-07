@@ -132,7 +132,6 @@ Document.addEventListener("DOMContentLoaded", function () {
       
       const prezzoBase = prezzoConMargine + costoPerPersonalizzazioni;
       
-      // Applica il sovrapprezzo e il margine globale al prezzo finale
       const prezzoFinale = prezzoBase * (1 + sovrapprezzo) * (1 + margineGlobale);
       
       return prezzoFinale.toFixed(2);
@@ -164,12 +163,14 @@ Document.addEventListener("DOMContentLoaded", function () {
     const key = button.dataset.key;
     button.addEventListener("click", () => {
       button.classList.toggle("active");
-      personalizzazioni[key] = button.classList.contains("active");
-
-      if (personalizzazioni[key]) {
+      
+      // La logica per aggiungere/rimuovere i box di upload è ora qui
+      if (button.classList.contains("active")) {
+        personalizzazioni[key] = true;
         const box = creaUploadBox(key, labelMap[key] || key);
         uploadContainer.appendChild(box);
       } else {
+        personalizzazioni[key] = false;
         const existing = document.getElementById(`upload-${key}`);
         if (existing) existing.remove();
       }
