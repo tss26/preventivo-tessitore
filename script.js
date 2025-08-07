@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
     return conteggioStampa;
   }
 
-  // --- NUOVA FUNZIONE per calcolare il sovrapprezzo per prova scrivo queste parole---
+  // --- NUOVA FUNZIONE per calcolare il sovrapprezzo nel caso in cui c e solo una stampa aumento del 12%---
   function calcolaSovrapprezzo() {
     const numStampa = contaPersonalizzazioniStampa();
     const numRicamo = contaPersonalizzazioniRicamo();
@@ -125,7 +125,7 @@ document.addEventListener("DOMContentLoaded", function () {
     return 0; // Nessun sovrapprezzo
   }
 // --- COSTANTE: Margine globale per l'aumento dei prezzi ---
-  const margineGlobale = 0.03; // Esempio: 3% di aumento. Modifica questo valore per aggiornare i prezzi.
+  const margineGlobale = 0.00; // Esempio: 3% di aumento imposto il valore a 0.03. Modifica questo valore per aggiornare i prezzi.
   
   // Funzione aggiornata per includere il sovrapprezzo
   function getPrezzoBase(prezzoUnit) {
