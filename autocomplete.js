@@ -1,6 +1,6 @@
 // Inserisci qui le tue chiavi API di Supabase. Le trovi nella dashboard del tuo progetto, in "Settings" -> "API".
-const SUPABASE_URL = 'IL_TUO_URL_SUPABASE';
-const SUPABASE_ANON_KEY = 'LA_TUA_CHIAVE_PUBBLICA_ANON';
+const SUPABASE_URL = 'https://jukyggaoiekenvekoicv.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1a3lnZ2FvaWVrZW52ZWtvaWN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwNjEwOTgsImV4cCI6MjA3MjYzNzA5OH0.84lO4yqqZ6pbVLX0hlxOC3qgK508y1gFxeSp3Wx3kkw';
 
 // Importa la libreria di Supabase, se non l'hai già fatto. Puoi aggiungerla all'HTML:
 // <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
