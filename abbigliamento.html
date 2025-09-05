@@ -12,7 +12,7 @@
 
   <div class="header-right-group">
     <a href="index.html" class="logo-link">
-      <img src="img/icon-192.png" alt="Logo Tessitore" class="logo-in-group">
+      <img src="icon-192.png" alt="Logo Tessitore" class="logo-in-group">
     </a>
     <a href="index.html" class="home-button-in-group">Torna alla HOME</a>
   </div>
@@ -37,12 +37,6 @@
 
     <label>Nota (Titolo PDF):</label>
     <input type="text" id="nota" placeholder="Inserisci una nota (facoltativa)"/>
-  </div>
-  
-  <div class="form-section">
-    <label for="ricercaProdotto">Ricerca Codice Prodotto:</label>
-    <input type="text" id="ricercaProdotto" list="codiciProdottiList" placeholder="Inizia a digitare il codice..." />
-    <datalist id="codiciProdottiList"></datalist>
   </div>
 
   <h2>Personalizzazioni</h2>
@@ -84,7 +78,7 @@
   <div id="uploadContainer"></div>
 
   <h2>Prezzi unitari</h2>
-  <p>I prezzi 5pz e 12pz sono inclusi di IVA, in tutti gli altri prezzi il prezzo è NETTO quindi +IVA22%</p>
+  <p>i prezzi 5pz e 12pz sono inclusi di IVA, in tutti gli altri prezzi il prezzo è NETTO quindi +IVA22%</p>
   <div class="table-container">
     <table>
       <thead>
@@ -103,19 +97,13 @@
 
   <button id="generaPdf">Genera PDF</button>
 
-  <!-- Libreria Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- Script JS -->
-  <script src="js/autocomplete.js"></script>
-  <script src="js/script.js"></script>
-  <script src="js/pdf-export.js"></script>
+  <script src="script.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="pdf-export.js"></script>
 
-  <!-- Service Worker -->
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js')
+      navigator.serviceWorker.register('service-worker.js')
         .then(() => console.log("Service Worker registrato!"))
         .catch(e => console.error("Errore SW:", e));
     }
