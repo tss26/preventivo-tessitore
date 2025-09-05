@@ -3,15 +3,15 @@ const urlsToCache = [
   "/index.html",
   "/abbigliamento.html",
   "/style.css",
-  "/js/script.js",
-  "/js/autocomplete.js",
-  "/js/pdf-export.js",
-  "/img/icon-192.png",
-  "/img/icon-512.png",
+  "/script.js",
+  "/autocomplete.js",
+  "/pdf-export.js",
+  "/icon-192.png",
+  "/icon-512.png",
   "/manifest.json"
 ];
 
-// Installazione e caching iniziale
+// Installazione e cache iniziale
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -21,15 +21,13 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
 
-// Attivazione e pulizia cache vecchie
+// Attivazione → pulizia cache vecchie
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keyList) => {
       return Promise.all(
         keyList.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
+          if (key !== CACHE_NAME) return caches.delete(key);
         })
       );
     })
@@ -37,11 +35,11 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// Gestione fetch: cache-first con fallback online
+// Fetch → prima cerca in cache, poi rete
 self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.match(event.request)
       .then((response) => response || fetch(event.request))
-      .catch(err => console.error("Errore fetch dal Service Worker:", err))
+      .catch(err => console.error("❌ Errore fetch SW:", err))
   );
 });
