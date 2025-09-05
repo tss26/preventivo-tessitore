@@ -12,7 +12,7 @@
 
   <div class="header-right-group">
     <a href="index.html" class="logo-link">
-      <img src="icon-192.png" alt="Logo Tessitore" class="logo-in-group">
+      <img src="img/icon-192.png" alt="Logo Tessitore" class="logo-in-group">
     </a>
     <a href="index.html" class="home-button-in-group">Torna alla HOME</a>
   </div>
@@ -103,15 +103,19 @@
 
   <button id="generaPdf">Genera PDF</button>
 
+  <!-- Libreria Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="script.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="pdf-export.js"></script>
-  <script src="autocomplete.js"></script>
 
+  <!-- Script JS -->
+  <script src="js/autocomplete.js"></script>
+  <script src="js/script.js"></script>
+  <script src="js/pdf-export.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <!-- Service Worker -->
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
+      navigator.serviceWorker.register('/service-worker.js')
         .then(() => console.log("Service Worker registrato!"))
         .catch(e => console.error("Errore SW:", e));
     }
