@@ -25,7 +25,7 @@ async function avviaAutocompletamento() {
             // Esegue la query al database Supabase
             const { data: prodotti, error } = await supabase
                 .from('prodotti')
-                .select('Cod, Prezzo forn')
+                .select('Cod, Prezzo_forn')
                 .ilike('Cod', `${valoreRicerca}%`);
 
             if (error) {
@@ -47,7 +47,7 @@ async function avviaAutocompletamento() {
         // Esegue la query per recuperare il prezzo esatto del prodotto selezionato
         const { data: prodotto, error } = await supabase
             .from('prodotti')
-            .select('Prezzo forn')
+            .select('Prezzo_forn')
             .eq('Cod', codiceSelezionato)
             .single();
 
@@ -57,7 +57,7 @@ async function avviaAutocompletamento() {
             return;
         }
 
-        const prezzoStringa = prodotto['Prezzo forn'];
+        const prezzoStringa = prodotto['Prezzo_forn'];
         const prezzoNumero = parseFloat(prezzoStringa.replace('€ ', '').replace(',', '.'));
         
         if (!isNaN(prezzoNumero)) {
