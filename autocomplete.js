@@ -1,12 +1,12 @@
-// Inserisci qui le tue chiavi API di Supabase. Le trovi nella dashboard del tuo progetto, in "Settings" -> "API".
+/*// Inserisci qui le tue chiavi API di Supabase. Le trovi nella dashboard del tuo progetto, in "Settings" -> "API".
 const SUPABASE_URL = 'https://jukyggaoiekenvekoicv.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1a3lnZ2FvaWVrZW52ZWtvaWN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwNjEwOTgsImV4cCI6MjA3MjYzNzA5OH0.84lO4yqqZ6pbVLX0hlxOC3qgK508y1gFxeSp3Wx3kkw';
+*/
+// Inizializza Supabase (sostituisci con le tue credenziali reali)
+const SUPABASE_URL = "https://jukyggaoiekenvekoicv.supabase.co"; 
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1a3lnZ2FvaWVrZW52ZWtvaWN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwNjEwOTgsImV4cCI6MjA3MjYzNzA5OH0.84lO4yqqZ6pbVLX0hlxOC3qgK508y1gFxeSp3Wx3kkw"; 
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-
-// Crea il client Supabase
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// Funzione principale per gestire l'autocompletamento
 async function avviaAutocompletamento() {
     const inputRicerca = document.getElementById('ricercaProdotto');
     const dataList = document.getElementById('codiciProdottiList');
@@ -19,14 +19,15 @@ async function avviaAutocompletamento() {
 
     // Autocompletamento
     inputRicerca.addEventListener('input', async () => {
-        const valoreRicerca = inputRicerca.value.toLowerCase();
-        dataList.innerHTML = ''; // Svuota il menù a tendina
+        const valoreRicerca = inputRicerca.value.trim();
+        dataList.innerHTML = '';
 
         if (valoreRicerca.length >= 2) {
-            const { data: prodotti, error } = await supabase
-                .from('prodotti')
+            const { data: prodotti, error } = await supabaseClient
+                .from('Prodotti') // nome tabella (rispetta maiuscole/minuscole)
                 .select('Cod, Prezzo_forn')
-                .ilike('Cod', `${valoreRicerca}%`);
+                .ilike('Cod', `${valoreRicerca}%`)
+                .limit(10);
 
             if (error) {
                 console.error('Errore durante la ricerca:', error);
@@ -45,8 +46,8 @@ async function avviaAutocompletamento() {
     inputRicerca.addEventListener('change', async () => {
         const codiceSelezionato = inputRicerca.value;
 
-        const { data: prodotto, error } = await supabase
-            .from('prodotti')
+        const { data: prodotto, error } = await supabaseClient
+            .from('Prodotti')
             .select('Prezzo_forn')
             .eq('Cod', codiceSelezionato)
             .single();
@@ -57,10 +58,10 @@ async function avviaAutocompletamento() {
             return;
         }
 
-        const prezzoNumero = prodotto.Prezzo_forn; // già numero
+        const prezzoNumero = prodotto.Prezzo_forn;
 
         if (!isNaN(prezzoNumero)) {
-            inputCodiceInterno.value = prezzoNumero.toFixed(2);
+            inputCodiceInterno.value = Number(prezzoNumero).toFixed(2);
         } else {
             inputCodiceInterno.value = '';
             console.error('Prezzo non valido nel database:', prodotto.Prezzo_forn);
