@@ -24,8 +24,8 @@ async function avviaAutocompletamento() {
             // Esegue la query al database Supabase
             const { data: prodotti, error } = await supabase
                 .from('prodotti')
-                .select('Cod., Prezzo forn.')
-                .ilike('Cod.', `${valoreRicerca}%`);
+                .select('Cod, Prezzo_forn')
+                .ilike('Cod', `${valoreRicerca}%`);
 
             if (error) {
                 console.error('Errore durante la ricerca:', error);
@@ -34,7 +34,7 @@ async function avviaAutocompletamento() {
 
             prodotti.forEach(prodotto => {
                 const opzione = document.createElement('option');
-                opzione.value = prodotto['Cod.'];
+                opzione.value = prodotto['Cod'];
                 dataList.appendChild(opzione);
             });
         }
@@ -46,8 +46,8 @@ async function avviaAutocompletamento() {
         // Esegue la query per recuperare il prezzo esatto del prodotto selezionato
         const { data: prodotto, error } = await supabase
             .from('prodotti')
-            .select('Prezzo forn.')
-            .eq('Cod.', codiceSelezionato)
+            .select('Prezzo_forn')
+            .eq('Cod', codiceSelezionato)
             .single();
 
         if (error || !prodotto) {
@@ -56,7 +56,7 @@ async function avviaAutocompletamento() {
             return;
         }
 
-        const prezzoStringa = prodotto['Prezzo forn.'];
+        const prezzoStringa = prodotto['Prezzo_forn'];
         const prezzoNumero = parseFloat(prezzoStringa.replace('€ ', '').replace(',', '.'));
         
         if (!isNaN(prezzoNumero)) {
