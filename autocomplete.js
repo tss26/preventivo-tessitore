@@ -1,7 +1,7 @@
 // Inserisci qui le tue chiavi API di Supabase. Le trovi nella dashboard del tuo progetto, in "Settings" -> "API".
 const SUPABASE_URL = 'https://jukyggaoiekenvekoicv.supabase.co'; 
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1a3lnZ2FvaWVrZW52ZWtvaWN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwNjEwOTgsImV4cCI6MjA3MjYzNzA5OH0.84lO4yqqZ6pbVLX0hlxOC3qgK508y1gFxeSp3Wx3kkw'; 
-
+ 
 
 // Crea il client Supabase usando la funzione createClient esposta globalmente
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -57,14 +57,13 @@ async function avviaAutocompletamento() {
             return;
         }
 
-        const prezzoStringa = prodotto['Prezzo_forn'];
-        const prezzoNumero = parseFloat(prezzoStringa.replace('€ ', '').replace(',', '.'));
+        const prezzoNumero = prodotto['Prezzo_forn'];
         
-        if (!isNaN(prezzoNumero)) {
+        if (typeof prezzoNumero === 'number') {
             inputCodiceInterno.value = prezzoNumero.toFixed(2);
         } else {
             inputCodiceInterno.value = '';
-            console.error('Prezzo non valido nel database:', prezzoStringa);
+            console.error('Valore del prezzo non è un numero valido:', prezzoNumero);
         }
     });
 }
