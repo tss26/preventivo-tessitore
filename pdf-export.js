@@ -133,7 +133,7 @@ document.getElementById("generaPdf").addEventListener("click", async () => {
         const img = new Image();
         img.src = resizedImageDataUrl;
         img.style.display = "block";
-        img.style.width = "720px";
+        img.style.width = "360px";
         img.style.height = "auto";
         img.style.objectFit = "contain";
         imgWrapper.appendChild(img);
