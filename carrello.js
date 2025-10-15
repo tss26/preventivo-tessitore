@@ -1,8 +1,5 @@
 // ===========================================
 // CONFIGURAZIONE SUPABASE
-// Devi definire qui le tue chiavi reali.
-// ATTENZIONE: Se carichi questo file su GitHub, le chiavi pubbliche (ANON_KEY)
-// possono essere visibili, ma sono necessarie per l'uso lato client.
 // ===========================================
 const SUPABASE_URL = 'https://jukyggaoiekenvekoicv.supabase.co'; 
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1a3lnZ2FvaWVrZW52ZWtvaWN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwNjEwOTgsImV4cCI6MjA3MjYzNzA5OH0.84lO4yqqZ6pbVLX0hlxOC3qgK508y1gFxeSp3Wx3kkw'; 
@@ -13,7 +10,6 @@ const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SU
 
 // ===========================================
 // GESTIONE CARRELLO (LOGICA)
-// (Nessuna modifica qui)
 // ===========================================
 
 // 1. Inizializzazione del Carrello da localStorage
@@ -50,7 +46,6 @@ function rimuoviDalCarrello(index) {
 
 // ===========================================
 // GESTIONE INTERFACCIA UTENTE (UI)
-// (Nessuna modifica qui)
 // ===========================================
 
 /**
@@ -91,7 +86,6 @@ function aggiornaUIPreventivo() {
 
 // ===========================================
 // LOGICA DI ACQUISTO (Fase 1: Aggiungi al Carrello)
-// (Nessuna modifica qui)
 // ===========================================
 
 /**
@@ -164,7 +158,7 @@ async function gestisciAggiuntaAlCarrello() {
 
 // ===========================================
 // LOGICA DI CHECKOUT (Fase 2: Invio dell'Ordine)
-// **BLOCCO MODIFICATO**
+// *************** BLOCCO AGGIORNATO ***************
 // ===========================================
 
 /**
@@ -176,7 +170,7 @@ async function gestisciCheckout() {
         return;
     }
     
-    // ** 1. CONTROLLO AUTENTICAZIONE (RICHIESTO DALLA POLICY RLS) **
+    // ** 1. CONTROLLO AUTENTICAZIONE (OBBLIGATORIO) **
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
@@ -186,8 +180,6 @@ async function gestisciCheckout() {
         return; 
     }
     
-    // Assegna userId solo se l'utente è loggato
-    const userId = user.id; 
     // ***************************************************************
 
     // 2. Prepara i dati
@@ -211,7 +203,8 @@ async function gestisciCheckout() {
             .from('ordini')
             .insert([
                 {
-                    user_id: userId, // <-- userID ORA GARANTITO NON NULL
+                    // !!!!!!! user_id RIMOSSO DA QUI !!!!!!
+                    // Il DB lo popolerà automaticamente con auth.uid() (grazie al Default Value)
                     stato: 'In attesa di lavorazione',
                     totale: totaleCalcolato,
                     dettagli_prodotti: carrelloDaSalvare,
@@ -220,7 +213,6 @@ async function gestisciCheckout() {
             .select();
 
         if (error) {
-            // L'errore RLS non dovrebbe più verificarsi qui se l'utente è loggato
             throw new Error(error.message);
         }
 
@@ -234,14 +226,13 @@ async function gestisciCheckout() {
 
     } catch (e) {
         console.error('Errore durante l\'invio dell\'ordine:', e);
-        alert(`Errore nell'invio dell'ordine: ${e.message}. Se l'errore RLS persiste, verifica di aver salvato la policy corretta.`);
+        alert(`Errore nell'invio dell'ordine: ${e.message}. Riprova il login.`);
     }
 }
 
 
 // ===========================================
 // INIZIALIZZAZIONE E EVENT LISTENERS
-// (Nessuna modifica qui)
 // ===========================================
 
 document.addEventListener('DOMContentLoaded', () => {
