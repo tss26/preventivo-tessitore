@@ -1,19 +1,13 @@
 // ===========================================
 // CONFIGURAZIONE SUPABASE
-// Devi definire il client Supabase anche qui, 
-// o assicurarti che sia disponibile globalmente.
-// Per semplicità, lo includiamo anche qui.
-// Usa le tue chiavi reali.
-//const SUPABASE_URL = 'https://jukyggaoiekenvekoicv.supabase.co'; 
-//const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1a3lnZ2FvaWVrZW52ZWtvaWN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwNjEwOTgsImV4cCI6MjA3MjYzNzA5OH0.84lO4yqqZ6pbVLX0hlxOC3qgK508y1gFxeSp3Wx3kkw'; 
-// 
-//
-// Crea il client Supabase usando la funzione createClient esposta globalmente
-//const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+// Devi definire qui le tue chiavi reali.
+// ATTENZIONE: Se carichi questo file su GitHub, le chiavi pubbliche (ANON_KEY)
+// possono essere visibili, ma sono necessarie per l'uso lato client.
 // ===========================================
 const SUPABASE_URL = 'https://jukyggaoiekenvekoicv.supabase.co'; 
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1a3lnZ2FvaWVrZW52ZWtvaWN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwNjEwOTgsImV4cCI6MjA3MjYzNzA5OH0.84lO4yqqZ6pbVLX0hlxOC3qgK508y1gFxeSp3Wx3kkw'; 
+ 
+// Crea il client Supabase solo se la libreria è caricata
 const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 
@@ -40,13 +34,23 @@ function aggiungiAlCarrello(articolo) {
  */
 function calcolaTotaleParziale() {
     // Implementa la logica di calcolo del prezzo qui.
-    // Per ora, usiamo una somma di prezzi fittizi per l'esempio.
     return carrello.reduce((totale, item) => {
-        // Usa un prezzo base se non definito, altrimenti usa il prezzo dell'articolo.
-        const prezzoArticolo = item.prezzo_unitario || 100; 
+        // Usa il prezzo unitario definito nell'oggetto articolo.
+        const prezzoArticolo = item.prezzo_unitario || 0; 
         return totale + (prezzoArticolo * item.quantita);
     }, 0);
 }
+
+/**
+ * Rimuove un articolo dal carrello tramite indice.
+ * @param {number} index - L'indice dell'articolo da rimuovere.
+ */
+function rimuoviDalCarrello(index) {
+    carrello.splice(index, 1); // Rimuove 1 elemento all'indice specificato
+    localStorage.setItem('carrello', JSON.stringify(carrello));
+    aggiornaUIPreventivo();
+}
+
 
 // ===========================================
 // GESTIONE INTERFACCIA UTENTE (UI)
@@ -79,7 +83,7 @@ function aggiornaUIPreventivo() {
     const totale = calcolaTotaleParziale();
     totaleStrong.textContent = `€ ${totale.toFixed(2)}`;
     
-    // Aggiunge i listener per la rimozione (opzionale ma utile)
+    // Aggiunge i listener per la rimozione
     document.querySelectorAll('.remove-item').forEach(button => {
         button.addEventListener('click', (e) => {
             rimuoviDalCarrello(e.target.getAttribute('data-index'));
@@ -87,32 +91,10 @@ function aggiornaUIPreventivo() {
     });
 }
 
-/**
- * Rimuove un articolo dal carrello tramite indice.
- * @param {number} index - L'indice dell'articolo da rimuovere.
- */
-function rimuoviDalCarrello(index) {
-    carrello.splice(index, 1); // Rimuove 1 elemento all'indice specificato
-    localStorage.setItem('carrello', JSON.stringify(carrello));
-    aggiornaUIPreventivo();
-}
-
 
 // ===========================================
-// EVENTI E LOGICA DI ACQUISTO
+// LOGICA DI ACQUISTO (Fase 1: Aggiungi al Carrello)
 // ===========================================
-
-// 2. Logica al caricamento della pagina
-document.addEventListener('DOMContentLoaded', () => {
-    // Assicurati che il preventivo sia aggiornato all'apertura
-    aggiornaUIPreventivo(); 
-    
-    const btnAggiungi = document.querySelector('.btn-add');
-    if (btnAggiungi) {
-        btnAggiungi.addEventListener('click', gestisciAggiuntaAlCarrello);
-    }
-});
-
 
 /**
  * Funzione principale per gestire l'aggiunta al carrello: 
@@ -123,8 +105,8 @@ async function gestisciAggiuntaAlCarrello() {
     const qta = parseInt(document.getElementById('qta').value);
     const formaElement = document.querySelector('.forma.active');
     
-    if (!formaElement || qta < 1) {
-        alert("Seleziona una forma e una quantità valida.");
+    if (!formaElement || qta < 1 || isNaN(qta)) {
+        alert("Seleziona una forma e una quantità valida (min. 1).");
         return;
     }
 
@@ -133,14 +115,20 @@ async function gestisciAggiuntaAlCarrello() {
 
     let fileUrl = null;
 
-    if (fileInput.files.length > 0 && supabase) {
+    if (fileInput.files.length > 0) {
+        if (!supabase) {
+             alert("ERRORE: Supabase non è stato inizializzato. Controlla la console.");
+             return;
+        }
+
         const file = fileInput.files[0];
-        // Crea un nome file univoco basato sull'utente e il timestamp
+        // Crea un nome file univoco
+        // Nota: user_id sarà 'anonimo' finché non implementi la login.
         const userId = (await supabase.auth.getUser()).data.user?.id || 'anonimo';
         const fileName = `${userId}/${Date.now()}-${file.name.replace(/\s/g, '_')}`;
         
         try {
-            // Upload del file su Supabase Storage (Assumi bucket chiamato 'personalizzazioni')
+            // Upload del file su Supabase Storage (bucket chiamato 'personalizzazioni')
             const { data, error } = await supabase.storage.from('personalizzazioni').upload(fileName, file, {
                 cacheControl: '3600',
                 upsert: false
@@ -148,11 +136,11 @@ async function gestisciAggiuntaAlCarrello() {
             
             if (error) {
                 console.error('Errore upload Supabase:', error);
-                alert('Errore nel caricamento del file. Controlla il bucket "personalizzazioni".');
+                alert('Errore nel caricamento del file. Verifica le policy di RLS nel bucket "personalizzazioni".');
                 return;
             }
             
-            // Ottieni l'URL pubblico per visualizzazione/download dell'admin
+            // Ottieni l'URL pubblico
             const { data: urlData } = supabase.storage.from('personalizzazioni').getPublicUrl(data.path);
             fileUrl = urlData.publicUrl;
 
@@ -162,20 +150,17 @@ async function gestisciAggiuntaAlCarrello() {
             return;
         }
 
-    } else if (fileInput.files.length > 0 && !supabase) {
-        alert("ERRORE: Supabase non è stato inizializzato correttamente per l'upload.");
-        return;
     }
 
 
     // Creazione dell'oggetto articolo da aggiungere al carrello
     const nuovoArticolo = {
-        id_unico: Date.now(), // ID temporaneo per identificazione nel carrello
+        id_unico: Date.now(),
         prodotto: `Bandiera ${forma} Personalizzata`,
         quantita: qta,
         personalizzazione_url: fileUrl, 
         componenti: componenti,
-        prezzo_unitario: 142.75 // TODO: Implementa logica di pricing dinamica qui
+        prezzo_unitario: 142.75 // TODO: Sostituisci con il pricing dinamico reale
     };
 
     aggiungiAlCarrello(nuovoArticolo);
@@ -185,15 +170,20 @@ async function gestisciAggiuntaAlCarrello() {
     fileInput.value = ''; // Resetta l'input file
 }
 
-// Assicurati che la funzione di checkout (richiediPreventivo) sia definita qui 
-// o nel tuo file di checkout dedicato.
-// ... (La logica del checkout della Fase 2 andrà qui, usando 'carrello' e 'supabase')
-// AGGIUNGI QUESTO CODICE AL TUO FILE carrello.js
+
+// ===========================================
+// LOGICA DI CHECKOUT (Fase 2: Invio dell'Ordine)
+// ===========================================
 
 /**
  * Gestisce il processo di checkout: salva il carrello nel DB e lo svuota.
  */
 async function gestisciCheckout() {
+    if (!supabase) {
+        alert("ERRORE: Supabase non è inizializzato. Impossibile inviare l'ordine.");
+        return;
+    }
+
     // 1. Prepara i dati
     const carrelloDaSalvare = JSON.parse(localStorage.getItem('carrello')) || [];
     
@@ -204,12 +194,11 @@ async function gestisciCheckout() {
     
     const totaleCalcolato = calcolaTotaleParziale();
     
-    // NOTE: user_id sarà NULL finché non implementiamo la login (Fase 3)
+    // Ottiene l'ID utente (sarà null se non loggato)
     let userId = null;
-    if (supabase) {
-        const { data: { user } } = await supabase.auth.getUser();
-        userId = user ? user.id : null; 
-    }
+    const { data: { user } } = await supabase.auth.getUser();
+    userId = user ? user.id : null; 
+    
 
     // 2. Conferma (opzionale)
     if (!confirm(`Confermi l'invio del preventivo per un totale di € ${totaleCalcolato.toFixed(2)}?`)) {
@@ -235,7 +224,7 @@ async function gestisciCheckout() {
         }
 
         // 4. Successo: Svuota il carrello e aggiorna l'UI
-        carrello = []; // Resetta l'array JS
+        carrello = []; 
         localStorage.removeItem('carrello');
         aggiornaUIPreventivo();
         
@@ -248,11 +237,38 @@ async function gestisciCheckout() {
     }
 }
 
-// Aggiungi l'event listener al DOMContentLoaded in carrello.js
-document.addEventListener('DOMContentLoaded', () => {
-    // ... (altre logiche DOMContentLoaded esistenti) ...
 
-    // Nuova logica per il pulsante Richiedi Preventivo
+// ===========================================
+// INIZIALIZZAZIONE E EVENT LISTENERS
+// ===========================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Aggiorna subito l'UI al caricamento con i dati di localStorage
+    aggiornaUIPreventivo(); 
+    
+    
+    // ** CODICE AGGIUNTO PER GESTIRE IL CLICK SUI PULSANTI FORMA **
+    document.querySelectorAll('.forme .forma').forEach(button => {
+        button.addEventListener('click', (e) => {
+            // 1. Trova e rimuovi 'active' da tutti i pulsanti della forma
+            document.querySelectorAll('.forme .forma').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // 2. Aggiungi 'active' solo al pulsante cliccato
+            e.target.classList.add('active');
+        });
+    });
+    // ***************************************************************
+    
+    
+    // Listener per l'aggiunta al carrello
+    const btnAggiungi = document.querySelector('.btn-add');
+    if (btnAggiungi) {
+        btnAggiungi.addEventListener('click', gestisciAggiuntaAlCarrello);
+    }
+    
+    // Listener per il checkout (Richiedi preventivo ufficiale)
     const btnCheckout = document.getElementById('richiediPreventivo');
     if (btnCheckout) {
         btnCheckout.addEventListener('click', gestisciCheckout);
