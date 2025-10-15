@@ -22,8 +22,8 @@ async function handleRegister(email, password) {
         return;
     }
     
-    // 1. Esegue la registrazione
-    const { error } = await supabase.auth.signUp({
+    // 1. Esegue la registrazione in auth.users
+    const { data, error } = await supabase.auth.signUp({ // Modificato per catturare 'data'
         email: email,
         password: password,
     });
@@ -31,11 +31,37 @@ async function handleRegister(email, password) {
     if (error) {
         // La maggior parte degli errori qui è dovuta a password troppo deboli o email già registrate.
         alert(`Errore di registrazione: ${error.message}`);
-    } else {
-        // 2. Successo: Supabase invia automaticamente l'email di conferma
-        alert("Registrazione completata! Controlla la tua email per il link di conferma, poi prova ad accedere.");
-        // Non reindirizziamo finché l'utente non conferma l'email.
+        return;
     }
+    
+    // 2. NUOVO PASSO CRITICO: Inserimento nella tabella 'utenti' (profili)
+    if (data.user) {
+        try {
+            // L'utente è stato creato in auth.users, ora lo creiamo nella tabella 'utenti'
+            const { error: utentiError } = await supabase
+                .from('utenti')
+                .insert([
+                    { 
+                        id: data.user.id, // Usa l'ID utente creato in auth.users
+                        // Puoi aggiungere qui altri campi obbligatori della tua tabella utenti
+                        ragione_sociale: 'Cliente Registrato', 
+                        // ...
+                    }
+                ]);
+
+            if (utentiError) {
+                console.error("Attenzione! Errore nell'inserimento in tabella utenti, ma registrazione auth ok:", utentiError);
+                // Non blocchiamo l'utente, ma avvisiamo in console
+            }
+        } catch (e) {
+            console.error("Eccezione durante l'inserimento in utenti:", e);
+        }
+    }
+    // ******************************************************
+    
+    // 3. Successo: Supabase invia automaticamente l'email di conferma
+    alert("Registrazione completata! Controlla la tua email per il link di conferma, poi prova ad accedere.");
+    // Non reindirizziamo finché l'utente non conferma l'email.
 }
 
 /**
