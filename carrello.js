@@ -188,3 +188,73 @@ async function gestisciAggiuntaAlCarrello() {
 // Assicurati che la funzione di checkout (richiediPreventivo) sia definita qui 
 // o nel tuo file di checkout dedicato.
 // ... (La logica del checkout della Fase 2 andrà qui, usando 'carrello' e 'supabase')
+// AGGIUNGI QUESTO CODICE AL TUO FILE carrello.js
+
+/**
+ * Gestisce il processo di checkout: salva il carrello nel DB e lo svuota.
+ */
+async function gestisciCheckout() {
+    // 1. Prepara i dati
+    const carrelloDaSalvare = JSON.parse(localStorage.getItem('carrello')) || [];
+    
+    if (carrelloDaSalvare.length === 0) {
+        alert("Il preventivo è vuoto. Aggiungi prima degli articoli.");
+        return;
+    }
+    
+    const totaleCalcolato = calcolaTotaleParziale();
+    
+    // NOTE: user_id sarà NULL finché non implementiamo la login (Fase 3)
+    let userId = null;
+    if (supabase) {
+        const { data: { user } } = await supabase.auth.getUser();
+        userId = user ? user.id : null; 
+    }
+
+    // 2. Conferma (opzionale)
+    if (!confirm(`Confermi l'invio del preventivo per un totale di € ${totaleCalcolato.toFixed(2)}?`)) {
+        return;
+    }
+    
+    // 3. Inserisci l'ordine nel DB
+    try {
+        const { data, error } = await supabase
+            .from('ordini')
+            .insert([
+                {
+                    user_id: userId,
+                    stato: 'In attesa di lavorazione',
+                    totale: totaleCalcolato,
+                    dettagli_prodotti: carrelloDaSalvare,
+                }
+            ])
+            .select(); // Richiedi i dati inseriti per ottenere l'ID
+
+        if (error) {
+            throw new Error(error.message);
+        }
+
+        // 4. Successo: Svuota il carrello e aggiorna l'UI
+        carrello = []; // Resetta l'array JS
+        localStorage.removeItem('carrello');
+        aggiornaUIPreventivo();
+        
+        const ordineId = data && data[0] ? data[0].id : 'N/D';
+        alert(`Ordine/Preventivo inviato con successo! Ti contatteremo a breve. ID ordine: ${ordineId}`);
+
+    } catch (e) {
+        console.error('Errore durante l\'invio dell\'ordine:', e);
+        alert(`Errore nell'invio dell'ordine: ${e.message}. Assicurati che la tabella 'ordini' esista e che le policy di RLS lo permettano.`);
+    }
+}
+
+// Aggiungi l'event listener al DOMContentLoaded in carrello.js
+document.addEventListener('DOMContentLoaded', () => {
+    // ... (altre logiche DOMContentLoaded esistenti) ...
+
+    // Nuova logica per il pulsante Richiedi Preventivo
+    const btnCheckout = document.getElementById('richiediPreventivo');
+    if (btnCheckout) {
+        btnCheckout.addEventListener('click', gestisciCheckout);
+    }
+});
