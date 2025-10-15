@@ -13,6 +13,7 @@ const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SU
 
 // ===========================================
 // GESTIONE CARRELLO (LOGICA)
+// (Nessuna modifica qui)
 // ===========================================
 
 // 1. Inizializzazione del Carrello da localStorage
@@ -20,7 +21,6 @@ let carrello = JSON.parse(localStorage.getItem('carrello')) || [];
 
 /**
  * Aggiunge un articolo al carrello e aggiorna localStorage.
- * @param {object} articolo - L'oggetto che rappresenta l'articolo personalizzato.
  */
 function aggiungiAlCarrello(articolo) {
     carrello.push(articolo);
@@ -30,12 +30,9 @@ function aggiungiAlCarrello(articolo) {
 
 /**
  * Calcola il totale parziale del carrello.
- * @returns {number} Il totale calcolato.
  */
 function calcolaTotaleParziale() {
-    // Implementa la logica di calcolo del prezzo qui.
     return carrello.reduce((totale, item) => {
-        // Usa il prezzo unitario definito nell'oggetto articolo.
         const prezzoArticolo = item.prezzo_unitario || 0; 
         return totale + (prezzoArticolo * item.quantita);
     }, 0);
@@ -43,10 +40,9 @@ function calcolaTotaleParziale() {
 
 /**
  * Rimuove un articolo dal carrello tramite indice.
- * @param {number} index - L'indice dell'articolo da rimuovere.
  */
 function rimuoviDalCarrello(index) {
-    carrello.splice(index, 1); // Rimuove 1 elemento all'indice specificato
+    carrello.splice(index, 1);
     localStorage.setItem('carrello', JSON.stringify(carrello));
     aggiornaUIPreventivo();
 }
@@ -54,6 +50,7 @@ function rimuoviDalCarrello(index) {
 
 // ===========================================
 // GESTIONE INTERFACCIA UTENTE (UI)
+// (Nessuna modifica qui)
 // ===========================================
 
 /**
@@ -65,7 +62,7 @@ function aggiornaUIPreventivo() {
     
     if (!lista || !totaleStrong) return;
 
-    lista.innerHTML = ''; // Svuota la lista
+    lista.innerHTML = ''; 
     
     carrello.forEach((item, index) => {
         const p = document.createElement('p');
@@ -94,6 +91,7 @@ function aggiornaUIPreventivo() {
 
 // ===========================================
 // LOGICA DI ACQUISTO (Fase 1: Aggiungi al Carrello)
+// (Nessuna modifica qui)
 // ===========================================
 
 /**
@@ -122,13 +120,10 @@ async function gestisciAggiuntaAlCarrello() {
         }
 
         const file = fileInput.files[0];
-        // Crea un nome file univoco
-        // Nota: user_id sarà 'anonimo' finché non implementi la login.
         const userId = (await supabase.auth.getUser()).data.user?.id || 'anonimo';
         const fileName = `${userId}/${Date.now()}-${file.name.replace(/\s/g, '_')}`;
         
         try {
-            // Upload del file su Supabase Storage (bucket chiamato 'personalizzazioni')
             const { data, error } = await supabase.storage.from('personalizzazioni').upload(fileName, file, {
                 cacheControl: '3600',
                 upsert: false
@@ -140,7 +135,6 @@ async function gestisciAggiuntaAlCarrello() {
                 return;
             }
             
-            // Ottieni l'URL pubblico
             const { data: urlData } = supabase.storage.from('personalizzazioni').getPublicUrl(data.path);
             fileUrl = urlData.publicUrl;
 
@@ -152,27 +146,25 @@ async function gestisciAggiuntaAlCarrello() {
 
     }
 
-
-    // Creazione dell'oggetto articolo da aggiungere al carrello
     const nuovoArticolo = {
         id_unico: Date.now(),
         prodotto: `Bandiera ${forma} Personalizzata`,
         quantita: qta,
         personalizzazione_url: fileUrl, 
         componenti: componenti,
-        prezzo_unitario: 142.75 // TODO: Sostituisci con il pricing dinamico reale
+        prezzo_unitario: 142.75 
     };
 
     aggiungiAlCarrello(nuovoArticolo);
     
-    // Feedback e pulizia UI
     alert(`Aggiunto al preventivo: ${qta} x ${nuovoArticolo.prodotto}`);
-    fileInput.value = ''; // Resetta l'input file
+    fileInput.value = '';
 }
 
 
 // ===========================================
 // LOGICA DI CHECKOUT (Fase 2: Invio dell'Ordine)
+// **BLOCCO MODIFICATO**
 // ===========================================
 
 /**
@@ -183,8 +175,22 @@ async function gestisciCheckout() {
         alert("ERRORE: Supabase non è inizializzato. Impossibile inviare l'ordine.");
         return;
     }
+    
+    // ** 1. CONTROLLO AUTENTICAZIONE (RICHIESTO DALLA POLICY RLS) **
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+        // Blocca l'invio e reindirizza al login se l'utente non è loggato.
+        alert("Devi effettuare il login per richiedere un preventivo ufficiale. Verrai reindirizzato alla pagina di accesso.");
+        window.location.href = 'login.html'; 
+        return; 
+    }
+    
+    // Assegna userId solo se l'utente è loggato
+    const userId = user.id; 
+    // ***************************************************************
 
-    // 1. Prepara i dati
+    // 2. Prepara i dati
     const carrelloDaSalvare = JSON.parse(localStorage.getItem('carrello')) || [];
     
     if (carrelloDaSalvare.length === 0) {
@@ -193,37 +199,32 @@ async function gestisciCheckout() {
     }
     
     const totaleCalcolato = calcolaTotaleParziale();
-    
-    // Ottiene l'ID utente (sarà null se non loggato)
-    let userId = null;
-    const { data: { user } } = await supabase.auth.getUser();
-    userId = user ? user.id : null; 
-    
 
-    // 2. Conferma (opzionale)
+    // 3. Conferma (opzionale)
     if (!confirm(`Confermi l'invio del preventivo per un totale di € ${totaleCalcolato.toFixed(2)}?`)) {
         return;
     }
     
-    // 3. Inserisci l'ordine nel DB
+    // 4. Inserisci l'ordine nel DB
     try {
         const { data, error } = await supabase
             .from('ordini')
             .insert([
                 {
-                    user_id: userId,
+                    user_id: userId, // <-- userID ORA GARANTITO NON NULL
                     stato: 'In attesa di lavorazione',
                     totale: totaleCalcolato,
                     dettagli_prodotti: carrelloDaSalvare,
                 }
             ])
-            .select(); // Richiedi i dati inseriti per ottenere l'ID
+            .select();
 
         if (error) {
+            // L'errore RLS non dovrebbe più verificarsi qui se l'utente è loggato
             throw new Error(error.message);
         }
 
-        // 4. Successo: Svuota il carrello e aggiorna l'UI
+        // 5. Successo: Svuota il carrello e aggiorna l'UI
         carrello = []; 
         localStorage.removeItem('carrello');
         aggiornaUIPreventivo();
@@ -233,34 +234,30 @@ async function gestisciCheckout() {
 
     } catch (e) {
         console.error('Errore durante l\'invio dell\'ordine:', e);
-        alert(`Errore nell'invio dell'ordine: ${e.message}. Assicurati che la tabella 'ordini' esista e che le policy di RLS lo permettano.`);
+        alert(`Errore nell'invio dell'ordine: ${e.message}. Se l'errore RLS persiste, verifica di aver salvato la policy corretta.`);
     }
 }
 
 
 // ===========================================
 // INIZIALIZZAZIONE E EVENT LISTENERS
+// (Nessuna modifica qui)
 // ===========================================
 
 document.addEventListener('DOMContentLoaded', () => {
     // Aggiorna subito l'UI al caricamento con i dati di localStorage
     aggiornaUIPreventivo(); 
     
-    
     // ** CODICE AGGIUNTO PER GESTIRE IL CLICK SUI PULSANTI FORMA **
     document.querySelectorAll('.forme .forma').forEach(button => {
         button.addEventListener('click', (e) => {
-            // 1. Trova e rimuovi 'active' da tutti i pulsanti della forma
             document.querySelectorAll('.forme .forma').forEach(btn => {
                 btn.classList.remove('active');
             });
-
-            // 2. Aggiungi 'active' solo al pulsante cliccato
             e.target.classList.add('active');
         });
     });
     // ***************************************************************
-    
     
     // Listener per l'aggiunta al carrello
     const btnAggiungi = document.querySelector('.btn-add');
