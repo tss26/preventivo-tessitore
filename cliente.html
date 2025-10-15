@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Area Cliente - Tessitore</title>
+  <link rel="stylesheet" href="cliente.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="header">
+    <div class="logo">TESATURAS</div>
+    <nav class="nav">
+      <a href="index.html">Home</a>
+      <a href="#">Preventivo</a>
+      <a href="#">Clienti</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="intro">
+      <h1>Crea il tuo kit sportivo personalizzato</h1>
+      <p>Scegli la categoria per iniziare.</p>
+      <button class="btn-primary">Configura il tuo kit</button>
+
+      <div class="categorie">
+        <button class="categoria"><img src="icon-basket.png" alt=""> Basket</button>
+        <button class="categoria"><img src="icon-volley.png" alt=""> Volley</button>
+      </div>
+    </section>
+
+    <section class="personalizza">
+      <h2>Bandiere ed Espositori Drop</h2>
+      <p>Scegli la forma per visualizzare tutti i componenti.</p>
+      <div class="forme">
+        <button class="forma active">Goccia</button>
+        <button class="forma">Vela</button>
+        <button class="forma">Rettangolare</button>
+      </div>
+
+      <div class="quantita">
+        <label for="qta">Quantità</label>
+        <input type="number" id="qta" value="2" min="1">
+      </div>
+
+      <div class="upload">
+        <div class="upload-box">
+          <p>Trascina o carica file (.PNG / .PDF)</p>
+          <input type="file" id="fileUpload" />
+        </div>
+      </div>
+
+      <div class="componenti">
+        <h3>Componenti</h3>
+        <label><input type="checkbox" checked> Pacchetto completo (bandiera + asta + base)</label>
+        <label><input type="checkbox"> Solo bandiera</label>
+        <label><input type="checkbox"> Solo asta</label>
+        <label><input type="checkbox"> Solo base</label>
+        <label><input type="checkbox"> Aggiungi zavorra</label>
+      </div>
+
+      <button class="btn-add">Aggiungi al preventivo</button>
+    </section>
+
+    <aside class="preventivo">
+      <h2>Il tuo preventivo</h2>
+      <div class="preventivo-lista">
+        <p>2 × Bandiera Goccia Personalizzata</p>
+        <p>1 × Kit Calcio Personalizzato</p>
+      </div>
+      <div class="totale">
+        <span>Totale parziale:</span>
+        <strong>€ 285,50</strong>
+      </div>
+      <button class="btn-secondary" id="richiediPreventivo">Richiedi preventivo ufficiale</button>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    <p>© 2025 Tessitore SRL - Tutti i diritti riservati</p>
+  </footer>
+
+  <script>
+    document.getElementById("richiediPreventivo").addEventListener("click", () => {
+      alert("Richiesta preventivo inviata!");
+    });
+  </script>
+</body>
+</html>
