@@ -1,0 +1,271 @@
+/* FONT BASE */
+body {
+  font-family: "Poppins", sans-serif;
+  background-color: #f6f8fb;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+/* HEADER */
+.header {
+  background: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: #007bff;
+  letter-spacing: 1px;
+}
+
+.nav a {
+  margin-left: 1.5rem;
+  text-decoration: none;
+  color: #444;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.nav a:hover {
+  color: #007bff;
+}
+
+/* LAYOUT GENERALE */
+.container {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.intro,
+.personalizza,
+.preventivo {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+/* SEZIONE INTRO */
+.intro h1 {
+  font-size: 1.8rem;
+  color: #007bff;
+  margin-bottom: 0.5rem;
+}
+
+.intro p {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.btn-primary {
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 0.8rem 1.8rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #005fcc;
+}
+
+/* CATEGORIE */
+.categorie {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.categoria {
+  flex: 1;
+  background: #f0f4fa;
+  border: none;
+  border-radius: 12px;
+  padding: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.categoria:hover {
+  background: #007bff;
+  color: white;
+}
+
+/* PERSONALIZZA */
+.personalizza h2 {
+  color: #007bff;
+  margin-bottom: 1rem;
+}
+
+.forme {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.forma {
+  flex: 1;
+  background: #f0f4fa;
+  border: none;
+  border-radius: 12px;
+  padding: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.forma.active,
+.forma:hover {
+  background: #007bff;
+  color: white;
+}
+
+.quantita {
+  margin: 1.5rem 0;
+}
+
+.quantita label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+}
+
+.quantita input {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+/* UPLOAD */
+.upload-box {
+  border: 2px dashed #007bff;
+  padding: 1.5rem;
+  text-align: center;
+  border-radius: 12px;
+  background: #f9fbff;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+}
+
+.upload-box p {
+  margin: 0.5rem 0;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+/* COMPONENTI */
+.componenti h3 {
+  color: #007bff;
+  margin-bottom: 1rem;
+}
+
+.componenti label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.btn-add {
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 0.8rem 1.8rem;
+  margin-top: 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-add:hover {
+  background: #218838;
+}
+
+/* PREVENTIVO */
+.preventivo {
+  position: sticky;
+  top: 100px;
+  align-self: start;
+}
+
+.preventivo h2 {
+  color: #007bff;
+  margin-bottom: 1rem;
+}
+
+.preventivo-lista {
+  background: #f9fbff;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.totale {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+}
+
+.btn-secondary {
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 0.8rem 1.8rem;
+  font-size: 1rem;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #005fcc;
+}
+
+/* FOOTER */
+.footer {
+  text-align: center;
+  padding: 1rem;
+  color: #777;
+  font-size: 0.9rem;
+  margin-top: 2rem;
+}
+
+/* RESPONSIVE */
+@media (max-width: 960px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
+
+  .preventivo {
+    position: relative;
+    top: 0;
+    margin-top: 2rem;
+  }
+
+  .categorie,
+  .forme {
+    flex-direction: column;
+  }
+}
