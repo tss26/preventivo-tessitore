@@ -44,7 +44,7 @@ async function handleRegister(email, password) {
                     { 
                         id: data.user.id, // Usa l'ID utente creato in auth.users
                         // Puoi aggiungere qui altri campi obbligatori della tua tabella utenti
-                        ragione_sociale: 'Cliente Registrato', 
+                        //ragione_sociale: 'Cliente Registrato', 
                         // ...
                     }
                 ]);
