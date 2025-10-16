@@ -264,14 +264,36 @@ async function gestisciCheckout() {
 
 
 // ===========================================
-// EVENT LISTENERS (rimanente invariato)
+// FUNZIONE LOGOUT (aggiunta)
+// ===========================================
+
+/**
+ * Gestisce il logout dell'utente e reindirizza alla pagina iniziale.
+ */
+async function handleLogout() {
+    if (!confirm("Sei sicuro di voler uscire?")) {
+        return;
+    }
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+        console.error('Errore durante il logout:', error);
+        alert('Si è verificato un errore durante il logout. Riprova.');
+    } else {
+        localStorage.removeItem('carrello'); 
+        window.location.href = 'index.html'; 
+    }
+}
+
+
+// ===========================================
+// EVENT LISTENERS (FINALIZZATO)
 // ===========================================
 
 document.addEventListener('DOMContentLoaded', () => {
     // Aggiorna subito l'UI al caricamento con i dati di localStorage
     aggiornaUIPreventivo(); 
     
-    // ** CODICE AGGIUNTO PER GESTIRE IL CLICK SUI PULSANTI FORMA **
+    // ** CODICE PER GESTIRE IL CLICK SUI PULSANTI FORMA **
     document.querySelectorAll('.forme .forma').forEach(button => {
         button.addEventListener('click', (e) => {
             document.querySelectorAll('.forme .forma').forEach(btn => {
@@ -291,5 +313,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCheckout = document.getElementById('richiediPreventivo');
     if (btnCheckout) {
         btnCheckout.addEventListener('click', gestisciCheckout);
+    }
+    
+    // Listener per il Logout (collegato al link nel menu)
+    const btnLogout = document.getElementById('logoutBtn');
+    if (btnLogout) {
+        btnLogout.addEventListener('click', (e) => {
+            e.preventDefault(); 
+            handleLogout();
+        });
     }
 });
