@@ -43,21 +43,17 @@ async function handleRegister(email, password) {
                 .insert([
                     { 
                         id: data.user.id, // Usa l'ID utente creato in auth.users
-                        // Puoi aggiungere qui altri campi obbligatori della tua tabella utenti
-                        //ragione_sociale: 'Cliente Registrato', 
-                        // ...
+                        // I valori di ragione_sociale, partita_iva, e permessi: 'utente' sono gestiti dai DEFAULT VALUE della tabella.
                     }
                 ]);
 
             if (utentiError) {
                 console.error("Attenzione! Errore nell'inserimento in tabella utenti, ma registrazione auth ok:", utentiError);
-                // Non blocchiamo l'utente, ma avvisiamo in console
             }
         } catch (e) {
             console.error("Eccezione durante l'inserimento in utenti:", e);
         }
     }
-    // ******************************************************
     
     // 3. Successo: Supabase invia automaticamente l'email di conferma
     alert("Registrazione completata! Controlla la tua email per il link di conferma, poi prova ad accedere.");
@@ -65,7 +61,7 @@ async function handleRegister(email, password) {
 }
 
 /**
- * Gestisce il login di un utente esistente.
+ * Gestisce il login di un utente esistente e il reindirizzamento in base ai permessi.
  */
 async function handleLogin(email, password) {
     if (!supabase) {
@@ -73,7 +69,7 @@ async function handleLogin(email, password) {
         return;
     }
     
-    // 1. Esegue il login
+    // 1. Esegue il login e ottiene i dati di base (incluso l'UUID dell'utente)
     const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
@@ -84,11 +80,30 @@ async function handleLogin(email, password) {
         return;
     }
     
-    // 2. Login di successo!
-    alert("Accesso effettuato con successo!");
+    const userId = data.user.id;
     
-    // 3. Reindirizzamento all'area cliente
-    window.location.href = 'cliente.html';
+    // 2. RECUPERA I PERMESSI DALLA TABELLA 'utenti'
+    const { data: profilo, error: profiloError } = await supabase
+        .from('utenti')
+        .select('permessi') // Seleziona il campo 'permessi'
+        .eq('id', userId)
+        .single();
+
+    if (profiloError) {
+        console.error("Errore nel recupero dei permessi utente:", profiloError);
+        alert("Accesso OK, ma impossibile determinare i permessi. Reindirizzamento standard.");
+        window.location.href = 'cliente.html'; // Fallback sicuro
+        return;
+    }
+
+    // 3. LOGICA DI REINDIRIZZAMENTO CONDIZIONALE
+    if (profilo && profilo.permessi === 'admin') {
+        alert("Accesso Admin effettuato!");
+        window.location.href = 'admin.html'; // Reindirizza l'admin
+    } else {
+        alert("Accesso Cliente effettuato!");
+        window.location.href = 'cliente.html'; // Reindirizza il cliente
+    }
 }
 
 
