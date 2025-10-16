@@ -43,7 +43,7 @@ async function verificaAdmin() {
 }
 
 // ===========================================
-// FUNZIONALITÀ ORDINI (Con N. Ordine e Nome Cliente)
+// FUNZIONALITÀ ORDINI (Con N. Ordine leggibile e Nome Cliente)
 // ===========================================
 
 /**
@@ -53,7 +53,7 @@ async function caricaOrdini() {
     const container = document.getElementById('ordiniLista');
     container.innerHTML = '<h2>Caricamento ordini in corso...</h2>';
     
-    // Recupera ordini, includendo il nuovo campo 'num_ordine_prog'
+    // Recupera ordini e i dati del cliente correlato (JOIN su utente)
     const { data: ordini, error } = await supabase
         .from('ordini')
         .select(`
@@ -63,8 +63,8 @@ async function caricaOrdini() {
         .order('data_ordine', { ascending: false }); 
 
     if (error) {
-        // Se la policy SELECT RLS non è ancora implementata, darà errore.
-        container.innerHTML = `<p style="color: red;">Errore nel recupero ordini: ${error.message}.</p>`;
+        // Se la policy SELECT RLS è stata eliminata, riavvisiamo
+        container.innerHTML = `<p style="color: red;">Errore nel recupero ordini: ${error.message}. Verifica RLS SELECT (admin_select_all_orders).</p>`;
         return;
     }
 
@@ -81,13 +81,18 @@ async function caricaOrdini() {
     ordini.forEach(ordine => {
         const dettagliProdotti = JSON.stringify(ordine.dettagli_prodotti).replace(/"/g, '&quot;');
         
-        // ** MODIFICA 1: Visualizzazione Nome Cliente **
-        // Utilizza ragione_sociale, fallback all'UUID se non è popolato
-        const clienteNome = (ordine.utente && ordine.utente.ragione_sociale) ? ordine.utente.ragione_sociale : 'ID: ' + (ordine.user_id ? ordine.user_id.substring(0, 8) : 'N/D');
-        const clientePiva = (ordine.utente && ordine.utente.partita_iva) || 'N/D';
+        // --- LOGICA DI VISUALIZZAZIONE ---
+        // N. Ordine Leggibile (UUID troncato)
+        const numeroOrdine = ordine.id.substring(0, 8).toUpperCase(); 
+
+        // Nome Cliente (con fallback robusto)
+        const nomeUtenteDB = ordine.utente?.ragione_sociale; 
+        const clienteNome = (nomeUtenteDB && nomeUtenteDB.trim() !== '') 
+            ? nomeUtenteDB 
+            : 'ID: ' + (ordine.user_id ? ordine.user_id.substring(0, 8) : 'N/D'); // Se ragione_sociale è vuota/null, usa l'ID
         
-        // ** MODIFICA 2: Utilizzo di num_ordine_prog **
-        const numeroOrdine = ordine.num_ordine_prog || ordine.id.substring(0, 8) + '...';
+        const clientePiva = (ordine.utente && ordine.utente.partita_iva) || 'N/D';
+        // --- FINE LOGICA DI VISUALIZZAZIONE ---
         
         html += `
             <tr data-id="${ordine.id}">
