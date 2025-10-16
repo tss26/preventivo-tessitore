@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Gestione Ordini</title>
+    <link rel="stylesheet" href="cliente.css"> 
+    <style>
+        /* Stile aggiuntivo per rendere la tabella admin più leggibile */
+        .admin-table {
+            width: 100%;
+            overflow-x: auto; 
+        }
+        .admin-table table {
+            width: 100%;
+            min-width: 800px; 
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .admin-table th, .admin-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            font-size: 0.9em;
+        }
+        .admin-table th {
+            background-color: #f0f4fa;
+            color: #007bff;
+        }
+        .admin-table tr:hover {
+            background-color: #f6f6f6;
+        }
+        .admin-table select {
+            padding: 5px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo" style="color: #dc3545; font-weight: 700;">ADMIN DASHBOARD</div>
+        <nav class="nav">
+            <a href="cliente.html">Area Cliente</a>
+            <a href="#" id="logoutBtn">Logout</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section style="grid-column: 1 / -1;"> 
+            <h1>Gestione Ordini Ricevuti</h1>
+            <div id="ordiniLista" class="admin-table">
+                <p>Verifica dei privilegi e caricamento ordini...</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2025 Tessitore SRL - Area Amministrativa</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
