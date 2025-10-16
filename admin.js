@@ -1,5 +1,5 @@
 // ===========================================
-// CONFIGURAZIONE SUPABASE (Sostituisci con le tue chiavi!)
+// CONFIGURAZIONE SUPABASE
 // ===========================================
 const SUPABASE_URL = 'https://jukyggaoiekenvekoicv.supabase.co'; 
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1a3lnZ2FvaWVrZW52ZWtvaWN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwNjEwOTgsImV4cCI6MjA3MjYzNzA5OH0.84lO4yqqZ6pbVLX0hlxOC3qgK508y1gFxeSp3Wx3kkw'; 
@@ -27,12 +27,11 @@ async function verificaAdmin() {
     // Carica il profilo dalla tabella 'utenti' per verificare il campo 'permessi'
     const { data: profilo, error } = await supabase
         .from('utenti')
-        // !!! CORREZIONE CHIAVE: Seleziona 'permessi' !!!
         .select('permessi, ragione_sociale') 
         .eq('id', user.id)
         .single();
 
-    if (error || !profilo || profilo.permessi !== 'admin') { // !!! USA profilo.permessi !!!
+    if (error || !profilo || profilo.permessi !== 'admin') { 
         alert('Accesso negato. Permessi insufficienti (Non sei un amministratore).');
         window.location.href = 'cliente.html'; 
         return false;
@@ -44,7 +43,7 @@ async function verificaAdmin() {
 }
 
 // ===========================================
-// FUNZIONALITÀ ORDINI
+// FUNZIONALITÀ ORDINI (Con N. Ordine e Nome Cliente)
 // ===========================================
 
 /**
@@ -54,7 +53,7 @@ async function caricaOrdini() {
     const container = document.getElementById('ordiniLista');
     container.innerHTML = '<h2>Caricamento ordini in corso...</h2>';
     
-    // Recupera ordini e i dati del cliente correlato (utente)
+    // Recupera ordini, includendo il nuovo campo 'num_ordine_prog'
     const { data: ordini, error } = await supabase
         .from('ordini')
         .select(`
@@ -64,6 +63,7 @@ async function caricaOrdini() {
         .order('data_ordine', { ascending: false }); 
 
     if (error) {
+        // Se la policy SELECT RLS non è ancora implementata, darà errore.
         container.innerHTML = `<p style="color: red;">Errore nel recupero ordini: ${error.message}.</p>`;
         return;
     }
@@ -73,19 +73,25 @@ async function caricaOrdini() {
         return;
     }
 
+    // Aggiorna l'intestazione della tabella per mostrare "N. Ordine" e "Cliente"
     let html = `<table><thead><tr>
-        <th>ID Ordine</th><th>Cliente</th><th>P. IVA</th><th>Data</th><th>Totale</th><th>Stato</th><th>Azioni</th>
+        <th>N. Ordine</th><th>Cliente</th><th>P. IVA</th><th>Data</th><th>Totale</th><th>Stato</th><th>Azioni</th>
         </tr></thead><tbody>`;
     
     ordini.forEach(ordine => {
         const dettagliProdotti = JSON.stringify(ordine.dettagli_prodotti).replace(/"/g, '&quot;');
         
+        // ** MODIFICA 1: Visualizzazione Nome Cliente **
+        // Utilizza ragione_sociale, fallback all'UUID se non è popolato
         const clienteNome = (ordine.utente && ordine.utente.ragione_sociale) ? ordine.utente.ragione_sociale : 'ID: ' + (ordine.user_id ? ordine.user_id.substring(0, 8) : 'N/D');
         const clientePiva = (ordine.utente && ordine.utente.partita_iva) || 'N/D';
         
+        // ** MODIFICA 2: Utilizzo di num_ordine_prog **
+        const numeroOrdine = ordine.num_ordine_prog || ordine.id.substring(0, 8) + '...';
+        
         html += `
             <tr data-id="${ordine.id}">
-                <td>${ordine.id.substring(0, 8)}...</td>
+                <td>${numeroOrdine}</td> 
                 <td>${clienteNome}</td>
                 <td>${clientePiva}</td>
                 <td>${new Date(ordine.data_ordine).toLocaleString()}</td>
