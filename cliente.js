@@ -289,12 +289,6 @@ async function caricaMieiOrdini() {
     container.innerHTML = html;
 }
 
-/**
- * Mostra i dettagli dell'ordine (Alert).
- 
-function mostraDettagliOrdine(ordineId, dettagliProdottiString) {
-    alert('Dettagli ordine ' + ordineId.substring(0, 8) + ' visualizzati.');
-}*/
 
 
 /**
