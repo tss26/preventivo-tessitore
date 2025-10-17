@@ -27,18 +27,21 @@
     /* Il DIV GENERALE (Contenitore della Galleria) occupa la prima colonna */
     .galleria-prodotti-container { 
         grid-column: 1 / 2;
+        /* Rimuoviamo il padding/margin dal body per evitare problemi di scroll */
     }
 
-    /* FIX STICKY: Rimuove align-self: start (che a volte interferisce) e garantisce top: 20px */
+    /* FIX STICKY: TOP FISSO E FUNZIONANTE */
     .preventivo { 
         grid-column: 2 / 3;
         position: sticky; 
         top: 20px; /* Si blocca a 20px dall'alto del viewport */
+        height: fit-content; /* CRITICO: Limita l'altezza al contenuto, permettendo al genitore di scorrere */
         /* Stili riutilizzati */
         background: white;
         border-radius: 16px;
         padding: 2rem;
         box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        z-index: 5; /* Assicura che sia sopra gli altri elementi durante lo scroll */
     }
     
     /* Stile per i box dei kit */
