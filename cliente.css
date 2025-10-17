@@ -269,3 +269,68 @@ body {
     flex-direction: column;
   }
 }
+/* CLIENTE.CSS - Aggiungi questi stili */
+
+/* Stile base per la sezione ordini */
+.ordini-view {
+    grid-column: 1 / -1; /* Forza la sezione ad occupare tutta la larghezza in caso di display block */
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.lista-ordini h2 {
+    color: #007bff;
+    margin-bottom: 1.5rem;
+}
+
+.lista-ordini table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.lista-ordini th, .lista-ordini td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    text-align: left;
+    font-size: 0.95rem;
+}
+
+.lista-ordini th {
+    background-color: #f1f1f1;
+    color: #333;
+    font-weight: 600;
+}
+
+.lista-ordini tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Stili per le label di stato */
+.stato-ordine {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 0.85em;
+    display: inline-block;
+    min-width: 120px;
+    text-align: center;
+}
+
+.stato-In-attesa-di-lavorazione {
+    background-color: #ffc107;
+    color: #333;
+}
+.stato-In-lavorazione {
+    background-color: #17a2b8;
+    color: white;
+}
+.stato-Completato {
+    background-color: #28a745;
+    color: white;
+}
+.stato-Spedito {
+    background-color: #007bff;
+    color: white;
+}
