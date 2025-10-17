@@ -16,7 +16,7 @@
       vertical-align: middle;
     }
 
-    /* MODIFICA CRITICA: LAYOUT GRIGLIA PRINCIPALE */
+    /* LAYOUT GRIGLIA PRINCIPALE */
     .container {
         display: grid;
         grid-template-columns: 2fr 1fr; 
@@ -24,27 +24,24 @@
         padding: 2rem;
     }
 
-    /* Il DIV GENERALE (Contenitore della Galleria) occupa la prima colonna */
     .galleria-prodotti-container { 
         grid-column: 1 / 2;
-        /* Rimuoviamo il padding/margin dal body per evitare problemi di scroll */
     }
 
-    /* FIX STICKY: TOP FISSO E FUNZIONANTE */
+    /* FIX STICKY DEFINITIVO */
     .preventivo { 
         grid-column: 2 / 3;
         position: sticky; 
-        top: 20px; /* Si blocca a 20px dall'alto del viewport */
-        height: fit-content; /* CRITICO: Limita l'altezza al contenuto, permettendo al genitore di scorrere */
-        /* Stili riutilizzati */
+        top: 80px; /* Imposta lo stop a 80px sotto la cima del viewport (dovrebbe essere sotto l'header) */
+        height: fit-content; /* L'elemento si adatta al suo contenuto */
         background: white;
         border-radius: 16px;
         padding: 2rem;
         box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        z-index: 5; /* Assicura che sia sopra gli altri elementi durante lo scroll */
+        z-index: 5; 
     }
     
-    /* Stile per i box dei kit */
+    /* Stili aggiuntivi (come in precedenza) */
     .kit-item {
         border: 1px solid #ddd;
         border-radius: 8px;
@@ -59,7 +56,6 @@
         margin-top: 15px;
     }
     
-    /* Stile riutilizzato per tutti i blocchi contenuti nella Galleria */
     .galleria-blocco { 
         background: white;
         border-radius: 16px;
@@ -78,7 +74,7 @@
     </div>
     <nav class="nav">
       <a href="index.html">Home</a>
-      <a href="#" id="mieiOrdiniBtn">I Miei Ordini</a>
+      <a href="#" id="mieiOrdiniBtn">I Miei Ordini</a> 
       <a href="#" id="logoutBtn" style="color: #dc3545; font-weight: 600;">Logout</a> 
     </nav>
   </header>
@@ -137,7 +133,7 @@
                 <label><input type="checkbox"> Aggiungi zavorra</label>
             </div>
 
-            <button class="btn-add">Aggiungi al preventivo</button>
+                        <button class="btn-add" id="aggiungiBandiera">Aggiungi al preventivo</button>
         </section>
         
         <section class="galleria-blocco" id="shoppeSection">
@@ -147,17 +143,18 @@
         
         <section class="galleria-blocco">
             <h2>EVENTUALI ALTRI BLOCCHI</h2>
-            <p>Contenuti aggiuntivi.</p>
+            <p>Contenuti aggiuntivi per testare lo scroll.</p>
+            <p>...</p><p>...</p><p>...</p><p>...</p><p>...</p>
         </section>
 
     </div>         <aside class="preventivo" id="sezioneCarrello">
-      <h2>DIV "Bloccato Preventivo"</h2>
-        <p style="color: red;">*Questo blocco rimane fisso con il riepilogo*</p>
-      <div class="preventivo-lista">
+      <h2>Il tuo preventivo</h2>
+      <div class="preventivo-lista" id="preventivoLista">
+            <p>Carrello vuoto.</p>
         </div>
       <div class="totale">
         <span>Totale parziale:</span>
-        <strong>€ 0.00</strong> </div>
+        <strong id="totaleParziale">€ 0.00</strong> </div>
       <button class="btn-secondary" id="richiediPreventivo">Richiedi preventivo ufficiale</button>
     </aside>
     
