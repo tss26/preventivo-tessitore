@@ -291,10 +291,40 @@ async function caricaMieiOrdini() {
 
 /**
  * Mostra i dettagli dell'ordine (Alert).
- */
+ 
 function mostraDettagliOrdine(ordineId, dettagliProdottiString) {
     alert('Dettagli ordine ' + ordineId.substring(0, 8) + ' visualizzati.');
+}*/
+
+
+/**
+ * Mostra i dettagli dell'ordine (Alert) in modo dettagliato, come l'admin.
+ */
+function mostraDettagliOrdine(ordineId, dettagliProdottiString) {
+    // 1. Converte la stringa JSON dei dettagli prodotti in un oggetto JavaScript
+    const dettagli = JSON.parse(dettagliProdottiString); 
+    
+    // 2. Inizia a costruire la stringa HTML/testuale da mostrare
+    let dettagliHtml = `Ordine ID: ${ordineId.substring(0, 8)}...\n\nDETTAGLI PRODOTTI:\n`; 
+    
+    // 3. Itera su ciascun prodotto nell'ordine
+    dettagli.forEach(item => {
+        dettagliHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
+        dettagliHtml += `Componenti: ${item.componenti.join(', ')}\n`;
+        dettagliHtml += `Prezzo netto cad.: € ${item.prezzo_unitario}\n`;
+        
+        // 4. Aggiunge le informazioni sul file, includendo la nota "COPIA E APRI L'URL"
+        if (item.personalizzazione_url) {
+            dettagliHtml += `File: COPIA E APRI L'URL:\n${item.personalizzazione_url}\n`;
+        } else {
+            dettagliHtml += `File: Nessun file caricato.\n`;
+        }
+    });
+
+    // 5. Visualizza la stringa costruita in una finestra di alert (pop-up)
+    alert(dettagliHtml); 
 }
+
 
 
 // ===========================================
