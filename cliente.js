@@ -1,57 +1,67 @@
 // ===========================================
 // CONFIGURAZIONE SUPABASE
 // ===========================================
-const SUPABASE_URL = 'https://jukyggaoiekenvekoicv.supabase.co'; 
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1a3lnZ2FvaWVrZW52ZWtvaWN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwNjEwOTgsImV4cCI6MjA3MjYzNzA5OH0.84lO4yqqZ6pbVLX0hlxOC3qgK508y1gFxeSp3Wx3kkw'; 
+const SUPABASE_URL = 'https://jukyggaoiekenvekoicv.supabase.co'; 
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1a3lnZ2FvaWVrZW52ZWtvaWN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwNjEwOTgsImV4cCI6MjA3MjYzNzA5OH0.84lO4yqqZ6pbVLX0hlxOC3qgK508y1gFxeSp3Wx3kkw'; 
 const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-let utenteCorrenteId = null; 
+let utenteCorrenteId = null; 
 let carrello = JSON.parse(localStorage.getItem('carrello')) || [];
 
+// ===========================================
+// NUOVE VARIABILI PER LA GESTIONE DEL DRAWER/MODAL
+// ===========================================
+const drawer = document.getElementById('sezioneCarrello');
+const openBtn = document.getElementById('openDrawerBtn');
+const closeBtn = document.getElementById('closeDrawerBtn');
+const backdrop = document.getElementById('cartBackdrop');
+const cartCount = document.getElementById('cartCount');
+const DESKTOP_WIDTH = 900; // Deve coincidere con la media query CSS
 
 // ===========================================
 // FUNZIONI DI BASE CLIENTE (Verifica e Logout)
 // ===========================================
+// ... (La funzione verificaCliente() e handleLogout() rimangono invariate) ...
 
 /**
- * Verifica se l'utente è loggato e imposta l'ID utente.
- */
+ * Verifica se l'utente è loggato e imposta l'ID utente.
+ */
 async function verificaCliente() {
-    if (!supabase) { console.error("Supabase non inizializzato."); return false; }
-    
-    const { data: { user } } = await supabase.auth.getUser();
+    if (!supabase) { console.error("Supabase non inizializzato."); return false; }
+    
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
-        window.location.href = 'login.html'; 
-        return false;
-    }
-    
-    utenteCorrenteId = user.id;
+    if (!user) {
+        window.location.href = 'login.html'; 
+        return false;
+    }
+    
+    utenteCorrenteId = user.id;
 
-    const { data: profilo } = await supabase
-        .from('utenti')
-        .select('ragione_sociale') 
-        .eq('id', user.id)
-        .single();
-    
-    const logoElement = document.querySelector('.logo');
-    if (logoElement) {
-        logoElement.innerHTML = `<img src="icon-192.png" alt="Logo Tessitore" style="height: 40px; vertical-align: middle;"> Cliente: ${profilo?.ragione_sociale || user.email}`;
-    }
-    return true; 
+    const { data: profilo } = await supabase
+        .from('utenti')
+        .select('ragione_sociale') 
+        .eq('id', user.id)
+        .single();
+    
+    const logoElement = document.querySelector('.logo');
+    if (logoElement) {
+        logoElement.innerHTML = `<img src="icon-192.png" alt="Logo Tessitore" style="height: 40px; vertical-align: middle;"> Cliente: ${profilo?.ragione_sociale || user.email}`;
+    }
+    return true; 
 }
 
 /**
- * Gestisce il logout.
- */
+ * Gestisce il logout.
+ */
 async function handleLogout() {
-    if (!confirm("Sei sicuro di voler uscire?")) { return; }
-    const { error } = await supabase.auth.signOut();
-    if (error) { console.error('Errore durante il logout:', error); } 
-    else {
-        localStorage.removeItem('carrello'); 
-        window.location.href = 'index.html'; 
-    }
+    if (!confirm("Sei sicuro di voler uscire?")) { return; }
+    const { error } = await supabase.auth.signOut();
+    if (error) { console.error('Errore durante il logout:', error); } 
+    else {
+        localStorage.removeItem('carrello'); 
+        window.location.href = 'index.html'; 
+    }
 }
 
 
@@ -60,330 +70,370 @@ async function handleLogout() {
 // ===========================================
 
 function aggiungiAlCarrello(articolo) {
-    carrello.push(articolo);
-    localStorage.setItem('carrello', JSON.stringify(carrello));
-    aggiornaUIPreventivo(); 
+    carrello.push(articolo);
+    localStorage.setItem('carrello', JSON.stringify(carrello));
+    aggiornaUIPreventivo(); 
 }
 
 function calcolaTotaleParziale() {
-    return carrello.reduce((totale, item) => {
-        const prezzoArticolo = item.prezzo_unitario || 0; 
-        return totale + (prezzoArticolo * item.quantita);
-    }, 0);
+    return carrello.reduce((totale, item) => {
+        const prezzoArticolo = item.prezzo_unitario || 0; 
+        return totale + (prezzoArticolo * item.quantita);
+    }, 0);
 }
 
 function rimuoviDalCarrello(index) {
-    carrello.splice(index, 1);
-    localStorage.setItem('carrello', JSON.stringify(carrello));
-    aggiornaUIPreventivo();
+    carrello.splice(index, 1);
+    localStorage.setItem('carrello', JSON.stringify(carrello));
+    aggiornaUIPreventivo();
 }
 
 /**
- * Aggiorna la sezione "Il tuo preventivo".
- */
+ * Aggiorna la sezione "Il tuo preventivo" e il contatore mobile. (MODIFICATA)
+ */
 function aggiornaUIPreventivo() {
-    const lista = document.getElementById('preventivoLista');
-    const totaleStrong = document.getElementById('totaleParziale');
-    
-    if (!lista || !totaleStrong) return;
+    const lista = document.getElementById('preventivoLista');
+    const totaleStrong = document.getElementById('totaleParziale');
+    
+    if (!lista || !totaleStrong) return;
 
-    lista.innerHTML = ''; 
-    
-    carrello.forEach((item, index) => {
-        const p = document.createElement('p');
-        const prezzoTotaleArticolo = (item.prezzo_unitario * item.quantita).toFixed(2);
-        
-        p.innerHTML = `
-            ${item.quantita} × ${item.prodotto} 
-            (€ ${prezzoTotaleArticolo}) 
-            <span class="remove-item" data-index="${index}" style="cursor: pointer; color: red; margin-left: 10px;">(X)</span>
-        `;
-        lista.appendChild(p);
-    });
+    lista.innerHTML = ''; 
+    
+    carrello.forEach((item, index) => {
+        const p = document.createElement('p');
+        const prezzoTotaleArticolo = (item.prezzo_unitario * item.quantita).toFixed(2);
+        
+        p.innerHTML = `
+            ${item.quantita} × ${item.prodotto} 
+            (€ ${prezzoTotaleArticolo}) 
+            <span class="remove-item" data-index="${index}" style="cursor: pointer; color: red; margin-left: 10px;">(X)</span>
+        `;
+        lista.appendChild(p);
+    });
 
-    const totale = calcolaTotaleParziale();
-    totaleStrong.textContent = `€ ${totale.toFixed(2)}`;
-    
-    document.querySelectorAll('.remove-item').forEach(button => {
-        button.addEventListener('click', (e) => {
-            rimuoviDalCarrello(e.target.getAttribute('data-index'));
-        });
-    });
+    const totale = calcolaTotaleParziale();
+    totaleStrong.textContent = `€ ${totale.toFixed(2)}`;
+    
+    document.querySelectorAll('.remove-item').forEach(button => {
+        button.addEventListener('click', (e) => {
+            rimuoviDalCarrello(e.target.getAttribute('data-index'));
+        });
+    });
+
+    // NUOVA LOGICA: Aggiornamento Contatore Carrello Mobile
+    const totaleArticoli = carrello.length;
+    if (cartCount) {
+        cartCount.textContent = totaleArticoli;
+        // Mostra il badge solo se ci sono articoli
+        cartCount.style.display = totaleArticoli > 0 ? 'block' : 'none'; 
+    }
 }
 
 
 // ===========================================
 // NUOVA FUNZIONE DI UTILITY (GENERAZIONE N. ORDINE)
 // ===========================================
+// ... (La funzione generaNumeroOrdineTemporaneo() rimane invariata) ...
 
 /**
- * Genera un numero d'ordine progressivo (YY/XXXX) leggendo l'ultimo dal DB.
- */
+ * Genera un numero d'ordine progressivo (YY/XXXX) leggendo l'ultimo dal DB.
+ */
 async function generaNumeroOrdineTemporaneo() {
-    const { data } = await supabase
-        .from('ordini')
-        .select('num_ordine_prog')
-        .order('data_ordine', { ascending: false })
-        .limit(1)
-        .single();
+    const { data } = await supabase
+        .from('ordini')
+        .select('num_ordine_prog')
+        .order('data_ordine', { ascending: false })
+        .limit(1)
+        .single();
 
-    const annoCorrente = new Date().getFullYear().toString().substring(2); 
-    let prossimoNumero = 1;
+    const annoCorrente = new Date().getFullYear().toString().substring(2); 
+    let prossimoNumero = 1;
 
-    if (data && data.num_ordine_prog) {
-        const ultimoOrdine = data.num_ordine_prog; 
-        const parti = ultimoOrdine.split('/');
-        
-        // La logica di incremento corretta
-        if (parti.length === 2 && parti[0] === annoCorrente && !isNaN(parseInt(parti[1]))) {
-            prossimoNumero = parseInt(parti[1]) + 1;
-        }
-    }
-    
-    const numeroFormattato = prossimoNumero.toString().padStart(4, '0');
-    return `${annoCorrente}/${numeroFormattato}`; 
+    if (data && data.num_ordine_prog) {
+        const ultimoOrdine = data.num_ordine_prog; 
+        const parti = ultimoOrdine.split('/');
+        
+        // La logica di incremento corretta
+        if (parti.length === 2 && parti[0] === annoCorrente && !isNaN(parseInt(parti[1]))) {
+            prossimoNumero = parseInt(parti[1]) + 1;
+        }
+    }
+    
+    const numeroFormattato = prossimoNumero.toString().padStart(4, '0');
+    return `${annoCorrente}/${numeroFormattato}`; 
 }
 
 
 // ===========================================
 // LOGICA ACQUISTO E CHECKOUT (COMPLETO)
 // ===========================================
+// ... (Le funzioni gestisciAggiuntaAlCarrello() e gestisciCheckout() rimangono invariate) ...
 
 /**
- * Funzione principale per gestire l'aggiunta al carrello (Bandiere).
- */
+ * Funzione principale per gestire l'aggiunta al carrello (Bandiere).
+ */
 async function gestisciAggiuntaAlCarrello() {
-    // Ho ripristinato l'esempio di logica del carrello
-    const fileInput = document.getElementById('fileUpload');
-    const qta = parseInt(document.getElementById('qta').value);
-    const formaElement = document.querySelector('.forme .forma.active');
-    
-    if (!formaElement || qta < 1 || isNaN(qta)) {
-        alert("Seleziona una forma e una quantità valida (min. 1).");
-        return;
-    }
+    // Ho ripristinato l'esempio di logica del carrello
+    const fileInput = document.getElementById('fileUpload');
+    const qta = parseInt(document.getElementById('qta').value);
+    const formaElement = document.querySelector('.forme .forma.active');
+    
+    if (!formaElement || qta < 1 || isNaN(qta)) {
+        alert("Seleziona una forma e una quantità valida (min. 1).");
+        return;
+    }
 
-    const forma = formaElement.textContent.trim();
-    const componenti = Array.from(document.querySelectorAll('.componenti input:checked')).map(cb => cb.parentNode.textContent.trim());
+    const forma = formaElement.textContent.trim();
+    const componenti = Array.from(document.querySelectorAll('.componenti input:checked')).map(cb => cb.parentNode.textContent.trim());
 
-    // Logica di upload e determinazione fileUrl omessa per brevità
-    let fileUrl = 'URL_UPLOAD_FITTIZIO'; 
+    // Logica di upload e determinazione fileUrl omessa per brevità
+    let fileUrl = 'URL_UPLOAD_FITTIZIO'; 
 
-    const nuovoArticolo = { 
-        id_unico: Date.now(), 
-        prodotto: `Bandiera ${forma} Personalizzata`, 
-        quantita: qta, 
-        prezzo_unitario: 142.75,
-        componenti: componenti, 
-        personalizzazione_url: fileUrl
-    };
-    
-    aggiungiAlCarrello(nuovoArticolo);
-    alert(`Aggiunto ${qta}x ${nuovoArticolo.prodotto} al preventivo!`);
+    const nuovoArticolo = { 
+        id_unico: Date.now(), 
+        prodotto: `Bandiera ${forma} Personalizzata`, 
+        quantita: qta, 
+        prezzo_unitario: 142.75,
+        componenti: componenti, 
+        personalizzazione_url: fileUrl
+    };
+    
+    aggiungiAlCarrello(nuovoArticolo);
+    alert(`Aggiunto ${qta}x ${nuovoArticolo.prodotto} al preventivo!`);
 }
 
 
 /**
- * Gestisce il processo di checkout.
- */
+ * Gestisce il processo di checkout.
+ */
 async function gestisciCheckout() {
-    if (!supabase) { alert("ERRORE: Supabase non è inizializzato."); return; }
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) { alert("Devi effettuare il login per richiedere un preventivo ufficiale."); return; }
-    
-    const carrelloDaSalvare = JSON.parse(localStorage.getItem('carrello')) || [];
-    
-    if (carrelloDaSalvare.length === 0) { alert("Il preventivo è vuoto."); return; }
-    
-    const totaleCalcolato = calcolaTotaleParziale();
-    const numeroOrdineGenerato = await generaNumeroOrdineTemporaneo();
+    if (!supabase) { alert("ERRORE: Supabase non è inizializzato."); return; }
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) { alert("Devi effettuare il login per richiedere un preventivo ufficiale."); return; }
+    
+    const carrelloDaSalvare = JSON.parse(localStorage.getItem('carrello')) || [];
+    
+    if (carrelloDaSalvare.length === 0) { alert("Il preventivo è vuoto."); return; }
+    
+    const totaleCalcolato = calcolaTotaleParziale();
+    const numeroOrdineGenerato = await generaNumeroOrdineTemporaneo();
 
-    if (!confirm(`Confermi l'invio del preventivo N. ${numeroOrdineGenerato} per € ${totaleCalcolato.toFixed(2)}?`)) { return; }
-    
-    try {
-        const { error } = await supabase
-            .from('ordini')
-            .insert([
-                {
-                    num_ordine_prog: numeroOrdineGenerato,
-                    stato: 'In attesa di lavorazione',
-                    totale: totaleCalcolato,
-                    dettagli_prodotti: carrelloDaSalvare,
-                }
-            ]);
+    if (!confirm(`Confermi l'invio del preventivo N. ${numeroOrdineGenerato} per € ${totaleCalcolato.toFixed(2)}?`)) { return; }
+    
+    try {
+        const { error } = await supabase
+            .from('ordini')
+            .insert([
+                {
+                    num_ordine_prog: numeroOrdineGenerato,
+                    stato: 'In attesa di lavorazione',
+                    totale: totaleCalcolato,
+                    dettagli_prodotti: carrelloDaSalvare,
+                }
+            ]);
 
-        if (error) { throw new Error(error.message); }
+        if (error) { throw new Error(error.message); }
 
-        carrello = []; 
-        localStorage.removeItem('carrello');
-        aggiornaUIPreventivo();
-        
-        alert(`Ordine/Preventivo ${numeroOrdineGenerato} inviato con successo!`);
+        carrello = []; 
+        localStorage.removeItem('carrello');
+        aggiornaUIPreventivo();
+        
+        alert(`Ordine/Preventivo ${numeroOrdineGenerato} inviato con successo!`);
 
-    } catch (e) {
-        console.error('Errore durante l\'invio dell\'ordine:', e);
-        alert(`Errore nell'invio dell'ordine: ${e.message}.`);
-    }
+    } catch (e) {
+        console.error('Errore durante l\'invio dell\'ordine:', e);
+        alert(`Errore nell'invio dell'ordine: ${e.message}.`);
+    }
 }
 
 
 // ===========================================
 // FUNZIONALITÀ ORDINI CLIENTE (Viste e Caricamento)
 // ===========================================
+// ... (Le funzioni caricaMieiOrdini() e mostraDettagliOrdine() rimangono invariate) ...
 
 /**
- * Recupera e visualizza gli ordini specifici del cliente loggato.
- */
+ * Recupera e visualizza gli ordini specifici del cliente loggato.
+ */
 async function caricaMieiOrdini() {
-    const container = document.getElementById('ordiniListaCliente');
-    if (!utenteCorrenteId) {
-        container.innerHTML = `<p style="color: red;">ID utente non disponibile.</p>`;
-        return;
-    }
-    
-    container.innerHTML = '<p>Caricamento ordini in corso...</p>';
-    
-    // FETCH: Recupera ordini solo per l'utente corrente (richiede RLS SELECT)
-    const { data: ordini, error } = await supabase
-        .from('ordini')
-        .select(`*`)
-        .eq('user_id', utenteCorrenteId) 
-        .order('data_ordine', { ascending: false }); 
+    const container = document.getElementById('ordiniListaCliente');
+    if (!utenteCorrenteId) {
+        container.innerHTML = `<p style="color: red;">ID utente non disponibile.</p>`;
+        return;
+    }
+    
+    container.innerHTML = '<p>Caricamento ordini in corso...</p>';
+    
+    // FETCH: Recupera ordini solo per l'utente corrente (richiede RLS SELECT)
+    const { data: ordini, error } = await supabase
+        .from('ordini')
+        .select(`*`)
+        .eq('user_id', utenteCorrenteId) 
+        .order('data_ordine', { ascending: false }); 
 
-    if (error) {
-        container.innerHTML = `<p style="color: red;">Errore nel recupero ordini: ${error.message}. Verifica Policy RLS SELECT sulla tabella ordini (auth.uid() = user_id).</p>`;
-        return;
-    }
+    if (error) {
+        container.innerHTML = `<p style="color: red;">Errore nel recupero ordini: ${error.message}. Verifica Policy RLS SELECT sulla tabella ordini (auth.uid() = user_id).</p>`;
+        return;
+    }
 
-    if (ordini.length === 0) {
-        container.innerHTML = '<p>Non hai ancora effettuato ordini.</p>';
-        return;
-    }
+    if (ordini.length === 0) {
+        container.innerHTML = '<p>Non hai ancora effettuato ordini.</p>';
+        return;
+    }
 
-    // Logica di rendering della tabella ordini
-    let html = `<div class="lista-ordini-table-wrapper"><table><thead><tr>
-        <th>N. Ordine</th><th>Data</th><th>Totale</th><th>Stato</th><th>Dettagli</th>
-        </tr></thead><tbody>`;
-    
-    ordini.forEach(ordine => {
-        const numeroOrdine = ordine.num_ordine_prog 
-            ? ordine.num_ordine_prog 
-            : ordine.id.substring(0, 8).toUpperCase(); 
-        
-        html += `
-            <tr data-id="${ordine.id}">
-                <td>${numeroOrdine}</td> 
-                <td>${new Date(ordine.data_ordine).toLocaleString()}</td>
-                <td>€ ${ordine.totale ? ordine.totale.toFixed(2) : '0.00'}</td>
-                <td><span class="stato-ordine stato-${ordine.stato.replace(/\s/g, '-')}">${ordine.stato}</span></td>
-                <td>
-                    <button onclick="mostraDettagliOrdine('${ordine.id}', '${JSON.stringify(ordine.dettagli_prodotti).replace(/"/g, '&quot;')}')" class="btn-primary" style="padding: 5px 10px;">Vedi Dettagli</button>
-                </td>
-            </tr>
-        `;
-    });
-    
-    html += '</tbody></table></div>';
-    container.innerHTML = html;
+    // Logica di rendering della tabella ordini
+    let html = `<div class="lista-ordini-table-wrapper"><table><thead><tr>
+        <th>N. Ordine</th><th>Data</th><th>Totale</th><th>Stato</th><th>Dettagli</th>
+        </tr></thead><tbody>`;
+    
+    ordini.forEach(ordine => {
+        const numeroOrdine = ordine.num_ordine_prog 
+            ? ordine.num_ordine_prog 
+            : ordine.id.substring(0, 8).toUpperCase(); 
+        
+        html += `
+            <tr data-id="${ordine.id}">
+                <td>${numeroOrdine}</td> 
+                <td>${new Date(ordine.data_ordine).toLocaleString()}</td>
+                <td>€ ${ordine.totale ? ordine.totale.toFixed(2) : '0.00'}</td>
+                <td><span class="stato-ordine stato-${ordine.stato.replace(/\s/g, '-')}">${ordine.stato}</span></td>
+                <td>
+                    <button onclick="mostraDettagliOrdine('${ordine.id}', '${JSON.stringify(ordine.dettagli_prodotti).replace(/"/g, '&quot;')}')" class="btn-primary" style="padding: 5px 10px;">Vedi Dettagli</button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
 }
-
 
 
 /**
  * Mostra i dettagli dell'ordine (Alert) in modo dettagliato, come l'admin.
  */
 function mostraDettagliOrdine(ordineId, dettagliProdottiString) {
-    // 1. Converte la stringa JSON dei dettagli prodotti in un oggetto JavaScript
-    const dettagli = JSON.parse(dettagliProdottiString); 
-    
-    // 2. Inizia a costruire la stringa HTML/testuale da mostrare
-    let dettagliHtml = `Ordine ID: ${ordineId.substring(0, 8)}...\n\nDETTAGLI PRODOTTI:\n`; 
-    
-    // 3. Itera su ciascun prodotto nell'ordine
-    dettagli.forEach(item => {
-        dettagliHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
-        dettagliHtml += `Componenti: ${item.componenti.join(', ')}\n`;
-        dettagliHtml += `Prezzo netto cad.: € ${item.prezzo_unitario}\n`;
-        
-        // 4. Aggiunge le informazioni sul file, includendo la nota "COPIA E APRI L'URL"
-        if (item.personalizzazione_url) {
-            dettagliHtml += `File: COPIA E APRI L'URL:\n${item.personalizzazione_url}\n`;
-        } else {
-            dettagliHtml += `File: Nessun file caricato.\n`;
-        }
-    });
+    // 1. Converte la stringa JSON dei dettagli prodotti in un oggetto JavaScript
+    const dettagli = JSON.parse(dettagliProdottiString); 
+    
+    // 2. Inizia a costruire la stringa HTML/testuale da mostrare
+    let dettagliHtml = `Ordine ID: ${ordineId.substring(0, 8)}...\n\nDETTAGLI PRODOTTI:\n`; 
+    
+    // 3. Itera su ciascun prodotto nell'ordine
+    dettagli.forEach(item => {
+        dettagliHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
+        dettagliHtml += `Componenti: ${item.componenti.join(', ')}\n`;
+        dettagliHtml += `Prezzo netto cad.: € ${item.prezzo_unitario}\n`;
+        
+        // 4. Aggiunge le informazioni sul file, includendo la nota "COPIA E APRI L'URL"
+        if (item.personalizzazione_url) {
+            dettagliHtml += `File: COPIA E APRI L'URL:\n${item.personalizzazione_url}\n`;
+        } else {
+            dettagliHtml += `File: Nessun file caricato.\n`;
+        }
+    });
 
-    // 5. Visualizza la stringa costruita in una finestra di alert (pop-up)
-    alert(dettagliHtml); 
+    // 5. Visualizza la stringa costruita in una finestra di alert (pop-up)
+    alert(dettagliHtml); 
 }
 
 
-
 // ===========================================
-// LOGICA DI SWITCH VISTE (FIX)
+// NUOVE FUNZIONI: GESTIONE DEL CARRELLO/DRAWER RESPONSIVE
 // ===========================================
 
 /**
- * Mostra la vista Preventivo (di default).
+ * Apre il cassetto laterale del carrello (solo se non è già desktop sidebar).
  */
+function openCartDrawer() {
+    // Apri solo se lo schermo è piccolo (larghezze < 900px)
+    if (window.innerWidth < DESKTOP_WIDTH) { 
+        drawer.classList.add('open');
+        backdrop.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Blocca lo scrolling sullo sfondo
+    }
+}
+
+/**
+ * Chiude il cassetto laterale del carrello.
+ */
+function closeCartDrawer() {
+    drawer.classList.remove('open');
+    backdrop.classList.remove('active');
+    document.body.style.overflow = ''; // Riattiva lo scrolling
+}
+
+
+// ===========================================
+// LOGICA DI SWITCH VISTE (MODIFICATA)
+// ===========================================
+
+/**
+ * Mostra la vista Preventivo (di default).
+ */
 function mostraVistaPreventivo() {
-    // La griglia principale (container) ha 2 colonne.
+    // La griglia principale (container) ha 2 colonne (se schermo grande).
     document.querySelector('.container').style.gridTemplateColumns = '2fr 1fr'; 
     document.getElementById('galleriaView').style.display = 'block'; 
-    document.getElementById('sezioneCarrello').style.display = 'block'; 
     document.getElementById('ordiniCliente').style.display = 'none';
+
+    // Desktop: il carrello deve essere reso visibile perché è sticky e in posizione
+    if (window.innerWidth >= DESKTOP_WIDTH) {
+        document.getElementById('sezioneCarrello').style.display = 'block'; 
+    } else {
+        // Mobile: il carrello deve rimanere nascosto, sarà mostrato dal click sul floating button.
+        document.getElementById('sezioneCarrello').style.display = 'none';
+        closeCartDrawer(); // Assicurati che il drawer sia chiuso se si cambia vista su mobile
+    }
 }
 
 /**
- * Mostra la vista Ordini.
- */
+ * Mostra la vista Ordini.
+ */
 function mostraVistaOrdini() {
-    // La griglia principale (container) deve avere 1 colonna per la tabella ordini.
-    document.querySelector('.container').style.gridTemplateColumns = '1fr'; 
-    
-    // Nascondi i blocchi del Preventivo
-    document.getElementById('galleriaView').style.display = 'none'; 
-    document.getElementById('sezioneCarrello').style.display = 'none';
-    
-    // Mostra la sezione Ordini e carica i dati
-    document.getElementById('ordiniCliente').style.display = 'block'; 
-    caricaMieiOrdini();
+    // La griglia principale (container) deve avere 1 colonna per la tabella ordini.
+    document.querySelector('.container').style.gridTemplateColumns = '1fr'; 
+    
+    // Nascondi i blocchi del Preventivo
+    document.getElementById('galleriaView').style.display = 'none'; 
+    document.getElementById('sezioneCarrello').style.display = 'none'; // Sempre nascosto in modalità Ordini
+    
+    // Mostra la sezione Ordini e carica i dati
+    document.getElementById('ordiniCliente').style.display = 'block'; 
+    caricaMieiOrdini();
 }
 
 
 // ===========================================
-// INIZIALIZZAZIONE & EVENT LISTENERS
+// INIZIALIZZAZIONE & EVENT LISTENERS (MODIFICATA)
 // ===========================================
 
 document.addEventListener('DOMContentLoaded', async () => {
-    
-    const isLogged = await verificaCliente();
-    
-    if (isLogged) {
+    
+    const isLogged = await verificaCliente();
+    
+    if (isLogged) {
+        
+        // 1. ASSEGNAZIONE EVENTI FONDAMENTALI
+        document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+        document.getElementById('aggiungiBandiera').addEventListener('click', gestisciAggiuntaAlCarrello);
+        document.getElementById('richiediPreventivo').addEventListener('click', gestisciCheckout);
+        
+        // 2. Listener per "I Miei Ordini" (SWAP VISTA)
+        document.getElementById('mieiOrdiniBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            mostraVistaOrdini();
+        });
+        
+        // 3. Listener per la Home (torna alla vista Preventivo/Galleria)
+        document.querySelector('.nav a[href="index.html"]').addEventListener('click', (e) => {
+             if (document.getElementById('ordiniCliente').style.display !== 'none') {
+                 e.preventDefault();
+                 mostraVistaPreventivo();
+             }
+        });
         
-        // 1. ASSEGNAZIONE EVENTI FONDAMENTALI
-        document.getElementById('logoutBtn').addEventListener('click', handleLogout);
-        document.getElementById('aggiungiBandiera').addEventListener('click', gestisciAggiuntaAlCarrello);
-        document.getElementById('richiediPreventivo').addEventListener('click', gestisciCheckout);
-        
-        // 2. Listener per "I Miei Ordini" (SWAP VISTA)
-        document.getElementById('mieiOrdiniBtn').addEventListener('click', (e) => {
-            e.preventDefault();
-            mostraVistaOrdini();
-        });
-        
-        // 3. Listener per la Home (torna alla vista Preventivo/Galleria)
-        document.querySelector('.nav a[href="index.html"]').addEventListener('click', (e) => {
-             if (document.getElementById('ordiniCliente').style.display !== 'none') {
-                 e.preventDefault();
-                 mostraVistaPreventivo();
-             }
-        });
-
-        // 4. Carica la UI all'inizio
-        aggiornaUIPreventivo();
-        mostraVistaPreventivo();
-    }
-});
+        // NUOVI LISTENER PER IL DRAWER (Mobile)
+        if (openBtn) openBtn.
