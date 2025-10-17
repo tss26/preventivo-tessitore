@@ -16,7 +16,7 @@
       vertical-align: middle;
     }
     
-    /* Layout a due colonne stabile */
+    /* LAYOUT GRIGLIA PRINCIPALE */
     .container {
         display: grid;
         grid-template-columns: 2fr 1fr; 
@@ -55,6 +55,15 @@
         gap: 15px;
         margin-top: 15px;
     }
+
+    /* Stile per la sezione Ordini Cliente */
+    .ordini-view {
+        grid-column: 1 / -1; /* Occupa tutta la larghezza quando visibile */
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
   </style>
 </head>
 <body>
@@ -74,7 +83,7 @@
 
   <main class="container">
     
-    <div class="galleria-prodotti-container">
+    <div class="galleria-prodotti-container" id="galleriaView">
         
         <section class="galleria-blocco" id="kitCalcioSection">
             <h1>DIV "Kit Calcio" Stampato in Sublimazione</h1>
@@ -142,14 +151,21 @@
     </div>         <aside class="preventivo" id="sezioneCarrello">
       <h2>Il tuo preventivo</h2>
       <div class="preventivo-lista" id="preventivoLista">
-                    </div>
+        </div>
       <div class="totale">
         <span>Totale parziale:</span>
         <strong id="totaleParziale">€ 0.00</strong> </div>
       <button class="btn-secondary" id="richiediPreventivo">Richiedi preventivo ufficiale</button>
     </aside>
     
-      </main>
+    <section id="ordiniCliente" class="ordini-view" style="display: none;">
+        <h2>I Miei Ordini Recenti</h2>
+        <div id="ordiniListaCliente" class="lista-ordini">
+            <p>Caricamento ordini in corso...</p>
+        </div>
+    </section>
+
+  </main>
 
   <footer class="footer">
     <p>© 2025 Tessitore SRL - Tutti i diritti riservati</p>
@@ -157,5 +173,5 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="cliente.js"></script> 
-  </body>
+</body>
 </html>
