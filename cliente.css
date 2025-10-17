@@ -49,8 +49,7 @@ body {
 
 .intro,
 .personalizza,
-.preventivo,
-.galleria-blocco { /* Aggiunto .galleria-blocco per lo stile dei riquadri */
+.preventivo {
   background: white;
   border-radius: 16px;
   padding: 2rem;
@@ -58,17 +57,11 @@ body {
 }
 
 
-/* SEZIONE PRODOTTI (Galleria) */
-.galleria-blocco {
-    margin-bottom: 2rem; /* Spazio tra i blocchi prodotti */
+main.container {
+  margin-top: 1rem;
 }
 
-.kit-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-    margin-top: 15px;
-}
+
 
 /* SEZIONE INTRO */
 .intro h1 {
@@ -77,9 +70,126 @@ body {
   margin-bottom: 0.5rem;
 }
 
-/* ... (Omissis, stili intermedi come .intro p, .btn-primary, .categorie) ... */
+.intro p {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
 
-/* PERSONALIZZA (Omissis, stili intermedi) */
+.btn-primary {
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 0.8rem 1.8rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #005fcc;
+}
+
+/* CATEGORIE */
+.categorie {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.categoria {
+  flex: 1;
+  background: #f0f4fa;
+  border: none;
+  border-radius: 12px;
+  padding: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.categoria:hover {
+  background: #007bff;
+  color: white;
+}
+
+/* PERSONALIZZA */
+.personalizza h2 {
+  color: #007bff;
+  margin-bottom: 1rem;
+}
+
+.forme {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.forma {
+  flex: 1;
+  background: #f0f4fa;
+  border: none;
+  border-radius: 12px;
+  padding: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.forma.active,
+.forma:hover {
+  background: #007bff;
+  color: white;
+}
+
+.quantita {
+  margin: 1.5rem 0;
+}
+
+.quantita label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+}
+
+.quantita input {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+/* UPLOAD */
+.upload-box {
+  border: 2px dashed #007bff;
+  padding: 1.5rem;
+  text-align: center;
+  border-radius: 12px;
+  background: #f9fbff;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+}
+
+.upload-box p {
+  margin: 0.5rem 0;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+/* COMPONENTI */
+.componenti h3 {
+  color: #007bff;
+  margin-bottom: 1rem;
+}
+
+.componenti label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
 
 .btn-add {
   background: #28a745;
@@ -100,7 +210,7 @@ body {
 /* PREVENTIVO */
 .preventivo {
   position: sticky;
-  top: 100px; /* Separazione dall'header */
+  top: 100px;
   align-self: start;
 }
 
@@ -147,21 +257,44 @@ body {
   color: #777;
   font-size: 0.9rem;
   margin-top: 2rem;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05); /* Aggiunto shadow per consistenza */
 }
 
-/* =========================================== */
-/* STILI TABELLA ORDINI (PER L'EFFETTO ZEBRA E COLORI) */
-/* =========================================== */
+/* RESPONSIVE */
+@media (max-width: 960px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
 
-.lista-ordini-table-wrapper {
-    overflow-x: auto; /* Garantisce la scrollbar se la tabella è troppo stretta */
+  .preventivo {
+    position: relative;
+    top: 0;
+    margin-top: 2rem;
+  }
+
+  .categorie,
+  .forme {
+    flex-direction: column;
+  }
+}
+/* CLIENTE.CSS - Aggiungi questi stili */
+
+/* Stile base per la sezione ordini */
+.ordini-view {
+    grid-column: 1 / -1; /* Forza la sezione ad occupare tutta la larghezza in caso di display block */
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.lista-ordini h2 {
+    color: #007bff;
+    margin-bottom: 1.5rem;
 }
 
 .lista-ordini table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 1rem;
 }
 
 .lista-ordini th, .lista-ordini td {
@@ -169,7 +302,6 @@ body {
     border: 1px solid #ddd;
     text-align: left;
     font-size: 0.95rem;
-    vertical-align: middle;
 }
 
 .lista-ordini th {
@@ -178,7 +310,6 @@ body {
     font-weight: 600;
 }
 
-/* EFFETTO ZEBRA */
 .lista-ordini tr:nth-child(even) {
     background-color: #f9f9f9;
 }
@@ -194,34 +325,19 @@ body {
     text-align: center;
 }
 
-/* COLORI STATO */
 .stato-In-attesa-di-lavorazione {
-    background-color: #ffc107; /* Giallo */
+    background-color: #ffc107;
     color: #333;
 }
 .stato-In-lavorazione {
-    background-color: #17a2b8; /* Azzurro */
+    background-color: #17a2b8;
     color: white;
 }
 .stato-Completato {
-    background-color: #28a745; /* Verde */
+    background-color: #28a745;
     color: white;
 }
 .stato-Spedito {
-    background-color: #007bff; /* Blu */
+    background-color: #007bff;
     color: white;
-}
-
-
-/* RESPONSIVE */
-@media (max-width: 960px) {
-  .container {
-    grid-template-columns: 1fr;
-  }
-
-  .preventivo {
-    position: relative;
-    top: 0;
-    margin-top: 2rem;
-  }
 }

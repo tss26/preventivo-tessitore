@@ -134,6 +134,7 @@ async function generaNumeroOrdineTemporaneo() {
         const ultimoOrdine = data.num_ordine_prog; 
         const parti = ultimoOrdine.split('/');
         
+        // La logica di incremento corretta
         if (parti.length === 2 && parti[0] === annoCorrente && !isNaN(parseInt(parti[1]))) {
             prossimoNumero = parseInt(parti[1]) + 1;
         }
@@ -152,6 +153,7 @@ async function generaNumeroOrdineTemporaneo() {
  * Funzione principale per gestire l'aggiunta al carrello (Bandiere).
  */
 async function gestisciAggiuntaAlCarrello() {
+    // Ho ripristinato l'esempio di logica del carrello
     const fileInput = document.getElementById('fileUpload');
     const qta = parseInt(document.getElementById('qta').value);
     const formaElement = document.querySelector('.forme .forma.active');
@@ -237,17 +239,17 @@ async function gestisciCheckout() {
 async function caricaMieiOrdini() {
     const container = document.getElementById('ordiniListaCliente');
     if (!utenteCorrenteId) {
-        container.innerHTML = `<p style="color: red;">ID utente non disponibile. Effettua il login.</p>`;
+        container.innerHTML = `<p style="color: red;">ID utente non disponibile.</p>`;
         return;
     }
     
     container.innerHTML = '<p>Caricamento ordini in corso...</p>';
     
-    // FETCH: Recupera ordini solo per l'utente corrente
+    // FETCH: Recupera ordini solo per l'utente corrente (richiede RLS SELECT)
     const { data: ordini, error } = await supabase
         .from('ordini')
         .select(`*`)
-        .eq('user_id', utenteCorrenteId) // Filtra per l'utente loggato
+        .eq('user_id', utenteCorrenteId) 
         .order('data_ordine', { ascending: false }); 
 
     if (error) {
@@ -270,15 +272,12 @@ async function caricaMieiOrdini() {
             ? ordine.num_ordine_prog 
             : ordine.id.substring(0, 8).toUpperCase(); 
         
-        // ** CREAZIONE DELLA CLASSE PER LA COLORAZIONE CSS **
-        const statoClass = `stato-${ordine.stato.replace(/\s/g, '-')}`; 
-        
         html += `
             <tr data-id="${ordine.id}">
                 <td>${numeroOrdine}</td> 
                 <td>${new Date(ordine.data_ordine).toLocaleString()}</td>
                 <td>€ ${ordine.totale ? ordine.totale.toFixed(2) : '0.00'}</td>
-                <td><span class="stato-ordine ${statoClass}">${ordine.stato}</span></td>
+                <td><span class="stato-ordine stato-${ordine.stato.replace(/\s/g, '-')}">${ordine.stato}</span></td>
                 <td>
                     <button onclick="mostraDettagliOrdine('${ordine.id}', '${JSON.stringify(ordine.dettagli_prodotti).replace(/"/g, '&quot;')}')" class="btn-primary" style="padding: 5px 10px;">Vedi Dettagli</button>
                 </td>
@@ -293,18 +292,22 @@ async function caricaMieiOrdini() {
 
 
 /**
- * Mostra i dettagli dell'ordine (Alert) in modo dettagliato, come l'admin.
- */
+ * Mostra i dettagli dell'ordine (Alert) in modo dettagliato, come l'admin.
+ */
 function mostraDettagliOrdine(ordineId, dettagliProdottiString) {
+    // 1. Converte la stringa JSON dei dettagli prodotti in un oggetto JavaScript
     const dettagli = JSON.parse(dettagliProdottiString); 
     
+    // 2. Inizia a costruire la stringa HTML/testuale da mostrare
     let dettagliHtml = `Ordine ID: ${ordineId.substring(0, 8)}...\n\nDETTAGLI PRODOTTI:\n`; 
     
+    // 3. Itera su ciascun prodotto nell'ordine
     dettagli.forEach(item => {
         dettagliHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
         dettagliHtml += `Componenti: ${item.componenti.join(', ')}\n`;
         dettagliHtml += `Prezzo netto cad.: € ${item.prezzo_unitario}\n`;
         
+        // 4. Aggiunge le informazioni sul file, includendo la nota "COPIA E APRI L'URL"
         if (item.personalizzazione_url) {
             dettagliHtml += `File: COPIA E APRI L'URL:\n${item.personalizzazione_url}\n`;
         } else {
@@ -312,6 +315,7 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString) {
         }
     });
 
+    // 5. Visualizza la stringa costruita in una finestra di alert (pop-up)
     alert(dettagliHtml); 
 }
 
@@ -377,7 +381,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                  mostraVistaPreventivo();
              }
         });
-        
+
         // 4. Carica la UI all'inizio
         aggiornaUIPreventivo();
         mostraVistaPreventivo();
