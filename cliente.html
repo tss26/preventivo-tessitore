@@ -19,24 +19,12 @@
     /* Layout a due colonne stabile */
     .container {
         display: grid;
-        grid-template-columns: 0fr 1fr; 
+        grid-template-columns: 1fr; 
         gap: 2rem;
         padding: 2rem;
     }
     
-    /* FIX STICKY DEL PREVENTIVO (Versione affidabile) */
-    .preventivo { 
-        grid-column: 2 / 3;
-        position: sticky; 
-        top: 80px; 
-        align-self: start; 
-        background: white;
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        z-index: 5;
-        height: fit-content;
-    }
+    
 
     /* Stili generali dei blocchi ripristinati */
     .galleria-prodotti-container {
