@@ -8,164 +8,138 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    /* Stile per l'immagine del logo nell'header */
-    .header .logo img {
-      height: 40px; 
-      width: auto;
-      vertical-align: middle;
-    }
-    
-    /* Layout a due colonne stabile */
-    .container {
-        display: grid;
-        grid-template-columns: 2fr 1fr; 
-        gap: 2rem;
-        padding: 2rem;
-    }
-    
-    /* FIX STICKY DEL PREVENTIVO (Versione affidabile) */
-    .preventivo { 
-        grid-column: 2 / 3;
-        position: sticky; 
-        top: 80px; 
-        align-self: start; 
-        background: white;
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        z-index: 5;
-        height: fit-content;
-    }
+  <style>
+    /* Stile per l'immagine del logo nell'header */
+    .header .logo img {
+      height: 40px; 
+      width: auto;
+      vertical-align: middle;
+    }
+    
+    /* Layout a due colonne stabile */
+    .container {
+        display: grid;
+        grid-template-columns: 2fr 1fr; 
+        gap: 2rem;
+        padding: 2rem;
+    }
+    
+    /* FIX STICKY DEL PREVENTIVO (Versione affidabile) */
+    .preventivo { 
+        grid-column: 2 / 3;
+        position: sticky; 
+        top: 80px; 
+        align-self: start; 
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        z-index: 5;
+        height: fit-content;
+    }
 
-    /* Stili generali dei blocchi ripristinati */
-    .galleria-prodotti-container {
-        grid-column: 1 / 2;
-    }
-    .galleria-blocco {
-        background: white;
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        margin-bottom: 2rem;
-    }
-    .kit-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 15px;
-        margin-top: 15px;
-    }
-  </style>
+    /* Stili generali dei blocchi ripristinati */
+    .galleria-prodotti-container {
+        grid-column: 1 / 2;
+    }
+    .galleria-blocco {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+    }
+    .kit-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-top: 15px;
+    }
+  </style>
 </head>
 <body>
   <header class="header">
     <div class="logo">
-      <a href="index.html">
-        <img src="icon-192.png" alt="Logo Tessitore">
-      </a>
-    </div>
+      <a href="index.html">
+        <img src="icon-192.png" alt="Logo Tessitore">
+      </a>
+    </div>
     <nav class="nav">
       <a href="index.html">Home</a>
-      
-      <a href="#" id="mieiOrdiniBtn">I Miei Ordini</a>
+      
+      <a href="#" id="mieiOrdiniBtn">I Miei Ordini</a>
       <a href="#" id="logoutBtn" style="color: #dc3545; font-weight: 600;">Logout</a> 
     </nav>
   </header>
 
   <main class="container">
-    
-    <div class="galleria-prodotti-container" id="galleriaView">
-        
-        <section class="galleria-blocco" id="kitCalcioSection">
-            <h1>DIV "Kit Calcio" Stampato in Sublimazione</h1>
-            <p>Seleziona il componente base per la personalizzazione.</p>
-            <div class="kit-grid">
-                <div class="kit-item">
-                    <img src="icon-basket.png" alt="Solo T-Shirt" style="width: 60px;"><br>
-                    Solo T-Shirt (Link 1)
-                </div>
-                <div class="kit-item">
-                    <img src="icon-volley.png" alt="Solo Pantaloncino" style="width: 60px;"><br>
-                    Solo Pant. (Link 2)
-                </div>
-                <div class="kit-item">
-                    <img src="icon-volley.png" alt="T-Shirt + Pantaloncino" style="width: 60px;"><br>
-                    T-Shirt + Pant. (Link 3)
-                </div>
-            </div>
-        </section>
-            
-        <section class="galleria-blocco" id="bandiereSection">
-            <h2>DIV "Bandiere" ed Espositori Drop</h2>
-            
-            <p>Scegli la forma per visualizzare tutti i componenti.</p>
-            <div class="forme">
-                <button class="forma active">Goccia</button>
-                <button class="forma">Vela</button>
-                <button class="forma">Rettangolare</button>
-            </div>
-
-            <div class="misure">
-                <h3>Misura</h3>
-                <label>
-                    <input type="radio" name="misura" value="S" checked> S (Area Grafica Piccola)
-                </label>
-                <label>
-                    <input type="radio" name="misura" value="M"> M (Area Grafica Media)
-                </label>
-                <label>
-                    <input type="radio" name="misura" value="L"> L (Area Grafica Grande)
-                </label>
-                <label>
-                    <input type="radio" name="misura" value="XL"> XL (Area Grafica Extra Grande)
-                </label>
+    
+    <div class="galleria-prodotti-container" id="galleriaView">
+        
+        <section class="galleria-blocco" id="kitCalcioSection">
+            <h1>DIV "Kit Calcio" Stampato in Sublimazione</h1>
+            <p>Seleziona il componente base per la personalizzazione.</p>
+            <div class="kit-grid">
+                <div class="kit-item">
+                    <img src="icon-basket.png" alt="Solo T-Shirt" style="width: 60px;"><br>
+                    Solo T-Shirt (Link 1)
+                </div>
+                <div class="kit-item">
+                    <img src="icon-volley.png" alt="Solo Pantaloncino" style="width: 60px;"><br>
+                    Solo Pant. (Link 2)
+                </div>
+                <div class="kit-item">
+                    <img src="icon-volley.png" alt="T-Shirt + Pantaloncino" style="width: 60px;"><br>
+                    T-Shirt + Pant. (Link 3)
+                </div>
             </div>
-                        <div class="quantita">
-                <label for="qta">Quantità</label>
-                <input type="number" id="qta" value="2" min="1">
-            </div>
+        </section>
+            
+        <section class="galleria-blocco" id="bandiereSection">
+            <h2>DIV "Bandiere" ed Espositori Drop</h2>
+            
+            <p>Scegli la forma per visualizzare tutti i componenti.</p>
+            <div class="forme">
+                <button class="forma active">Goccia</button>
+                <button class="forma">Vela</button>
+                <button class="forma">Rettangolare</button>
+            </div>
 
-            <div class="upload">
-                <div class="upload-box">
-                    <p>Trascina o carica file (.PNG / .PDF)</p>
-                    <input type="file" id="fileUpload" />
-                </div>
-            </div>
+            <div class="quantita">
+                <label for="qta">Quantità</label>
+                <input type="number" id="qta" value="2" min="1">
+            </div>
 
-                        <div class="componenti">
-                <h3>Componenti (Il prezzo si somma per ogni elemento)</h3>
-                
-                                <label>
-                    <input type="checkbox" name="componente" value="FLAG" checked disabled> Telo Bandiera (Prezzo incluso in base alla Misura)
-                </label><br>
-                
-                <label>
-                    <input type="checkbox" name="componente" value="ASTA"> Asta (Montante)
-                </label><br>
-                
-                <label>
-                    <input type="checkbox" name="componente" value="BASE"> Base di Supporto
-                </label><br>
-                
-                <label>
-                    <input type="checkbox" name="componente" value="ZAVORRA"> Zavorra (Peso aggiuntivo)
-                </label>
-            </div>
-            
-            <button class="btn-add" id="aggiungiBandiera">Aggiungi al preventivo</button>
-        </section>
-        
-        <section class="galleria-blocco" id="shoppeSection">
-            <h2>DIV "SHOPPE"</h2>
-            <p>Qui puoi aggiungere altri articoli non personalizzabili.</p>
-        </section>
-        
-        <section class="galleria-blocco">
-            <h2>EVENTUALI ALTRI BLOCCHI</h2>
-            <p>Contenuti aggiuntivi.</p>
-        </section>
+            <div class="upload">
+                <div class="upload-box">
+                    <p>Trascina o carica file (.PNG / .PDF)</p>
+                    <input type="file" id="fileUpload" />
+                </div>
+            </div>
 
-    </div>         <aside class="preventivo" id="sezioneCarrello">
+            <div class="componenti">
+                <h3>Componenti</h3>
+                <label><input type="checkbox" checked> Pacchetto completo (bandiera + asta + base)</label>
+                <label><input type="checkbox"> Solo bandiera</label>
+                <label><input type="checkbox"> Solo asta</label>
+                <label><input type="checkbox"> Solo base</label>
+                <label><input type="checkbox"> Aggiungi zavorra</label>
+            </div>
+            
+            <button class="btn-add" id="aggiungiBandiera">Aggiungi al preventivo</button>
+        </section>
+        
+        <section class="galleria-blocco" id="shoppeSection">
+            <h2>DIV "SHOPPE"</h2>
+            <p>Qui puoi aggiungere altri articoli non personalizzabili.</p>
+        </section>
+        
+        <section class="galleria-blocco">
+            <h2>EVENTUALI ALTRI BLOCCHI</h2>
+            <p>Contenuti aggiuntivi.</p>
+        </section>
+
+    </div>         <aside class="preventivo" id="sezioneCarrello">
       <h2>Il tuo preventivo</h2>
       <div class="preventivo-lista" id="preventivoLista">
         </div>
@@ -174,13 +148,13 @@
         <strong id="totaleParziale">€ 0.00</strong> </div>
       <button class="btn-secondary" id="richiediPreventivo">Richiedi preventivo ufficiale</button>
     </aside>
-    
-    <section id="ordiniCliente" class="galleria-blocco" style="display: none; grid-column: 1 / -1;">
-        <h2>I Miei Ordini Recenti</h2>
-        <div id="ordiniListaCliente" class="lista-ordini">
-            <p>Caricamento ordini in corso...</p>
-        </div>
-    </section>
+    
+    <section id="ordiniCliente" class="galleria-blocco" style="display: none; grid-column: 1 / -1;">
+        <h2>I Miei Ordini Recenti</h2>
+        <div id="ordiniListaCliente" class="lista-ordini">
+            <p>Caricamento ordini in corso...</p>
+        </div>
+    </section>
 
   </main>
 
@@ -189,7 +163,7 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="cliente.js"></script> 
-  
+  <script src="cliente.js"></script> 
+  
 </body>
 </html>
