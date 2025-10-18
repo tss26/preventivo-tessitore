@@ -202,9 +202,9 @@ body {
 
 /* PREVENTIVO */
 .preventivo {
-  /*position: relative;
-  top: auto;
-  align-self: start;*/
+  /*position: relative;*/
+  /*top: auto;*/
+  /*align-self: start;*/
 
 
   grid-column: auto; /* Rimuove l'assegnazione alla colonna 2 */
