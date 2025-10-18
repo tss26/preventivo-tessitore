@@ -202,9 +202,28 @@ body {
 
 /* PREVENTIVO */
 .preventivo {
-  position: sticky;
-  top: 100px;
-  align-self: start;
+  /*position: relative;
+  top: auto;
+  align-self: start;*/
+
+
+  grid-column: auto; /* Rimuove l'assegnazione alla colonna 2 */
+        position: relative; /* Rimuove lo sticky */
+        top: auto; /* Rimuove l'offset */
+        align-self: start; 
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        z-index: 5;
+        height: fit-content;
+        margin-top: 2rem; /* Aggiungi un margine sotto la galleria */
+    
+
+  
+
+
+  
 }
 
 .preventivo h2 {
