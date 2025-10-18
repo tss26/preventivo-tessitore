@@ -262,6 +262,9 @@ body {
     position: relative;
     top: 0;
     margin-top: 2rem;
+    grid-column: 1 / -1; /* Forza l'elemento ad occupare l'intera riga */
+    /* Aggiungendo 'order: -1;' qui (che non è necessario nel tuo HTML attuale) */
+    /* forzeresti il carrello ad apparire IN CIMA alla singola colonna mobile. */
   }
 
   .categorie,
