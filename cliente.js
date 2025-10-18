@@ -2,7 +2,7 @@
 // CONFIGURAZIONE SUPABASE
 // ===========================================
 const SUPABASE_URL = 'https://jukyggaoiekenvekoicv.supabase.co'; 
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1a3lnZ2FvaWVrZW5udmVrb2ljdiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzU3MDYxMDk4LCJleHAiOjIwNzI2MzcwOTh9.84lO4yqqZ6pbVLX0hlxOC3qgK508y1gFxeSp3Wx3kkw'; 
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1a3lnZ2FvaWVrZW52ZWtvaWN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwNjEwOTgsImV4cCI6MjA3MjYzNzA5OH0.84lO4yqqZ6pbVLX0hlxOC3qgK508y1gFxeSp3Wx3kkw'; 
 const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 let utenteCorrenteId = null; 
@@ -11,9 +11,9 @@ let carrello = JSON.parse(localStorage.getItem('carrello')) || [];
 
 // ===========================================
 // LISTINO PREZZI BANDIERE (Basato sulla foto allegata)
-// I prezzi sono suddivisi per FORMA, MISURA, e COMPONENTE.
 // ===========================================
 const LISTINO_COMPLETO = {
+    // I prezzi sono estratti dalla riga 'Bandiera Goccia'
     "Goccia": {
         // [FLAG, ASTA, BASE, ZAVORRA]
         "S": { FLAG: 26.00, ASTA: 27.00, BASE: 15.00, ZAVORRA: 6.00 },
@@ -21,6 +21,7 @@ const LISTINO_COMPLETO = {
         "L": { FLAG: 37.00, ASTA: 27.00, BASE: 15.00, ZAVORRA: 6.00 },
         "XL": { FLAG: 46.00, ASTA: 33.00, BASE: 15.00, ZAVORRA: 6.00 },
     },
+    // ASSUNZIONE: Usiamo la stessa struttura di costo per le altre forme.
     "Vela": { 
         "S": { FLAG: 26.00, ASTA: 27.00, BASE: 15.00, ZAVORRA: 6.00 },
         "M": { FLAG: 30.00, ASTA: 27.00, BASE: 15.00, ZAVORRA: 6.00 },
@@ -163,7 +164,7 @@ async function gestisciAggiuntaAlCarrello() {
     const qta = parseInt(document.getElementById('qta').value);
     
     const formaElement = document.querySelector('.forme .forma.active');
-    const misuraElement = document.querySelector('.misure input:checked'); 
+    const misuraElement = document.querySelector('.misure input:checked'); // NUOVO SELETTORE
     
     // Rileva tutti i componenti selezionati
     const componentiSelezionati = Array.from(document.querySelectorAll('.componenti input:checked'));
