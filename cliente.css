@@ -42,7 +42,7 @@ body {
 /* LAYOUT GENERALE */
 .container {
   display: grid;
-  grid-template-columns: 0fr 1fr;
+  grid-template-columns: 1fr;
   gap: 2rem;
   padding: 2rem;
 }
@@ -271,7 +271,7 @@ body {
 
   /* NUOVO: Forza la galleria ad apparire per prima */
   .galleria-prodotti-container {
-      order: 0;
+      grid-column: auto;
   }
 
   .categorie,
