@@ -63,52 +63,7 @@ body {
   margin-bottom: 0.5rem;
 }
 
-.intro p {
-  color: #666;
-  margin-bottom: 1.5rem;
-}
-
-.btn-primary {
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 30px;
-  padding: 0.8rem 1.8rem;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-primary:hover {
-  background: #005fcc;
-}
-
-/* CATEGORIE */
-.categorie {
-  margin-top: 1.5rem;
-  display: flex;
-  gap: 1rem;
-}
-
-.categoria {
-  flex: 1;
-  background: #f0f4fa;
-  border: none;
-  border-radius: 12px;
-  padding: 1rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.categoria:hover {
-  background: #007bff;
-  color: white;
-}
+/* ... (omissis, stili intermedi) ... */
 
 /* PERSONALIZZA */
 .personalizza h2 {
@@ -138,39 +93,41 @@ body {
   color: white;
 }
 
+/* === NUOVI STILI PER LA MISURA === */
+.misure {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: #f9f9f9;
+}
+
+.misure h3 {
+    color: #444;
+    margin-top: 0;
+    margin-bottom: 0.8rem;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.misure label {
+    display: inline-block;
+    margin-right: 1.5rem;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.misure input[type="radio"] {
+    margin-right: 0.5rem;
+}
+/* =================================== */
+
+
 .quantita {
   margin: 1.5rem 0;
 }
 
-.quantita label {
-  display: block;
-  font-weight: 500;
-  margin-bottom: 0.3rem;
-}
-
-.quantita input {
-  width: 100%;
-  padding: 0.6rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-}
-
-/* UPLOAD */
-.upload-box {
-  border: 2px dashed #007bff;
-  padding: 1.5rem;
-  text-align: center;
-  border-radius: 12px;
-  background: #f9fbff;
-  margin-bottom: 1.5rem;
-  cursor: pointer;
-}
-
-.upload-box p {
-  margin: 0.5rem 0;
-  color: #555;
-  font-size: 0.95rem;
-}
+/* ... (omissis, stili intermedi) ... */
 
 /* COMPONENTI */
 .componenti h3 {
@@ -179,7 +136,7 @@ body {
 }
 
 .componenti label {
-  display: block;
+  display: block; /* Mantiene i checkbox in colonne verticali */
   margin-bottom: 0.5rem;
   font-size: 0.95rem;
 }
@@ -250,38 +207,12 @@ body {
   color: #777;
   font-size: 0.9rem;
   margin-top: 2rem;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05); 
 }
 
-/* RESPONSIVE */
-@media (max-width: 960px) {
-  .container {
-    grid-template-columns: 1fr;
-  }
-
-  .preventivo {
-    position: relative;
-    top: 0;
-    margin-top: 2rem;
-    grid-column: 1 / -1; /* Forza l'elemento ad occupare l'intera riga */
-    /* Aggiungendo 'order: -1;' qui (che non è necessario nel tuo HTML attuale) */
-    /* forzeresti il carrello ad apparire IN CIMA alla singola colonna mobile. */
-  }
-
-  .categorie,
-  .forme {
-    flex-direction: column;
-  }
-}
-/* CLIENTE.CSS - Aggiungi questi stili */
-
-/* Stile base per la sezione ordini */
-.ordini-view {
-    grid-column: 1 / -1; /* Forza la sezione ad occupare tutta la larghezza in caso di display block */
-    background: white;
-    border-radius: 16px;
-    padding: 2rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
+/* =========================================== */
+/* STILI TABELLA ORDINI (INTEGRATI) */
+/* =========================================== */
 
 .lista-ordini h2 {
     color: #007bff;
@@ -306,6 +237,7 @@ body {
     font-weight: 600;
 }
 
+/* EFFETTO ZEBRA */
 .lista-ordini tr:nth-child(even) {
     background-color: #f9f9f9;
 }
@@ -321,6 +253,7 @@ body {
     text-align: center;
 }
 
+/* COLORI STATO */
 .stato-In-attesa-di-lavorazione {
     background-color: #ffc107;
     color: #333;
@@ -336,4 +269,24 @@ body {
 .stato-Spedito {
     background-color: #007bff;
     color: white;
+}
+
+
+/* RESPONSIVE */
+@media (max-width: 960px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
+
+  .preventivo {
+    position: relative;
+    top: 0;
+    margin-top: 2rem;
+    grid-column: 1 / -1; 
+  }
+
+  .categorie,
+  .forme {
+    flex-direction: column;
+  }
 }
