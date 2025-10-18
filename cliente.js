@@ -345,6 +345,25 @@ document.addEventListener('DOMContentLoaded', async () => {
              }
         });
 
+        // 4. LOGICA PER IL PULSANTE "BANDIERA COMPLETA" (CODICE DA INSERIRE QUI)
+        document.getElementById('selezionaCompleto').addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Questa riga fa il lavoro: trova tutti i checkbox NON disabilitati (Asta, Base, Zavorra)
+            const checkboxes = document.querySelectorAll('.componenti input[type="checkbox"]:not([disabled])');
+            
+            // Controlla lo stato attuale per sapere se selezionare o deselezionare
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+
+            // Itera e cambia lo stato
+            checkboxes.forEach(cb => {
+                cb.checked = !allChecked;
+            });
+            
+            // Aggiorna la visualizzazione del carrello
+            aggiornaUIPreventivo();
+        });
+
         // Logica per la selezione delle forme
         document.querySelectorAll('.forme .forma').forEach(button => {
             button.addEventListener('click', (e) => {
