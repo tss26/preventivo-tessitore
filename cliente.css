@@ -42,6 +42,7 @@ body {
 /* LAYOUT GENERALE */
 .container {
   display: grid;
+  /* La griglia è FISSATA a una sola colonna per tutti gli schermi */
   grid-template-columns: 1fr;
   gap: 2rem;
   padding: 2rem;
@@ -200,30 +201,15 @@ body {
   background: #218838;
 }
 
-/* PREVENTIVO */
+/* PREVENTIVO: Stili puliti per layout a colonna singola */
 .preventivo {
-  /*position: relative;*/
-  /*top: auto;*/
-  /*align-self: start;*/
-
-
-/*  grid-column: auto; /* Rimuove l'assegnazione alla colonna 2 
-        position: relative; /* Rimuove lo sticky 
-        top: auto; /* Rimuove l'offset 
-        align-self: start; 
-        background: white;
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        z-index: 5;
-        height: fit-content;
-        margin-top: 2rem; /* Aggiungi un margine sotto la galleria */
-    */
-
-  
-
-
-  
+  /* Regole di layout obsolete rimosse */
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  /* Aggiunge spazio sotto la galleria, dove ora si trova il carrello */
+  margin-top: 2rem; 
 }
 
 .preventivo h2 {
@@ -271,38 +257,24 @@ body {
   margin-top: 2rem;
 }
 
-/* RESPONSIVE */
-@media (max-width: 960px) {
-  .container {
-    grid-template-columns: 1fr;
-  }
-
-  .preventivo {
-    /*position: relative;
-    top: 0;
-    margin-top: 0rem;
-    grid-column: 1 / -1; /* Forza l'elemento ad occupare l'intera riga */
-    /* Aggiungendo 'order: -1;' qui (che non è necessario nel tuo HTML attuale) */
-    /* forzeresti il carrello ad apparire IN CIMA alla singola colonna mobile. */
-    /* NUOVO: Usa 'order' per forzare il carrello ad apparire dopo la galleria (order 1) 
-    order: 1;*/
-  }
-
-  /* NUOVO: Forza la galleria ad apparire per prima */
-  .galleria-prodotti-container {
-      grid-column: auto;
-  }
-
-  .categorie,
-  .forme {
-    flex-direction: column;
-  }
+/* RESPONSIVE: Le regole media query sono ora obsolete e possono essere rimosse */
+/* CANCELLATO: @media (max-width: 960px) { ... } */
+ 
+.galleria-prodotti-container {
+   /* Regole obsolete rimosse */
 }
-/* CLIENTE.CSS - Aggiungi questi stili */
+
+.categorie,
+.forme {
+  /* Regole obsolete rimosse */
+}
+
+
+/* CLIENTE.CSS - Stili per la sezione ordini */
 
 /* Stile base per la sezione ordini */
 .ordini-view {
-    grid-column: 1 / -1; /* Forza la sezione ad occupare tutta la larghezza in caso di display block */
+    grid-column: 1 / -1; 
     background: white;
     border-radius: 16px;
     padding: 2rem;
