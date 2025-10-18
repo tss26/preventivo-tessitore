@@ -102,7 +102,24 @@
             <div class="forme">
                 <button class="forma active">Goccia</button>
                 <button class="forma">Vela</button>
-                <button class="forma">Rettangolare</button>
+                <button class="forma">Cresta</button>
+              <button class="forma">Rettangolare</button>
+            </div>
+
+          <div class="misure">
+                <h3>Misura</h3>
+                <label>
+                    <input type="radio" name="misura" value="S" checked> S (Piccola)
+                </label>
+                <label>
+                    <input type="radio" name="misura" value="M"> M (Media)
+                </label>
+                <label>
+                    <input type="radio" name="misura" value="L"> L (Grande)
+                </label>
+                <label>
+                    <input type="radio" name="misura" value="XL"> XL (Extra Grande)
+                </label>
             </div>
 
             <div class="quantita">
@@ -119,18 +136,18 @@
 
             <div class="componenti">
                 <h3>Componenti</h3>
-                <label><input type="checkbox" checked> Pacchetto completo (bandiera + asta + base)</label>
-                <label><input type="checkbox"> Solo bandiera</label>
-                <label><input type="checkbox"> Solo asta</label>
-                <label><input type="checkbox"> Solo base</label>
-                <label><input type="checkbox"> Aggiungi zavorra</label>
+                <label><input type="checkbox" name="componente" value="COMPLETO" checked> Pacchetto completo (Bandiera + Asta + Base + Zavorra)</label>
+                <label><input type="checkbox" name="componente" value="FLAG" checked disabled> Solo Bandiera(Flag)</label>
+                <label><input type="checkbox" name="componente" value="ASTA"> Solo Asta</label>
+                <label><input type="checkbox" name="componente" value="BASE"> Solo Base a croce Grande </label>
+                <label><input type="checkbox" name="componente" value="ZAVORRA"> Zavorra</label>
             </div>
             
             <button class="btn-add" id="aggiungiBandiera">Aggiungi al preventivo</button>
         </section>
         
         <section class="galleria-blocco" id="shoppeSection">
-            <h2>DIV "SHOPPE"</h2>
+            <h2>DIV "SHOPPER"</h2>
             <p>Qui puoi aggiungere altri articoli non personalizzabili.</p>
         </section>
         
