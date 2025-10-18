@@ -353,37 +353,52 @@ function mostraVistaOrdini() {
 }
 
 
+
+
+
 // ===========================================
 // INIZIALIZZAZIONE & EVENT LISTENERS
 // ===========================================
 
 document.addEventListener('DOMContentLoaded', async () => {
-    
-    const isLogged = await verificaCliente();
-    
-    if (isLogged) {
-        
-        // 1. ASSEGNAZIONE EVENTI FONDAMENTALI
-        document.getElementById('logoutBtn').addEventListener('click', handleLogout);
-        document.getElementById('aggiungiBandiera').addEventListener('click', gestisciAggiuntaAlCarrello);
-        document.getElementById('richiediPreventivo').addEventListener('click', gestisciCheckout);
-        
-        // 2. Listener per "I Miei Ordini" (SWAP VISTA)
-        document.getElementById('mieiOrdiniBtn').addEventListener('click', (e) => {
-            e.preventDefault();
-            mostraVistaOrdini();
-        });
-        
-        // 3. Listener per la Home (torna alla vista Preventivo/Galleria)
-        document.querySelector('.nav a[href="index.html"]').addEventListener('click', (e) => {
-             if (document.getElementById('ordiniCliente').style.display !== 'none') {
-                 e.preventDefault();
-                 mostraVistaPreventivo();
-             }
+    
+    const isLogged = await verificaCliente();
+    
+    if (isLogged) {
+        
+        // 1. ASSEGNAZIONE EVENTI FONDAMENTALI
+        document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+        document.getElementById('aggiungiBandiera').addEventListener('click', gestisciAggiuntaAlCarrello);
+        document.getElementById('richiediPreventivo').addEventListener('click', gestisciCheckout);
+        
+        // 2. Listener per "I Miei Ordini" (SWAP VISTA)
+        document.getElementById('mieiOrdiniBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            mostraVistaOrdini();
+        });
+        
+        // 3. Listener per la Home (torna alla vista Preventivo/Galleria)
+        document.querySelector('.nav a[href="index.html"]').addEventListener('click', (e) => {
+             if (document.getElementById('ordiniCliente').style.display !== 'none') {
+                 e.preventDefault();
+                 mostraVistaPreventivo();
+             }
+        });
+
+        // ** 4. NUOVA LOGICA: Gestione selezione Forma (Bandiere) **
+        document.querySelectorAll('.forme .forma').forEach(button => {
+            button.addEventListener('click', (e) => {
+                // 1. Rimuovi la classe 'active' da tutti i pulsanti della forma
+                document.querySelectorAll('.forme .forma').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                // 2. Aggiungi la classe 'active' solo al pulsante cliccato
+                e.target.classList.add('active');
+            });
         });
 
-        // 4. Carica la UI all'inizio
-        aggiornaUIPreventivo();
-        mostraVistaPreventivo();
-    }
+        // 5. Carica la UI all'inizio
+        aggiornaUIPreventivo();
+        mostraVistaPreventivo();
+    }
 });
