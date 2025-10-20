@@ -1,0 +1,53 @@
+# .github/workflows/cleanup.yml
+name: Supabase Storage Maintenance
+
+on:
+  schedule:
+    # 1. SCHEDULER: Esegui la Edge Function ogni giorno a mezzanotte UTC
+    # Questa esecuzione pulirà tutti i file più vecchi di 72 ore (3 giorni)
+    - cron: '0 0 * * *' 
+  push:
+    branches:
+      - main # Esegui il deploy ad ogni push su main (per aggiornare la funzione)
+  workflow_dispatch: # Permette l'esecuzione manuale dalla UI di GitHub
+
+jobs:
+  # JOB 1: Deploy della Edge Function (Eseguito ad ogni Push)
+  # Questo risolve il problema di Docker compilando la funzione su GitHub
+  deploy_function:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v1
+      - name: Deploy Cleanup Storage Function
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          # Distribuisce la funzione usando le credenziali e il codice caricato
+          npx supabase functions deploy cleanup-storage --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
+          echo "Deploy Edge Function completato."
+          
+  # JOB 2: Esecuzione della Funzione (Eseguito ogni giorno tramite Scheduler)
+  run_cleanup_cron:
+    needs: deploy_function # Deve essere eseguito DOPO il deploy
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Cleanup Edge Function
+        env:
+          # Costruisci l'URL della funzione
+          FUNCTION_URL: https://${{ secrets.SUPABASE_PROJECT_ID }}.supabase.co/functions/v1/cleanup-storage
+          ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          echo "Avvio della funzione di pulizia tramite cron..."
+          
+          # Attiva la Edge Function usando l'URL e la chiave anonima
+          curl -X POST "$FUNCTION_URL" \
+          -H "Authorization: Bearer $ANON_KEY" \
+          -H "Content-Type: application/json" \
+          -d "{}"
+          
+          echo "Richiesta Edge Function inviata per la pulizia dei file scaduti."
