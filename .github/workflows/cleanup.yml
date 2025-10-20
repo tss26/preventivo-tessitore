@@ -32,7 +32,7 @@ jobs:
           
   # JOB 2: Esecuzione della Funzione (Eseguito ogni giorno tramite Scheduler)
   run_cleanup_cron:
-    needs: deploy_function # Deve essere eseguito DOPO il deploy
+    needs: deploy_function 
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
@@ -41,7 +41,7 @@ jobs:
           # Costruisci l'URL della funzione
           FUNCTION_URL: https://${{ secrets.SUPABASE_PROJECT_ID }}.supabase.co/functions/v1/cleanup-storage
           ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-        run: |
+        run: |  # <-- QUESTA CHIAVE 'run' DEVE ESSERE ALLINEATA CON 'env' E 'name'
           echo "Avvio della funzione di pulizia tramite cron..."
           
           # Attiva la Edge Function usando l'URL e la chiave anonima
