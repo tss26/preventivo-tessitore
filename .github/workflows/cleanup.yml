@@ -36,7 +36,7 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - name: Call Cleanup Edge Function
+    - name: Call Cleanup Edge Function
         env:
           # Costruisci l'URL della funzione
           FUNCTION_URL: https://${{ secrets.SUPABASE_PROJECT_ID }}.supabase.co/functions/v1/cleanup-storage
