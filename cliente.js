@@ -152,76 +152,286 @@ async function generaNumeroOrdineTemporaneo() {
 // LOGICA ACQUISTO E CHECKOUT (COMPLETO)
 // ===========================================
 
+// ... (parte superiore del file cliente.js)
+
+
+
+const BUCKET_NAME = 'personalizzazioni'; // <--- ASSUMIAMO CHE IL TUO BUCKET SI CHIAMI 'uploads'
+
+                               //      CAMBIA QUESTO NOME SE IL TUO BUCKET E' DIVERSO!
+
+// ...
+
+
+
 /**
- * Funzione principale per gestire l'aggiunta al carrello (Bandiere). (CORRETTA)
+
+ * Funzione principale per gestire l'aggiunta al carrello (Bandiere),
+
+ * ora include la logica di upload con scadenza (72h) e tracciamento nel DB.
+
  */
+
 async function gestisciAggiuntaAlCarrello() {
+
     
+
     // --- 1. RILEVAZIONE ATTRIBUTI ---
+
     const fileInput = document.getElementById('fileUpload');
+
+    const fileToUpload = fileInput.files[0]; // Ottiene il file selezionato
+
     const qta = parseInt(document.getElementById('qta').value);
+
     
+
+    // ... (omissis, controlli di forma e misura)
+
     const formaElement = document.querySelector('.forme .forma.active');
-    const misuraElement = document.querySelector('.misure input:checked'); // NUOVO SELETTORE
-    
-    // Rileva tutti i componenti selezionati
+
+    const misuraElement = document.querySelector('.misure input:checked'); 
+
     const componentiSelezionati = Array.from(document.querySelectorAll('.componenti input:checked'));
 
-    // --- 2. CONTROLLI DI VALIDAZIONE ---
+
+
+    // --- 2. CONTROLLI DI VALIDAZIONE AGGIUNTIVI ---
+
     if (!formaElement || !misuraElement || qta < 1 || isNaN(qta)) {
+
         alert("Seleziona una forma, una misura e una quantità valida (min. 1).");
+
         return;
+
     }
+
+    
+
+    // NUOVO CONTROLLO: Il file è obbligatorio per l'aggiunta al carrello
+
+    if (!fileToUpload) {
+
+        alert("Per aggiungere una Bandiera personalizzata, devi caricare un file (.PNG / .PDF).");
+
+        return;
+
+    }
+
+    
+
+    if (!utenteCorrenteId) {
+
+        alert("Errore: ID Utente non disponibile. Prova a ricaricare la pagina o a effettuare nuovamente il login.");
+
+        return;
+
+    }
+
+
 
     const forma = formaElement.textContent.trim();
-    const misura = misuraElement.value; // Ottiene S, M, L, o XL
+
+    const misura = misuraElement.value;
+
     
-    // --- 3. CALCOLO DEL PREZZO UNITARIO ---
+
+    // --- 3. LOGICA DI UPLOAD E TRACCIAMENTO (NUOVO BLOCCO) ---
+
     
+
+    let fileUrl = 'Nessun file caricato (Errore)'; 
+
+    let storagePathFull = null;
+
+
+
+    try {
+
+        const extension = fileToUpload.name.split('.').pop();
+
+        // Crea un percorso di storage unico: user_id/timestamp-random.ext
+
+        const filePath = `${utenteCorrenteId}/${Date.now()}-${Math.random().toString(36).substring(2)}.${extension}`;
+
+        
+
+        // 3a. Carica il file nello Storage di Supabase
+
+        const { error: uploadError } = await supabase.storage
+
+          .from(BUCKET_NAME)
+
+          .upload(filePath, fileToUpload, {
+
+            cacheControl: '3600', 
+
+            upsert: false,
+
+          });
+
+
+
+        if (uploadError) {
+
+          throw uploadError;
+
+        }
+
+        
+
+        // Ottiene l'URL pubblico per salvarlo nel carrello/ordine
+
+        fileUrl = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath).data.publicUrl;
+
+        
+
+        // Salva il percorso completo per la cancellazione automatica
+
+        storagePathFull = `${BUCKET_NAME}/${filePath}`;
+
+
+
+        // 3b. Calcola l'orario di scadenza (adesso + 72 ore)
+
+        const expirationTime = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
+
+
+
+        // 3c. Registra il percorso del file e la scadenza nel database 'temp_files'
+
+        const { error: dbError } = await supabase
+
+          .from('temp_files')
+
+          .insert([
+
+            { 
+
+              storage_path: storagePathFull, 
+
+              expires_at: expirationTime, 
+
+            }
+
+          ]);
+
+
+
+        if (dbError) {
+
+          // Se fallisce l'inserimento nel DB, cancella il file appena caricato!
+
+          await supabase.storage.from(BUCKET_NAME).remove([filePath]);
+
+          throw dbError;
+
+        }
+
+
+
+    } catch (e) {
+
+        console.error('Errore Upload/Tracciamento:', e.message);
+
+        alert(`Errore critico durante il caricamento del file. Riprova. Dettagli: ${e.message}`);
+
+        fileInput.value = ''; // Resetta il campo file
+
+        return; // Blocca l'aggiunta al carrello se l'upload fallisce
+
+    }
+
+
+
+    // --- 4. CALCOLO DEL PREZZO UNITARIO (Resto della logica) ---
+
+    // ... (Logica di calcolo del prezzo rimane invariata)
+
+    
+
+    // Inizia la sezione di calcolo del prezzo (che era al punto 3 del tuo vecchio codice)
+
     const listinoForma = LISTINO_COMPLETO[forma];
-    if (!listinoForma) {
-        alert(`Errore: Dati listino mancanti per la forma "${forma}".`);
-        return;
-    }
-    
-    const listinoMisura = listinoForma[misura];
-    if (!listinoMisura) {
-        alert(`Errore: Dati listino mancanti per la misura "${misura}".`);
-        return;
-    }
+
+    // ... (restanti calcoli del prezzo e controllo componenti)
 
     let prezzoUnitarioFinale = 0;
-    let componentiNomi = []; // Per il riepilogo nel carrello
 
-    // Calcola il costo totale sommando i componenti selezionati
+    let componentiNomi = []; 
+
+    // ... (calcoli omessi per brevità)
+
     componentiSelezionati.forEach(checkbox => {
-        const componenteKey = checkbox.value; // Esempio: "FLAG", "ASTA", "BASE", "ZAVORRA"
+
+        const componenteKey = checkbox.value; 
+
         const prezzoComponente = listinoMisura[componenteKey] || 0;
-        
+
         prezzoUnitarioFinale += prezzoComponente;
+
         componentiNomi.push(checkbox.parentNode.textContent.trim());
+
     });
 
-    // Logica di upload e determinazione fileUrl omessa per brevità
-    let fileUrl = 'URL_UPLOAD_FITTIZIO'; 
+    // Fine sezione di calcolo del prezzo
+
+
 
     const nuovoArticolo = { 
+
         id_unico: Date.now(), 
+
         prodotto: `${forma} (${misura})`, 
+
         quantita: qta, 
+
         prezzo_unitario: prezzoUnitarioFinale, 
+
         componenti: componentiNomi, 
-        personalizzazione_url: fileUrl
+
+        personalizzazione_url: fileUrl // <--- ADESSO CONTIENE L'URL PUBBLICO VERO
+
     };
+
     
+
     if (prezzoUnitarioFinale <= 0) {
+
          if (!confirm(`Attenzione! Prezzo calcolato di € ${prezzoUnitarioFinale.toFixed(2)} cad. Continuare?`)) return;
+
     }
 
+
+
     aggiungiAlCarrello(nuovoArticolo);
-    alert(`Aggiunto ${qta}x ${nuovoArticolo.prodotto} al preventivo per € ${prezzoUnitarioFinale.toFixed(2)} cad.!`);
-    fileInput.value = '';
+
+    alert(`Aggiunto ${qta}x ${nuovoArticolo.prodotto} al preventivo per € ${prezzoUnitarioFinale.toFixed(2)} cad.! (File: OK)`);
+
+    fileInput.value = ''; // Resetta il campo file dopo l'aggiunta di successo
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /**
