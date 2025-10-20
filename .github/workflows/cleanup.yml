@@ -3,6 +3,7 @@ name: Supabase Storage Maintenance
 
 on:
   schedule:
+    # Esegui la Edge Function ogni giorno a mezzanotte UTC (02:00/01:00 CEST/CET)
     - cron: '0 0 * * *' 
   push:
     branches:
@@ -10,7 +11,7 @@ on:
   workflow_dispatch: 
 
 jobs:
-  # JOB 1: Deploy (CORRETTO)
+  # JOB 1: Distribuisce la Edge Function (Necessario per il deploy remoto)
   deploy_function:
     runs-on: ubuntu-latest
     steps:
@@ -26,20 +27,23 @@ jobs:
           npx supabase functions deploy cleanup-storage --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
           echo "Deploy Edge Function completato."
           
-  # JOB 2: Esecuzione (CON INDENTAZIONE CORRETTA)
+  # JOB 2: Esecuzione della Funzione (Timer Cron)
   run_cleanup_cron:
     needs: deploy_function
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - name: Call Cleanup Edge Function # 6 spazi
-        env:                             # 8 spazi
-          FUNCTION_URL: https://${{ secrets.SUPABASE_PROJECT_ID }}.supabase.co/functions/v1/cleanup-storage # 10 spazi
-          ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }} # 10 spazi
-        run: |                           # 8 spazi
+      - name: Call Cleanup Edge Function
+        env:
+          FUNCTION_URL: https://${{ secrets.SUPABASE_PROJECT_ID }}.supabase.co/functions/v1/cleanup-storage
+          ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
           echo "Avvio della funzione di pulizia tramite cron..."
+          
+          # Attiva la Edge Function
           curl -X POST "$FUNCTION_URL" \
           -H "Authorization: Bearer $ANON_KEY" \
           -H "Content-Type: application/json" \
           -d "{}"
+          
           echo "Richiesta Edge Function inviata per la pulizia dei file scaduti."
