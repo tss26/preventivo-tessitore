@@ -307,7 +307,7 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString) {
 }
 
 function mostraVistaPreventivo() {
-    document.querySelector('.container').style.gridTemplateColumns = '2fr 1fr'; 
+    document.querySelector('.container').style.gridTemplateColumns = '1fr'; 
     document.getElementById('galleriaView').style.display = 'block'; 
     document.getElementById('sezioneCarrello').style.display = 'block'; 
     document.getElementById('ordiniCliente').style.display = 'none';
