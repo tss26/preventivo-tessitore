@@ -344,37 +344,40 @@ async function gestisciAggiuntaAlCarrello() {
 
 
 
-    // --- 4. CALCOLO DEL PREZZO UNITARIO (Resto della logica) ---
 
-    // ... (Logica di calcolo del prezzo rimane invariata)
 
+    // --- 4. CALCOLO DEL PREZZO UNITARIO (Logica CORRETTA per lo scope) --- - - - -- - - - - - - - -- -- - - -
     
-
-    // Inizia la sezione di calcolo del prezzo (che era al punto 3 del tuo vecchio codice)
-
+    // 1. Definisce listinoForma e verifica l'esistenza
     const listinoForma = LISTINO_COMPLETO[forma];
-
-    // ... (restanti calcoli del prezzo e controllo componenti)
+    if (!listinoForma) {
+        console.error('Listino non trovato per la forma:', forma);
+        alert('Errore interno: Listino prezzi non trovato per la forma selezionata.');
+        return; 
+    }
+    
+    // 2. Definisce listinoMisura e verifica l'esistenza (NUOVO)
+    const listinoMisura = listinoForma[misura]; 
+    if (!listinoMisura) {
+        console.error('Listino non trovato per la misura:', misura);
+        alert('Errore interno: Listino prezzi non trovato per la misura selezionata.');
+        return; 
+    }
 
     let prezzoUnitarioFinale = 0;
-
     let componentiNomi = []; 
 
-    // ... (calcoli omessi per brevità)
-
+    // 3. Esegue il ciclo (listinoMisura ORA è definita!)
     componentiSelezionati.forEach(checkbox => {
-
         const componenteKey = checkbox.value; 
-
-        const prezzoComponente = listinoMisura[componenteKey] || 0;
-
+        const prezzoComponente = listinoMisura[componenteKey] || 0; 
+        
         prezzoUnitarioFinale += prezzoComponente;
-
         componentiNomi.push(checkbox.parentNode.textContent.trim());
-
     });
-
     // Fine sezione di calcolo del prezzo
+    
+    // ... (Il codice prosegue con la creazione di nuovoArticolo e aggiungiAlCarrello)----------- -- - - - - - -- - - - 
 
 
 
@@ -411,25 +414,6 @@ async function gestisciAggiuntaAlCarrello() {
     fileInput.value = ''; // Resetta il campo file dopo l'aggiunta di successo
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
