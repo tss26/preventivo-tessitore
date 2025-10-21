@@ -461,6 +461,26 @@ document.addEventListener('DOMContentLoaded', async () => {
              }
         });
 
+
+// *** LOGICA DI FORZATURA STATI (PER TIMING JS) ***
+        // 1. Forza la forma attiva (per l'elemento che ha .active nell'HTML)
+        const defaultForma = document.querySelector('.forme .forma.active');
+        if (defaultForma) {
+            defaultForma.classList.add('active'); 
+        }
+        
+        // 2. Forza la misura checkata (per l'elemento che ha checked nell'HTML)
+        const defaultMisura = document.querySelector('.misure input:checked'); 
+        if (defaultMisura) {
+             defaultMisura.checked = true;
+        }
+        // **********************************************
+
+
+
+
+        
+
         // LISTENER PER IL PREZZO DINAMICO E AGGIORNAMENTO
         
         // 1. Logica per la selezione delle forme
@@ -494,7 +514,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             checkboxes.forEach(cb => {
                 cb.checked = !allChecked;
             });
-            
+
+
+            
             aggiornaUIPreventivo();
             calcolaPrezzoDinamico();
         });
