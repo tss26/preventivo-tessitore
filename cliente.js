@@ -611,8 +611,6 @@ function calcolaPrezzoDinamico() {
 
     prezzoDinamicoSpan.textContent = `€ ${prezzoUnitarioFinale.toFixed(2)}`;
 }
-QUESTO è IL MIO ATTUALE CODICE PUOI INSERIRE SOLO LA PARTE MANCANTE PER COMPLETRLO SENZA EFFETTUARE NESSUN LTRO TIPO DI MOFICHE 
-
 
 
 
