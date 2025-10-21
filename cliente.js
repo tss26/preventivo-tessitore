@@ -385,6 +385,42 @@ async function gestisciCheckout() {
 // ... (omissis, funzioni ordini non modificate)
 // ...
 
+
+async function caricaMieiOrdini() {
+    const container = document.getElementById('ordiniListaCliente');
+    if (!utenteCorrenteId) { container.innerHTML = `<p style="color: red;">ID utente non disponibile.</p>`; return; }
+    container.innerHTML = '<p>Caricamento ordini in corso...</p>';
+    const { data: ordini, error } = await supabase.from('ordini').select(`*`).eq('user_id', utenteCorrenteId).order('data_ordine', { ascending: false }); 
+    if (error) { container.innerHTML = `<p style="color: red;">Errore nel recupero ordini: ${error.message}. Verifica Policy RLS SELECT sulla tabella ordini (auth.uid() = user_id).</p>`; return; }
+    if (ordini.length === 0) { container.innerHTML = '<p>Non hai ancora effettuato ordini.</p>'; return; }
+    let html = `<div class="lista-ordini-table-wrapper"><table><thead><tr><th>N. Ordine</th><th>Data</th><th>Totale</th><th>Stato</th><th>Dettagli</th></tr></thead><tbody>`;
+    ordini.forEach(ordine => {
+        const numeroOrdine = ordine.num_ordine_prog ? ordine.num_ordine_prog : ordine.id.substring(0, 8).toUpperCase(); 
+        html += `<tr data-id="${ordine.id}"><td>${numeroOrdine}</td><td>${new Date(ordine.data_ordine).toLocaleString()}</td><td>€ ${ordine.totale ? ordine.totale.toFixed(2) : '0.00'}</td><td><span class="stato-ordine stato-${ordine.stato.replace(/\s/g, '-')}">${ordine.stato}</span></td><td><button onclick="mostraDettagliOrdine('${ordine.id}', '${JSON.stringify(ordine.dettagli_prodotti).replace(/"/g, '&quot;')}')" class="btn-primary" style="padding: 5px 10px;">Vedi Dettagli</button></td></tr>`;
+    });
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+}
+function mostraDettagliOrdine(ordineId, dettagliProdottiString) {
+    const dettagli = JSON.parse(dettagliProdottiString); 
+    let dettagliHtml = `Ordine ID: ${ordineId.substring(0, 8)}...\n\nDETTAGLI PRODOTTI:\n`; 
+    dettagli.forEach(item => {
+        dettagliHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
+        dettagliHtml += `Componenti: ${item.componenti.join(', ')}\n`;
+        dettagliHtml += `Prezzo netto cad.: € ${item.prezzo_unitario}\n`;
+        if (item.personalizzazione_url) {
+            dettagliHtml += `File: COPIA E APRI L'URL:\n${item.personalizzazione_url}\n`;
+        } else {
+            dettagliHtml += `File: Nessun file caricato.\n`;
+        }
+    });
+    alert(dettagliHtml); 
+}
+
+
+
+
+
 function mostraVistaPreventivo() {
     document.querySelector('.container').style.gridTemplateColumns = '1fr'; 
     document.getElementById('galleriaView').style.display = 'block'; 
