@@ -361,6 +361,7 @@ async function gestisciCheckout() {
                     stato: 'In attesa di lavorazione',
                     totale: totaleCalcolato,
                     dettagli_prodotti: carrelloDaSalvare,
+                    user_id: utenteCorrenteId,
                 }
             ]);
 
