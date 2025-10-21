@@ -112,7 +112,7 @@
 
             <div class="quantita">
                 <label for="qta">Quantità</label>
-                <input type="number" id="qta" value="2" min="1">
+                <input type="number" id="qta" value="1" min="1">
             </div>
 
             <div class="upload">
@@ -120,6 +120,12 @@
                     <p>Trascina o carica file (.PNG / .PDF)</p>
                     <input type="file" id="fileUpload" />
                 </div>
+              <div id="uploadStatusBox" style="margin-top: 15px; background: #e9ecef; padding: 10px; border-radius: 8px; display: none;">
+                  <div style="font-weight: 600;" id="uploadMessage">In attesa...</div>
+                  <div style="height: 8px; background: #ccc; border-radius: 4px; margin-top: 5px;">
+                    <div id="uploadProgressBar" style="height: 100%; width: 0%; background: #007bff; border-radius: 4px; transition: width 0.3s;"></div>
+                  </div>
+              </div>
             </div>
 
             <div class="componenti">
@@ -131,12 +137,13 @@
                 <label><input type="checkbox" name="componente" value="BASE"> Base a croce Grande </label>
                 <label><input type="checkbox" name="componente" value="ZAVORRA"> Zavorra</label>
             </div>
-            
-            <button class="btn-add" id="aggiungiBandiera">Aggiungi al preventivo</button>
 
-            <div style="margin-top: 15px; font-size: 1.1rem; font-weight: 600; color: #007bff;">
-                    Costo unitario stimato al netto di IVA al 22%: <span id="prezzoDinamico">€ 0.00</span>
+              <div style="margin-top: 15px; font-size: 1.1rem; font-weight: 600; color: #007bff;">
+                Costo unitario stimato al netto di IVA: <span id="prezzoDinamico">€ 0.00</span>
               </div>
+
+            <button class="btn-add" id="aggiungiBandiera">Aggiungi al preventivo</button>
+            
         </section>
         
         <section class="galleria-blocco" id="shoppeSection">
