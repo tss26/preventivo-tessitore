@@ -8,6 +8,21 @@ const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SU
 let utenteCorrenteId = null; 
 let carrello = JSON.parse(localStorage.getItem('carrello')) || [];
 
+// Fasce di quantità per il listino Kit Calcio (Totale Pezzi)
+// Questo array aiuta la funzione a trovare il prezzo corretto per fascia.
+const FASCE_QUANTITA_KIT = [
+    { max: 5, key: "1_5" },
+    { max: 20, key: "6_20" },
+    { max: 50, key: "21_50" },
+    { max: 70, key: "51_70" },
+    { max: 100, key: "71_100" },
+    { max: 150, key: "101_150" },
+    { max: 200, key: "151_200" },
+    { max: 250, key: "201_250" },
+    { max: 350, key: "251_350" },
+    { max: 500, key: "351_500" }
+];
+
 
 // ===========================================
 // LISTINO PREZZI BANDIERE (Dati Dinamici dalla foto)
@@ -39,6 +54,29 @@ const LISTINO_COMPLETO = {
         "L": { FLAG: 28.00, ASTA: 45.00, BASE: 15.00, ZAVORRA: 6.00 },
         "XL": { FLAG: 34.00, ASTA: 56.00, BASE: 15.00, ZAVORRA: 6.00 },
     },
+
+
+
+    // --- NUOVO LISTINO KIT CALCIO (Basato su Listini Completini Tessitore.pdf) ---
+    "KIT_CALCIO": {
+        // Prezzi unitari netti (€) basati sulla fascia di quantità TOTALE
+        "PREZZI_FASCIA": {
+            "1_5": { COMPLETINO: 25.00, MAGLIA_SOLA: 14.50, PANTALONCINO_SOLO: 13.00 },
+            "6_20": { COMPLETINO: 22.50, MAGLIA_SOLA: 13.50, PANTALONCINO_SOLO: 11.50 },
+            "21_50": { COMPLETINO: 19.50, MAGLIA_SOLA: 11.50, PANTALONCINO_SOLO: 9.50 },
+            "51_70": { COMPLETINO: 18.00, MAGLIA_SOLA: 9.50, PANTALONCINO_SOLO: 9.00 },
+            "71_100": { COMPLETINO: 17.00, MAGLIA_SOLA: 9.00, PANTALONCINO_SOLO: 8.50 },
+            "101_150": { COMPLETINO: 16.00, MAGLIA_SOLA: 8.50, PANTALONCINO_SOLO: 8.00 },
+            "151_200": { COMPLETINO: 15.00, MAGLIA_SOLA: 8.00, PANTALONCINO_SOLO: 7.50 },
+            "201_250": { COMPLETINO: 14.00, MAGLIA_SOLA: 7.50, PANTALONCINO_SOLO: 7.00 },
+            "251_350": { COMPLETINO: 13.50, MAGLIA_SOLA: 6.90, PANTALONCINO_SOLO: 6.90 },
+            "351_500": { COMPLETINO: 13.00, MAGLIA_SOLA: 6.50, PANTALONCINO_SOLO: 6.50 }
+        },
+        "COSTO_GRAFICO": 20.00 // Costo impianto grafico 
+    }
+
+
+    
 };
 // ===========================================
 
@@ -380,6 +418,149 @@ async function gestisciCheckout() {
 }
 
 
+/// ===========================================
+// FUNZIONI DI SUPPORTO PER IL KIT CALCIO
+// ===========================================
+
+
+
+
+//------------------------------
+// FUNZIONE DI CALCOLO DINAMICO DEL PREZZO PER kit sublimazione
+//------
+function calcolaPrezzoDinamicoKit() {
+    const prezzoDinamicoSpan = document.getElementById('kitPrezzoDinamico');
+    const qtaTotaleSpan = document.getElementById('kitQtaTotale');
+    const taglieTables = document.querySelectorAll('#taglieInputContainer .taglie-table');
+    const kitProdSelezionato = document.querySelector('.kit-item.active')?.dataset.prodotto;
+
+    if (!kitProdSelezionato || !prezzoDinamicoSpan || !qtaTotaleSpan) {
+        prezzoDinamicoSpan.textContent = '€ 0.00';
+        qtaTotaleSpan.textContent = '0';
+        return;
+    }
+
+    const listinoKit = LISTINO_COMPLETO.KIT_CALCIO;
+    let qtaTotale = 0;
+    
+    // 1. Calcola la quantità totale di tutti gli input
+    taglieTables.forEach(table => {
+        table.querySelectorAll('input[type="number"]').forEach(input => {
+            qtaTotale += parseInt(input.value) || 0;
+        });
+    });
+
+    if (qtaTotale === 0) {
+        prezzoDinamicoSpan.textContent = '€ 0.00';
+        qtaTotaleSpan.textContent = '0';
+        return;
+    }
+    
+    // 2. Trova la fascia di prezzo corretta
+    const fascia = FASCE_QUANTITA_KIT.find(f => qtaTotale <= f.max);
+    
+    // 3. Recupera il prezzo unitario in base al prodotto selezionato
+    let prezzoUnitarioBase = 0;
+    
+    if (fascia) {
+        const prezzi = listinoKit.PREZZI_FASCIA[fascia.key];
+        
+        if (kitProdSelezionato === 'COMPLETINO') {
+            prezzoUnitarioBase = prezzi.COMPLETINO;
+        } else if (kitProdSelezionato === 'T-SHIRT_SOLO') {
+            prezzoUnitarioBase = prezzi.MAGLIA_SOLA;
+        } else if (kitProdSelezionato === 'PANTALONCINO_SOLO') {
+            prezzoUnitarioBase = prezzi.PANTALONCINO_SOLO;
+        }
+    }
+
+    // 4. Calcola il costo totale e applica l'impianto grafico
+    const costoTotaleBase = qtaTotale * prezzoUnitarioBase;
+    
+    // Il costo impianto grafico di 20€ viene applicato una sola volta 
+    const costoImpianto = listinoKit.COSTO_GRAFICO || 0; 
+    
+    const costoTotaleFinale = costoTotaleBase + costoImpianto;
+    
+    // 5. Calcola il prezzo MEDIO unitario finale (per visualizzazione dinamica)
+    const prezzoMedioUnitario = costoTotaleFinale / qtaTotale;
+
+    prezzoDinamicoSpan.textContent = `€ ${prezzoMedioUnitario.toFixed(2)}`;
+    qtaTotaleSpan.textContent = qtaTotale;
+}
+
+//-----------
+//Questa funzione deve usare il prezzo medio e deve includere il costo grafico nei componenti per tracciarlo nell'ordine.
+
+async function gestisciAggiuntaKitCalcio() {
+    const taglieTables = document.querySelectorAll('#taglieInputContainer .taglie-table');
+    const kitProdSelezionato = document.querySelector('.kit-item.active')?.dataset.prodotto;
+    
+    const qtaTotale = parseInt(document.getElementById('kitQtaTotale').textContent) || 0;
+    const prezzoDinamico = parseFloat(document.getElementById('kitPrezzoDinamico').textContent.replace('€', '').trim()) || 0;
+    const kitNote = document.getElementById('kitNote').value;
+
+    if (!kitProdSelezionato) {
+        alert("Devi selezionare un prodotto Kit (T-Shirt, Pantaloncino o Completino).");
+        return;
+    }
+    if (qtaTotale === 0 || isNaN(prezzoDinamico)) {
+        alert("La quantità totale deve essere superiore a zero.");
+        return;
+    }
+    if (!utenteCorrenteId) { // Controllo cruciale
+        alert("Errore: ID Utente non disponibile. Effettua nuovamente il login.");
+        return;
+    }
+    
+    // Raccoglie i dettagli delle taglie
+    let dettagliTaglie = {};
+    taglieTables.forEach(table => {
+        const genere = table.dataset.genere;
+        dettagliTaglie[genere] = {};
+        
+        const inputs = table.querySelectorAll('input[type="number"]');
+        inputs.forEach(input => {
+            const taglia = input.dataset.taglia;
+            const qta = parseInt(input.value) || 0;
+            if (qta > 0) {
+                dettagliTaglie[genere][taglia] = qta;
+            }
+        });
+        if (Object.keys(dettagliTaglie[genere]).length === 0) {
+            delete dettagliTaglie[genere];
+        }
+    });
+    
+    // Traccia il costo impianto grafico come componente fisso
+    const componenti = [`Sublimazione Inclusa`, `Costo Impianto Grafico (€${LISTINO_COMPLETO.KIT_CALCIO.COSTO_GRAFICO.toFixed(2)})`];
+
+    const nuovoArticolo = { 
+        id_unico: Date.now(), 
+        prodotto: `KIT CALCIO - ${kitProdSelezionato}`, 
+        quantita: qtaTotale, 
+        // Il prezzo unitario è il prezzo medio calcolato
+        prezzo_unitario: parseFloat(prezzoDinamico.toFixed(2)), 
+        componenti: componenti,
+        dettagli_taglie: dettagliTaglie,
+        note: kitNote,
+        // NON c'è upload qui, ma l'ordine verrà inviato con questo campo
+        personalizzazione_url: 'Nessun file collegato direttamente.'
+    };
+
+    aggiungiAlCarrello(nuovoArticolo);
+    alert(`Aggiunto ${qtaTotale}x ${nuovoArticolo.prodotto} al preventivo per € ${nuovoArticolo.prezzo_unitario.toFixed(2)} cad. (Prezzo Medio)!`);
+    
+    // Reset dell'interfaccia dopo l'aggiunta 
+    document.getElementById('kitNote').value = '';
+    taglieTables.forEach(table => table.querySelectorAll('input[type="number"]').forEach(input => input.value = '0'));
+    calcolaPrezzoDinamicoKit(); // Ritorna a €0.00
+}
+
+
+
+
+
 // ===========================================
 // FUNZIONALITÀ ORDINI CLIENTE (Viste e Caricamento)
 // ... (omissis, funzioni ordini non modificate)
@@ -475,6 +656,11 @@ function calcolaPrezzoDinamico() {
 }
 
 
+
+
+
+
+
 // ===========================================
 // INIZIALIZZAZIONE & EVENT LISTENERS
 // ===========================================
@@ -552,12 +738,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 cb.checked = !allChecked;
             });
 
-
-            
+                        
             aggiornaUIPreventivo();
             calcolaPrezzoDinamico();
         });
 
+        // *** NUOVO LISTENER PER IL KIT CALCIO ***
+        
+        // Listener per il pulsante Aggiungi Kit
+        document.getElementById('aggiungiKitCalcioBtn').addEventListener('click', gestisciAggiuntaKitCalcio);
 
         aggiornaUIPreventivo();
         mostraVistaPreventivo();
