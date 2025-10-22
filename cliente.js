@@ -492,7 +492,7 @@ function calcolaPrezzoDinamicoKit() {
     const prezzoMedioUnitario = costoTotaleFinale ;
     
 
-    prezzoDinamicoSpan.textContent = `€ ${prezzoMedioUnitario.toFixed(2)}`;
+    prezzoDinamicoSpan.textContent = `€ ${prezzoUnitarioBase.toFixed(2)}`;
     qtaTotaleSpan.textContent = qtaTotale;
 }
 
@@ -556,7 +556,7 @@ async function gestisciAggiuntaKitCalcio() {
     };
 
     aggiungiAlCarrello(nuovoArticolo);
-    alert(`Aggiunto ${qtaTotale}x ${nuovoArticolo.prodotto} al preventivo per € ${nuovoArticolo.prezzo_unitario.toFixed(2)} cad. (Prezzo Medio)!`);
+    alert(`Aggiunto ${qtaTotale}x ${nuovoArticolo.prodotto} al preventivo per € ${nuovoArticolo.prezzo_unitario.toFixed(2)} cad. (Prezzo Netto)!`);
     
     // Reset dell'interfaccia dopo l'aggiunta 
     document.getElementById('kitNote').value = '';
