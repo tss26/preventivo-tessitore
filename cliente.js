@@ -509,7 +509,8 @@ async function gestisciAggiuntaKitCalcio() {
     const kitProdSelezionato = document.querySelector('.kit-item.active')?.dataset.prodotto;
     
     const qtaTotale = parseInt(document.getElementById('kitQtaTotale').textContent) || 0;
-    const prezzoDinamico = parseFloat(document.getElementById('kitPrezzoDinamico').textContent.replace('€', '').trim()) || 0;
+    //kitPrezzoBase sostituito a kitPrezzoDinamico
+    const prezzoDinamico = parseFloat(document.getElementById('kitPrezzoBase').textContent.replace('€', '').trim()) || 0;
     const kitNote = document.getElementById('kitNote').value;
 
     if (!kitProdSelezionato) {
