@@ -482,8 +482,8 @@ function calcolaPrezzoDinamicoKit() {
     //---const costoTotaleFinale = costoTotaleBase ;
     
     // 5. Calcola il prezzo MEDIO unitario finale (per visualizzazione dinamica)
-    const prezzoMedioUnitario = costoTotaleFinale / qtaTotale;
-    //---const prezzoMedioUnitario = costoTotaleFinale ;
+    //---const prezzoMedioUnitario = costoTotaleFinale / qtaTotale;
+    const prezzoMedioUnitario = costoTotaleFinale ;
     
 
     prezzoDinamicoSpan.textContent = `€ ${prezzoMedioUnitario.toFixed(2)}`;
