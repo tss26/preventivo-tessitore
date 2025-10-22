@@ -477,11 +477,13 @@ function calcolaPrezzoDinamicoKit() {
     // Il costo impianto grafico di 20€ viene applicato una sola volta 
     const costoImpianto = listinoKit.COSTO_GRAFICO || 0; 
     
-    //const costoTotaleFinale = costoTotaleBase + costoImpianto;
+    //---const costoTotaleFinale = costoTotaleBase + costoImpianto;
     const costoTotaleFinale = costoTotaleBase ;
     
     // 5. Calcola il prezzo MEDIO unitario finale (per visualizzazione dinamica)
-    const prezzoMedioUnitario = costoTotaleFinale / qtaTotale;
+    //---const prezzoMedioUnitario = costoTotaleFinale / qtaTotale;
+    const prezzoMedioUnitario = costoTotaleFinale ;
+    
 
     prezzoDinamicoSpan.textContent = `€ ${prezzoMedioUnitario.toFixed(2)}`;
     qtaTotaleSpan.textContent = qtaTotale;
