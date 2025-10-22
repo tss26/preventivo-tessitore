@@ -687,15 +687,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // *** LOGICA DI FORZATURA STATI (PER TIMING JS) ***
         // 1. Forza la forma attiva (per l'elemento che ha .active nell'HTML)
-        const defaultForma = document.querySelector('.forme .forma.active');
-        if (defaultForma) {
-            defaultForma.classList.add('active'); 
-        }
+        //const defaultForma = document.querySelector('.forme .forma.active');
+       // if (defaultForma) {
+        //    defaultForma.classList.add('active'); 
+       // }
         
         // 2. Forza la misura checkata (per l'elemento che ha checked nell'HTML)
-        const defaultMisura = document.querySelector('.misure input:checked'); 
-        if (defaultMisura) {
-             defaultMisura.checked = true;
+      //  const defaultMisura = document.querySelector('.misure input:checked'); 
+      //  if (defaultMisura) {
+      //       defaultMisura.checked = true;
         }
         // **********************************************
 
@@ -744,6 +744,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         // *** NUOVO LISTENER PER IL KIT CALCIO ***
+
+
+// --- LISTENER KIT CALCIO: Selezione del Prodotto Base ---
+
+document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => {
+    button.addEventListener('click', (e) => {
+        // Rimuove la classe 'active' da tutti i pulsanti kit-item
+        document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(btn => btn.classList.remove('active'));
+        
+        // Trova il pulsante genitore su cui è avvenuto il click e lo marca come attivo
+        const targetButton = e.target.closest('.kit-item'); 
+        if (targetButton) {
+            targetButton.classList.add('active');
+            
+            // 1. RENDE IL CONTENITORE DELLE TAGLIE VISIBILE!
+            document.getElementById('taglieInputContainer').style.display = 'block'; 
+            
+            // 2. Aggiorna il titolo del prodotto selezionato
+            document.getElementById('kitProdottoSelezionato').textContent = targetButton.dataset.prodotto;
+            
+            // 3. Esegue il calcolo dinamico
+            calcolaPrezzoDinamicoKit();
+        }
+    });
+});
+
+
         
         // Listener per il pulsante Aggiungi Kit
         document.getElementById('aggiungiKitCalcioBtn').addEventListener('click', gestisciAggiuntaKitCalcio);
