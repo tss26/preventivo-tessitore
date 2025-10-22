@@ -65,23 +65,104 @@
     <div class="galleria-prodotti-container" id="galleriaView">
         
         <section class="galleria-blocco" id="kitCalcioSection">
-            <h1> "Kit Calcio" Stampato in Sublimazione</h1>
-            <p>Seleziona il componente base per la personalizzazione.</p>
-            <div class="kit-grid">
-                <div class="kit-item">
-                    <img src="Tshirt.jpg" alt="Solo T-Shirt" style="width: 90px;"><br>
-                    Solo T-Shirt (Link 1)
-                </div>
-                <div class="kit-item">
-                    <img src="Pantaloncino.jpg" alt="Solo Pantaloncino" style="width: 90px;"><br>
-                    Solo Pant. (Link 2)
-                </div>
-                <div class="kit-item">
-                    <img src="Completino.jpg" alt="T-Shirt + Pantaloncino" style="width: 90px;"><br>
-                    T-Shirt + Pant. (Link 3)
-                </div>
-            </div>
-        </section>
+    <h1>"Kit Calcio" Stampato in Sublimazione</h1>
+    
+    <div class="prodotti-base kit-grid" id="kitSelectionContainer">
+        <button class="kit-item" data-prodotto="T-SHIRT_SOLO">
+            <img src="Tshirt.jpg" alt="Solo T-Shirt" style="width: 90px;"><br>
+            Solo T-Shirt
+        </button>
+        <button class="kit-item" data-prodotto="PANTALONCINO_SOLO">
+            <img src="Pantaloncino.jpg" alt="Solo Pantaloncino" style="width: 90px;"><br>
+            Solo Pant.
+        </button>
+        <button class="kit-item" data-prodotto="COMPLETINO">
+            <img src="Completino.jpg" alt="T-Shirt + Pantaloncino" style="width: 90px;"><br>
+            T-Shirt + Pant.
+        </button>
+    </div>
+
+    <div id="taglieInputContainer" style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; display: none;">
+        
+        <h2>Quantità e Taglie per: <span id="kitProdottoSelezionato" style="color: #007bff;"></span></h2>
+
+      <h3>Tabella Taglie: UOMO</h3>
+        <table class="taglie-table" data-genere="UOMO">
+            <thead>
+                <tr>
+                    <th>Taglia</th>
+                    <th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>XXL</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Quantità</td>
+                    <td><input type="number" data-taglia="XS" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="S" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="M" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="L" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="XL" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="XXL" min="0" value="0"></td>
+                </tr>
+            </tbody>
+        </table>
+      
+        <h3>Tabella Taglie: BAMBINO</h3>
+        <table class="taglie-table" data-genere="BAMBINO">
+            <thead>
+                <tr>
+                    <th>Taglia (anni)</th>
+                    <th>3-4</th><th>5-6</th><th>7-8</th><th>9-11</th><th>12-14</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Quantità</td>
+                    <td><input type="number" data-taglia="3-4" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="5-6" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="7-8" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="9-11" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="12-14" min="0" value="0"></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h3>Tabella Taglie: DONNA</h3>
+        <table class="taglie-table" data-genere="DONNA">
+            <thead>
+                <tr>
+                    <th>Taglia</th>
+                    <th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>XXL</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Quantità</td>
+                    <td><input type="number" data-taglia="XS" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="S" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="M" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="L" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="XL" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="XXL" min="0" value="0"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+            <h3>Note Aggiuntive per la Personalizzazione:</h3>
+            <textarea id="kitNote" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;"></textarea>
+        </div>
+        
+        <div style="margin-top: 20px; font-size: 1.2rem; font-weight: 600;">
+            Quantità Totale Pezzi: <span id="kitQtaTotale" style="color: #dc3545;">0</span>
+        </div>
+        <div style="font-size: 1.2rem; font-weight: 600; color: #007bff;">
+            Prezzo Dinamico Unitario Stimato: <span id="kitPrezzoDinamico">€ 0.00</span>
+        </div>
+        
+        <button class="btn-add" id="aggiungiKitCalcioBtn" style="margin-top: 20px;">Aggiungi Kit al Preventivo</button>
+    </div>
+</section>
             
         <section class="galleria-blocco" id="bandiereSection">
             <h2> "Bandiere" ed Espositori Drop</h2>
