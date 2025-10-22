@@ -335,3 +335,42 @@ body {
     background-color: #007bff;
     color: white;
 }
+
+/* ======================================= */
+/* STILI PER TABELLE TAGLIE KIT CALCIO */
+/* ======================================= */
+
+/* Rende la tabella piú compatta (opzionale, se non è già responsive) */
+.taglie-table {
+    width: 100%;
+    table-layout: fixed; /* Assicura che le colonne abbiano larghezza uniforme */
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+/* Larghezza minima per le celle che contengono le taglie e i campi input */
+.taglie-table th, .taglie-table td {
+    padding: 4px; /* Riduci il padding per guadagnare spazio */
+    text-align: center;
+    white-space: nowrap; /* Evita che il testo vada a capo */
+    width: 10%; /* Larghezza proporzionale a ogni colonna taglia */
+}
+
+/* Stile per i campi di input quantità */
+.taglie-table input[type="number"] {
+    /* Imposta una larghezza fissa molto piccola per gli input */
+    width: 95%; 
+    max-width: 50px; /* Limita la dimensione massima (Cruciale) */
+    padding: 3px; 
+    text-align: center;
+    font-size: 0.85rem;
+    height: 25px; /* Riduci l'altezza per renderli meno invadenti */
+    box-sizing: border-box; /* Include padding e bordo nella larghezza */
+}
+
+/* Stili per la prima colonna (Taglia/Quantità) */
+.taglie-table td:first-child {
+    width: 15%; 
+    text-align: left;
+    font-weight: 500;
+}
