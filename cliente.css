@@ -366,6 +366,7 @@ body {
     font-size: 0.85rem;
     height: 25px; /* Riduci l'altezza per renderli meno invadenti */
     box-sizing: border-box; /* Include padding e bordo nella larghezza */
+    margin: 0; /* IMPOSTA A ZERO: Rimuove i margini esterni invisibili (Cruciale) */
 }
 
 /* Stili per la prima colonna (Taglia/Quantità) */
