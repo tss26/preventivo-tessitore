@@ -429,12 +429,14 @@ async function gestisciCheckout() {
 function calcolaPrezzoDinamicoKit() {
     const prezzoDinamicoSpan = document.getElementById('kitPrezzoDinamico');
     const qtaTotaleSpan = document.getElementById('kitQtaTotale');
+    const prezzoBaseSpan = document.getElementById('kitPrezzoBase');
     const taglieTables = document.querySelectorAll('#taglieInputContainer .taglie-table');
     const kitProdSelezionato = document.querySelector('.kit-item.active')?.dataset.prodotto;
 
-    if (!kitProdSelezionato || !prezzoDinamicoSpan || !qtaTotaleSpan) {
+    if (!kitProdSelezionato || !prezzoDinamicoSpan || !qtaTotaleSpan || !prezzoBaseSpan) {
         prezzoDinamicoSpan.textContent = '€ 0.00';
         qtaTotaleSpan.textContent = '0';
+        prezzoBaseSpan.textContent = '€ 0.00'; // <-- RESET NUOVO
         return;
     }
 
@@ -451,6 +453,7 @@ function calcolaPrezzoDinamicoKit() {
     if (qtaTotale === 0) {
         prezzoDinamicoSpan.textContent = '€ 0.00';
         qtaTotaleSpan.textContent = '0';
+        prezzoBaseSpan.textContent = '€ 0.00';
         return;
     }
     
@@ -471,6 +474,9 @@ function calcolaPrezzoDinamicoKit() {
             prezzoUnitarioBase = prezzi.PANTALONCINO_SOLO;
         }
     }
+
+    //  Visualizzazione del Prezzo Base ***
+    prezzoBaseSpan.textContent = `€ ${prezzoUnitarioBase.toFixed(2)}`;
 
     // 4. Calcola il costo totale e applica l'impianto grafico
     const costoTotaleBase = qtaTotale * prezzoUnitarioBase;
