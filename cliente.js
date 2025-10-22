@@ -492,7 +492,7 @@ function calcolaPrezzoDinamicoKit() {
     const prezzoMedioUnitario = costoTotaleFinale ;
     
 
-    prezzoDinamicoSpan.textContent = `€ ${prezzoUnitarioBase.toFixed(2)}`;
+    prezzoDinamicoSpan.textContent = `€ ${prezzoMedioUnitario.toFixed(2)}`;
     qtaTotaleSpan.textContent = qtaTotale;
 }
 
