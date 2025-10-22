@@ -422,9 +422,6 @@ async function gestisciCheckout() {
 // FUNZIONI DI SUPPORTO PER IL KIT CALCIO
 // ===========================================
 
-
-
-
 //------------------------------
 // FUNZIONE DI CALCOLO DINAMICO DEL PREZZO PER kit sublimazione
 //------
@@ -701,7 +698,42 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
+        // *** NUOVO LISTENER PER IL KIT CALCIO ***
 
+
+// --- LISTENER KIT CALCIO: Selezione del Prodotto Base ---
+
+document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => {
+    button.addEventListener('click', (e) => {
+        // Rimuove la classe 'active' da tutti i pulsanti kit-item
+        document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(btn => btn.classList.remove('active'));
+        
+        // Trova il pulsante genitore su cui è avvenuto il click e lo marca come attivo
+        const targetButton = e.target.closest('.kit-item'); 
+        if (targetButton) {
+            targetButton.classList.add('active');
+            
+            // 1. RENDE IL CONTENITORE DELLE TAGLIE VISIBILE!
+            document.getElementById('taglieInputContainer').style.display = 'block'; 
+            
+            // 2. Aggiorna il titolo del prodotto selezionato
+            document.getElementById('kitProdottoSelezionato').textContent = targetButton.dataset.prodotto;
+            
+            // 3. Esegue il calcolo dinamico
+            calcolaPrezzoDinamicoKit();
+        }
+    });
+});
+
+    //--------
+// 2. LISTENER PER GLI INPUT DELLE QUANTITÀ DEL KIT (Aggiorna Prezzo Dinamico Kit)
+        document.querySelectorAll('#taglieInputContainer input[type="number"]').forEach(input => {
+            input.addEventListener('input', calcolaPrezzoDinamicoKit);
+            input.addEventListener('change', calcolaPrezzoDinamicoKit); 
+        });
+
+        // 3. Listener per il pulsante Aggiungi Kit
+        document.getElementById('aggiungiKitCalcioBtn').addEventListener('click', gestisciAggiuntaKitCalcio);
         
 
         // LISTENER PER IL PREZZO DINAMICO E AGGIORNAMENTO
@@ -743,40 +775,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             calcolaPrezzoDinamico();
         });
 
-        // *** NUOVO LISTENER PER IL KIT CALCIO ***
-
-
-// --- LISTENER KIT CALCIO: Selezione del Prodotto Base ---
-
-document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => {
-    button.addEventListener('click', (e) => {
-        // Rimuove la classe 'active' da tutti i pulsanti kit-item
-        document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(btn => btn.classList.remove('active'));
-        
-        // Trova il pulsante genitore su cui è avvenuto il click e lo marca come attivo
-        const targetButton = e.target.closest('.kit-item'); 
-        if (targetButton) {
-            targetButton.classList.add('active');
-            
-            // 1. RENDE IL CONTENITORE DELLE TAGLIE VISIBILE!
-            document.getElementById('taglieInputContainer').style.display = 'block'; 
-            
-            // 2. Aggiorna il titolo del prodotto selezionato
-            document.getElementById('kitProdottoSelezionato').textContent = targetButton.dataset.prodotto;
-            
-            // 3. Esegue il calcolo dinamico
-            calcolaPrezzoDinamicoKit();
-        }
-    });
-});
-
-
-        
-        // Listener per il pulsante Aggiungi Kit
-        document.getElementById('aggiungiKitCalcioBtn').addEventListener('click', gestisciAggiuntaKitCalcio);
-
         aggiornaUIPreventivo();
         mostraVistaPreventivo();
         calcolaPrezzoDinamico(); // Inizializza il prezzo dinamico all'avvio
+        calcolaPrezzoDinamicoKit(); // Inizializza il prezzo dinamico Kit all'avvio (dovrebbe essere 0)
     }
 });
