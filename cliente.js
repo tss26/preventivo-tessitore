@@ -602,6 +602,28 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString) {
         dettagliHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
         dettagliHtml += `Componenti: ${item.componenti.join(', ')}\n`;
         dettagliHtml += `Prezzo netto cad.: € ${item.prezzo_unitario}\n`;
+        // *******************************************************
+        // 1. LOGICA AGGIUNTA TAGLIE E NOTE
+        // *******************************************************
+        
+        // Mostra i dettagli delle taglie se presenti
+        if (item.dettagli_taglie && Object.keys(item.dettagli_taglie).length > 0) {
+            dettagliHtml += `\nDettagli Taglie:\n`;
+            for (const genere in item.dettagli_taglie) {
+                const taglie = Object.entries(item.dettagli_taglie[genere])
+                    .map(([taglia, qty]) => `${taglia}: ${qty}`)
+                    .join(', ');
+                dettagliHtml += `  - ${genere}: ${taglie}\n`;
+            }
+        }
+        
+        // Mostra le note se presenti
+        if (item.note && item.note.trim() !== '') {
+            dettagliHtml += `Note Cliente: ${item.note}\n`;
+        }
+        
+        // *******************************************************
+        
         if (item.personalizzazione_url) {
             dettagliHtml += `File: COPIA E APRI L'URL:\n${item.personalizzazione_url}\n`;
         } else {
