@@ -511,7 +511,7 @@ async function gestisciAggiuntaKitCalcio() {
     const qtaTotale = parseInt(document.getElementById('kitQtaTotale').textContent) || 0;
     //kitPrezzoBase sostituito a kitPrezzoDinamico
     const prezzoDinamico = parseFloat(document.getElementById('kitPrezzoBase').textContent.replace('€', '').trim()) || 0;
-    let kitNote = document.getElementById('kitNote').value;
+    const kitNote = document.getElementById('kitNote').value;
 
     if (!kitProdSelezionato) {
         alert("Devi selezionare un prodotto Kit (T-Shirt, Pantaloncino o Completino).");
