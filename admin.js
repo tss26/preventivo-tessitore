@@ -346,10 +346,17 @@ function mostraDettagli(ordineId, dettagliProdottiString) {
     let outputHtml = '';
  
     dettagli.forEach(item => {
-        dettagliHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
+        /*dettagliHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
         dettagliHtml += `Componenti: ${item.componenti.join(', ')}\n`;
         dettagliHtml += `Prezzo netto cad.: € ${item.prezzo_unitario}\n`;
-        
+dettagli.forEach(item => {*/
+        outputHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
+        outputHtml += `Componenti: ${item.componenti.join(', ')}\n`;
+        outputHtml += `Prezzo netto cad.: € ${item.prezzo_unitario}\n`;
+
+
+
+     
         // Logica Taglie (per Kit Calcio)
         if (item.dettagli_taglie && Object.keys(item.dettagli_taglie).length > 0) {
             dettagliHtml += `\nDettagli Taglie:\n`;
