@@ -342,18 +342,17 @@ function mostraDettagli(ordineId, dettagliProdottiString) {
     }
     
     let dettagliHtml = `Ordine ID: ${ordineId.substring(0, 8)}...\n\nDETTAGLI PRODOTTI:\n`; 
-// Convertiamo la stringa dettagliHtml in un array di righe per usare i tag HTML
-    let outputHtml = '';
+
  
     dettagli.forEach(item => {
-        /*dettagliHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
+        dettagliHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
         dettagliHtml += `Componenti: ${item.componenti.join(', ')}\n`;
         dettagliHtml += `Prezzo netto cad.: € ${item.prezzo_unitario}\n`;
-dettagli.forEach(item => {*/
-        outputHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
+/*dettagli.forEach(item => {
+       outputHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
         outputHtml += `Componenti: ${item.componenti.join(', ')}\n`;
         outputHtml += `Prezzo netto cad.: € ${item.prezzo_unitario}\n`;
-
+*/
 
 
      
@@ -372,7 +371,8 @@ dettagli.forEach(item => {*/
         if (item.note && item.note.trim() !== '') {
             dettagliHtml += `Note Cliente: ${item.note}\n`;
         }
-
+// Convertiamo la stringa dettagliHtml in un array di righe per usare i tag HTML
+    let outputHtml = '';
         // Logica File
         if (item.personalizzazione_url && item.personalizzazione_url !== 'Nessun file collegato direttamente.') {
            // dettagliHtml += `File: COPIA E APRI L'URL:\n${item.personalizzazione_url}\n`;
