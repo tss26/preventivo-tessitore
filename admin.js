@@ -342,7 +342,9 @@ function mostraDettagli(ordineId, dettagliProdottiString) {
     }
     
     let dettagliHtml = `Ordine ID: ${ordineId.substring(0, 8)}...\n\nDETTAGLI PRODOTTI:\n`; 
-    
+// Convertiamo la stringa dettagliHtml in un array di righe per usare i tag HTML
+    let outputHtml = '';
+ 
     dettagli.forEach(item => {
         dettagliHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
         dettagliHtml += `Componenti: ${item.componenti.join(', ')}\n`;
@@ -366,7 +368,8 @@ function mostraDettagli(ordineId, dettagliProdottiString) {
 
         // Logica File
         if (item.personalizzazione_url && item.personalizzazione_url !== 'Nessun file collegato direttamente.') {
-            dettagliHtml += `File: COPIA E APRI L'URL:\n${item.personalizzazione_url}\n`;
+           // dettagliHtml += `File: COPIA E APRI L'URL:\n${item.personalizzazione_url}\n`;
+         outputHtml += `File: <a href="${url}" target="_blank" style="color: blue;">SCARICA / VISUALIZZA FILE</a>\n`;
         } else {
             dettagliHtml += `File: Nessun file caricato.\n`;
         }
