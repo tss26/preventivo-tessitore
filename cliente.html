@@ -265,6 +265,17 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="cliente.js"></script> 
-  
+  <div id="orderDetailsModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-content">
+        <span class="close-button" id="closeModalBtn">&times;</span>
+        <h2>Dettagli Ordine Completo: <span id="modalOrderId" style="color: #6c757d; font-size: 0.9em;"></span></h2>
+        
+        <div id="modalOrderDetails" class="order-details-body" style="white-space: pre-wrap; margin-top: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9; max-height: 70vh; overflow-y: auto; cursor: text;">
+            </div>
+        
+        <p style="margin-top: 15px; font-style: italic; color: #555;">Puoi selezionare e copiare il testo da questa finestra.</p>
+    </div>
+</div>
+
 </body>
 </html>
