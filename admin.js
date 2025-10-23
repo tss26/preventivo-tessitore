@@ -376,6 +376,7 @@ dettagli.forEach(item => {*/
         // Logica File
         if (item.personalizzazione_url && item.personalizzazione_url !== 'Nessun file collegato direttamente.') {
            // dettagliHtml += `File: COPIA E APRI L'URL:\n${item.personalizzazione_url}\n`;
+         const url = item.personalizzazione_url;
          outputHtml += `File: <a href="${url}" target="_blank" style="color: blue;">SCARICA / VISUALIZZA FILE</a>\n`;
         } else {
             dettagliHtml += `File: Nessun file caricato.\n`;
