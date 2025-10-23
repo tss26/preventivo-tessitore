@@ -544,11 +544,11 @@ async function gestisciAggiuntaKitCalcio() {
             delete dettagliTaglie[genere];
         }
     });
-   
+   kitNote = document.getElementById('kitNote').value;
 
     
     // Traccia il costo impianto grafico come componente fisso
-    const componenti = [`Sublimazione`, `+20€ Costo Impianto Grafico (€${LISTINO_COMPLETO.KIT_CALCIO.COSTO_GRAFICO.toFixed(2)})`];
+    const componenti = [`Sublimazione`, `Costo Impianto Grafico (€${LISTINO_COMPLETO.KIT_CALCIO.COSTO_GRAFICO.toFixed(2)})`];
 
     const nuovoArticolo = { 
         id_unico: Date.now(), 
