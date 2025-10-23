@@ -511,7 +511,7 @@ async function gestisciAggiuntaKitCalcio() {
     const qtaTotale = parseInt(document.getElementById('kitQtaTotale').textContent) || 0;
     //kitPrezzoBase sostituito a kitPrezzoDinamico
     const prezzoDinamico = parseFloat(document.getElementById('kitPrezzoBase').textContent.replace('€', '').trim()) || 0;
-    const kitNote = document.getElementById('kitNote').value;
+    let kitNote = document.getElementById('kitNote').value;
 
     if (!kitProdSelezionato) {
         alert("Devi selezionare un prodotto Kit (T-Shirt, Pantaloncino o Completino).");
@@ -544,10 +544,6 @@ async function gestisciAggiuntaKitCalcio() {
             delete dettagliTaglie[genere];
         }
     });
-    
-    //Assegna questo valore (che potrebbe essere una stringa vuota, il che è accettabile) alla variabile kitNote
-       kitNote = document.getElementById('kitNote').value;
-
     
     // Traccia il costo impianto grafico come componente fisso
     const componenti = [`Sublimazione`, `Costo Impianto Grafico (€${LISTINO_COMPLETO.KIT_CALCIO.COSTO_GRAFICO.toFixed(2)})`];
