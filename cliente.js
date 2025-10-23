@@ -702,7 +702,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
+});
 //chiusura nuova funzione modale
 
 
