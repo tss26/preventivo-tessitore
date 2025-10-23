@@ -544,7 +544,9 @@ async function gestisciAggiuntaKitCalcio() {
             delete dettagliTaglie[genere];
         }
     });
-   kitNote = document.getElementById('kitNote').value;
+    
+    //Assegna questo valore (che potrebbe essere una stringa vuota, il che è accettabile) alla variabile kitNote
+       kitNote = document.getElementById('kitNote').value;
 
     
     // Traccia il costo impianto grafico come componente fisso
