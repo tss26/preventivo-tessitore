@@ -301,42 +301,84 @@ async function aggiornaStatoOrdine(ordineId, nuovoStato) {
  * 4. Mostra i dettagli dell'ordine, inclusi i link ai file.
 
  */
-
+/*
 function mostraDettagli(ordineId, dettagliProdottiString) {
-
     const dettagli = JSON.parse(dettagliProdottiString);
-
     let dettagliHtml = `Ordine ID: ${ordineId.substring(0, 8)}...\n\nDETTAGLI PRODOTTI:\n`;
-
     
-
     dettagli.forEach(item => {
 
         dettagliHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
-
         dettagliHtml += `Componenti: ${item.componenti.join(', ')}\n`;
-
         dettagliHtml += `Prezzo: € ${item.prezzo_unitario}\n`;
-
         
-
         if (item.personalizzazione_url) {
-
             dettagliHtml += `File: COPIA E APRI L'URL:\n${item.personalizzazione_url}\n`;
-
         } else {
-
             dettagliHtml += `File: Nessun file caricato.\n`;
-
         }
-
     });
 
-
-
     alert(dettagliHtml); 
-
 }
+----------*/
+
+
+/**
+ * 4. Mostra i dettagli dell'ordine in un modale HTML selezionabile.
+ * Questa funzione sostituisce il vecchio alert() nel pannello Admin.
+ */
+function mostraDettagli(ordineId, dettagliProdottiString) {
+    const dettagli = JSON.parse(dettagliProdottiString); 
+    const modal = document.getElementById('orderDetailsModal');
+    const modalBody = document.getElementById('modalOrderDetails');
+    const modalTitle = document.getElementById('modalOrderId');
+
+    if (!modal || !modalBody || !modalTitle) {
+        // Fallback: se gli elementi del modale non esistono nell'HTML, usa alert
+        console.error("Elementi modale non trovati in admin.html!");
+        alert("Errore nel caricamento del modale. Controllare l'HTML.");
+        return; 
+    }
+    
+    let dettagliHtml = `Ordine ID: ${ordineId.substring(0, 8)}...\n\nDETTAGLI PRODOTTI:\n`; 
+    
+    dettagli.forEach(item => {
+        dettagliHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
+        dettagliHtml += `Componenti: ${item.componenti.join(', ')}\n`;
+        dettagliHtml += `Prezzo netto cad.: € ${item.prezzo_unitario}\n`;
+        
+        // Logica Taglie (per Kit Calcio)
+        if (item.dettagli_taglie && Object.keys(item.dettagli_taglie).length > 0) {
+            dettagliHtml += `\nDettagli Taglie:\n`;
+            for (const genere in item.dettagli_taglie) {
+                const taglie = Object.entries(item.dettagli_taglie[genere])
+                    .map(([taglia, qty]) => `${taglia}: ${qty}`)
+                    .join(', ');
+                dettagliHtml += `  - ${genere}: ${taglie}\n`;
+            }
+        }
+        
+        // Logica Note
+        if (item.note && item.note.trim() !== '') {
+            dettagliHtml += `Note Cliente: ${item.note}\n`;
+        }
+
+        // Logica File
+        if (item.personalizzazione_url && item.personalizzazione_url !== 'Nessun file collegato direttamente.') {
+            dettagliHtml += `File: COPIA E APRI L'URL:\n${item.personalizzazione_url}\n`;
+        } else {
+            dettagliHtml += `File: Nessun file caricato.\n`;
+        }
+    });
+
+    // Aggiorna e mostra il modale
+    modalTitle.textContent = ordineId.substring(0, 8).toUpperCase() + '...';
+    modalBody.textContent = dettagliHtml;
+    modal.style.display = 'block';
+}
+
+
 
 
 
@@ -369,19 +411,30 @@ async function handleLogout() {
 
 
 document.addEventListener('DOMContentLoaded', async () => {
-
     document.getElementById('logoutBtn').addEventListener('click', handleLogout);
-
-    
-
     const isAdmin = await verificaAdmin();
-
-    
 
     if (isAdmin) {
 
-        caricaOrdini();
+     const modal = document.getElementById('orderDetailsModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    
+    if (closeModalBtn && modal) {
+        // Chiudi quando si clicca il pulsante X
+        closeModalBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
 
+        // Chiudi quando si clicca fuori dal modale
+        window.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    }
+
+    // ... (resto delle chiamate come caricaOrdini())
+        caricaOrdini();
     }
 
 });
