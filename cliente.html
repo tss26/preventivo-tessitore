@@ -229,17 +229,62 @@
             <button class="btn-add" id="aggiungiBandiera">Aggiungi al preventivo</button>
             
         </section>
-        
-        <section class="galleria-blocco" id="shoppeSection">
-            <h2>DIV "SHOPPER"</h2>
-            <p>Qui puoi aggiungere altri articoli non personalizzabili.</p>
-        </section>
-        
-        <section class="galleria-blocco">
-            <h2>EVENTUALI ALTRI BLOCCHI</h2>
-            <p>Contenuti aggiuntivi.</p>
-        </section>
 
+      <section class="galleria-blocco" id="dtfSection">
+    <h2>Stampa DTF (Direct to Film)</h2>
+    
+    <div class="dtf-container">
+        
+        <div class="dtf-info-box">
+            <span id="dtfInfoIcon" class="info-icon" title="Clicca per i requisiti di stampa">ℹ️ DTF INFO</span>
+            
+            <div id="dtfInfoContent" class="info-content">
+                </div>
+        </div>
+
+        <div class="input-group">
+            <label for="dtfNomeFile">Nome del File per Tracciamento:</label>
+            <input type="text" id="dtfNomeFile" placeholder="Es: Logo_Cliente_1203.pdf">
+        </div>
+
+        <div class="upload" style="margin-top: 15px;">
+            <div class="upload-box" id="dtfDropZone">
+                <p>Trascina o carica il tuo file di stampa (.PDF / .PNG)</p>
+                <input type="file" id="dtfFileUpload" />
+            </div>
+            <div id="dtfUploadStatusBox" style="margin-top: 15px; background: #e9ecef; padding: 10px; border-radius: 8px; display: none;">
+                <div style="font-weight: 600;" id="dtfUploadMessage">In attesa...</div>
+                <div style="height: 8px; background: #ccc; border-radius: 4px; margin-top: 5px;">
+                    <div id="dtfUploadProgressBar" style="height: 100%; width: 0%; background: #007bff; border-radius: 4px; transition: width 0.3s;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dtf-misure-qta" style="display: flex; gap: 20px; margin-top: 20px;">
+            <div class="input-group">
+                <label for="dtfMetri">Quantità Metri (Lunghezza in Mt.):</label>
+                <input type="number" id="dtfMetri" value="1" min="1">
+            </div>
+            <div class="input-group">
+                <label for="dtfCopie">Quantità Copie di Stampa:</label>
+                <input type="number" id="dtfCopie" value="1" min="1">
+            </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <div style="font-size: 1.3rem; font-weight: 600; color: #dc3545;">
+                PREZZO DINAMICO: <span id="dtfPrezzoDinamico">€ 0.00</span>
+            </div>
+            
+            <h3 style="margin-top: 15px;">Note per la Stampa:</h3>
+            <textarea id="dtfNote" rows="2" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;"></textarea>
+        </div>
+
+        <button class="btn-add" id="aggiungiDTFBtn" style="margin-top: 20px;">AGGIUNGI AL PREVENTIVO</button>
+    </div>
+</section>
+        
+        
     </div>         <aside class="preventivo" id="sezioneCarrello">
       <h2>Il tuo preventivo</h2>
       <div class="preventivo-lista" id="preventivoLista">
