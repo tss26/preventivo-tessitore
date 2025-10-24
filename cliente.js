@@ -939,7 +939,8 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
                         
             aggiornaUIPreventivo();
             calcolaPrezzoDinamico();
-        });
+
+
 //----- LISTENER PER DTF----------
         
     document.addEventListener('DOMContentLoaded', async () => {
@@ -987,6 +988,10 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
 
    
 
+
+
+            
+        });
 
       
         aggiornaUIPreventivo();
