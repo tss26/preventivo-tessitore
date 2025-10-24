@@ -942,7 +942,7 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
         });
 //----- LISTENER PER DTF----------
         
-    //document.addEventListener('DOMContentLoaded', async () => {
+    document.addEventListener('DOMContentLoaded', async () => {
     // --- LISTENER PER LA SEZIONE DTF ---
 
     // 1. Inizializzazione Info Box DTF
