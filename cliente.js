@@ -74,25 +74,12 @@ const LISTINO_COMPLETO = {
             "351_500": { COMPLETINO: 13.00, MAGLIA_SOLA: 6.50, PANTALONCINO_SOLO: 6.50 }
         },
         "COSTO_GRAFICO": 20.00 // Costo impianto grafico 
-        //"MINIMO_METRI": 0.1 // per calcolo DTF
     }
 
 
     
 };
 // ===========================================
-
-
-// --- NUOVO LISTINO TIER PER DTF (MTR) ---
-const LISTINO_DTF_METRO = [
-    // La chiave 'max' è in metri, 'prezzo' è il costo per metro
-    { max: 3.0, prezzo: 15.00 }, // da 0.1 a 3 metri
-    { max: 10.0, prezzo: 12.50 }, // da 3.1 a 10 metri
-    { max: 9999.0, prezzo: 9.50 } // da 10.1 metri in poi
-];
-
-
-
 
 
 // ===========================================
@@ -773,52 +760,6 @@ function calcolaPrezzoDinamico() {
 }
 
 
-//--------------------------------
-// CALCOLA PREZZO DINAMICO DTF
-//--------------------------------
-function calcolaPrezzoDinamicoDTF() {
-    const centimetriInput = document.getElementById('dtfMetri')?.value; 
-    const copie = parseInt(document.getElementById('dtfCopie')?.value) || 1;
-    const prezzoDinamicoSpan = document.getElementById('dtfPrezzoDinamico');
-
-    // Conversione da Centimetri a Metri (Cruciale: 100 cm = 1 mt)
-    const metri = parseFloat(centimetriInput) / 100 || 0; 
-    
-    const listinoDTF = LISTINO_COMPLETO.DTF;
-
-    // 🛑 CONTROLLO MINIMO ORDINABILE (0.1 metri = 10 cm)
-    if (metri < listinoDTF.MINIMO_METRI || !prezzoDinamicoSpan) { 
-        prezzoDinamicoSpan.textContent = '€ 0.00';
-        return;
-    }
-    
-    // 1. Trova il prezzo al metro in base alla quantità (metri)
-    const fasciaPrezzo = LISTINO_DTF_METRO.find(f => metri <= f.max);
-    
-    let prezzoMetro = 0;
-    
-    if (fasciaPrezzo) {
-        prezzoMetro = fasciaPrezzo.prezzo;
-    } else {
-        // Usa il prezzo più basso (€9.50) se la quantità è enorme
-        prezzoMetro = 9.50; 
-    }
-
-    // 2. Calcolo del Costo Totale (Costo grafico fisso rimosso)
-    const costoTotaleBase = metri * prezzoMetro;
-    
-    // Calcoliamo solo le copie aggiuntive (se copie > 1)
-    const costoCopiaAggiuntiva = 0; // Se non c'è costo per copia, lasciamo 0
-    const copieAggiuntive = Math.max(0, copie - 1); 
-    const costoGestioneAggiuntiva = copieAggiuntive * costoCopiaAggiuntiva; // Assumendo che il costo sia zero
-
-    // Il costo totale è solo il costo base di stampa
-    const costoTotaleFinale = costoTotaleBase + costoGestioneAggiuntiva; 
-    
-    prezzoDinamicoSpan.textContent = `€ ${costoTotaleFinale.toFixed(2)}`;
-}
-
-
 
 
 
@@ -834,8 +775,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('logoutBtn').addEventListener('click', handleLogout);
         document.getElementById('aggiungiBandiera').addEventListener('click', gestisciAggiuntaAlCarrello);
         document.getElementById('richiediPreventivo').addEventListener('click', gestisciCheckout);
-        
-        
+        
         document.getElementById('mieiOrdiniBtn').addEventListener('click', (e) => {
             e.preventDefault();
             mostraVistaOrdini();
@@ -891,7 +831,8 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
         }
     });
 });
-    //--------^^^^^^^^^^
+
+    //--------
 // 2. LISTENER PER GLI INPUT DELLE QUANTITÀ DEL KIT (Aggiorna Prezzo Dinamico Kit)
         document.querySelectorAll('#taglieInputContainer input[type="number"]').forEach(input => {
             input.addEventListener('input', calcolaPrezzoDinamicoKit);
@@ -939,16 +880,11 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
                         
             aggiornaUIPreventivo();
             calcolaPrezzoDinamico();
-
-
-
         });
 
-      
         aggiornaUIPreventivo();
         mostraVistaPreventivo();
         calcolaPrezzoDinamico(); // Inizializza il prezzo dinamico all'avvio
         calcolaPrezzoDinamicoKit(); // Inizializza il prezzo dinamico Kit all'avvio (dovrebbe essere 0)
-        calcolaPrezzoDinamicoDTF(); // Inizializzazione del prezzo DTF
     }
 });
