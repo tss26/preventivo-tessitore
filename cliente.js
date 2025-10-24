@@ -73,7 +73,7 @@ const LISTINO_COMPLETO = {
         },
         "COSTO_GRAFICO": 20.00 // Costo impianto grafico 
     },
-    
+   }; 
    
 // --- NUOVO LISTINO TIER PER DTF (MTR) ---
 const LISTINO_DTF_METRO = [
@@ -86,7 +86,7 @@ const MINIMO_METRI_DTF = 0.1; // 10 cm
 
 
     
-};
+
 // ===========================================
 
 
