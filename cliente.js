@@ -937,9 +937,8 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
     document.getElementById('aggiungiDTFBtn')?.addEventListener('click', aggiungiDTFAlCarrello);
 
     // ... (Chiamate finali: calcolaPrezzoDinamico(), calcolaPrezzoDinamicoKit())
-   // calcolaPrezzoDinamicoDTF(); // Inizializzazione del prezzo DTF
-});//--------- fine listner dtf
-        
+   // calcolaPrezzoDinamicoDTF(); // Inizializzazione del prezzo DTF-----esattamente qua erano chiuse le 3 parentesi erratee
+
 
     //--------^^^^^^^^^^
 // 2. LISTENER PER GLI INPUT DELLE QUANTITÀ DEL KIT (Aggiorna Prezzo Dinamico Kit)
