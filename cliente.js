@@ -891,55 +891,6 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
         }
     });
 });
-
-
-//----- LISTENER PER DTF----------
-        
-    //document.addEventListener('DOMContentLoaded', async () => {
-    // --- LISTENER PER LA SEZIONE DTF ---
-
-    // 1. Inizializzazione Info Box DTF
-    const dtfInfoContent = document.getElementById('dtfInfoContent');
-    const dtfInfoIcon = document.getElementById('dtfInfoIcon');
-
-    // Contenuto dei requisiti
-    const requisitiDTF = `
-        File formato PDF o PNG con sfondo trasparente.
-        Metodo colore CMYK.
-        Risoluzione 300dpi (misure reali).
-        Il file deve avere larghezza 55 cm x la lunghezza selezionata.
-        Sono da evitare sfumature trasparenti o traslucide, con trasparenze del 30/40%.
-        Si consiglia di mantenere i contorni della grafica sempre ben definiti.
-        N.B. Quando la grafica da stampare è di colore bianco, evitare assolutamente di inserire fondini di altri colori.
-        Per qualsiasi informazione contattaci o scrivici nel campo "Note".
-    `;
-    
-    // Inserisce il contenuto formattato (pre-wrap per mantenere i salti di riga)
-    if (dtfInfoContent) {
-        dtfInfoContent.innerHTML = `<pre style="white-space: pre-wrap; font-family: inherit; font-size: 0.9em; margin: 0;">${requisitiDTF}</pre>`;
-        dtfInfoContent.style.display = 'none'; // Nascondi all'inizio
-    }
-    
-    // Listener per mostrare/nascondere il contenuto (click su ℹ️)
-    if (dtfInfoIcon) {
-        dtfInfoIcon.addEventListener('click', () => {
-            if (dtfInfoContent.style.display === 'none') {
-                dtfInfoContent.style.display = 'block';
-            } else {
-                dtfInfoContent.style.display = 'none';
-            }
-        });
-    }
-
-    // 2. Listener per il Calcolo Dinamico (Metri e Copie)
-    document.getElementById('dtfMetri')?.addEventListener('input', calcolaPrezzoDinamicoDTF);
-    document.getElementById('dtfCopie')?.addEventListener('input', calcolaPrezzoDinamicoDTF);
-
-    // 3. Listener per l'Aggiunta al Carrello
-    document.getElementById('aggiungiDTFBtn')?.addEventListener('click', aggiungiDTFAlCarrello);
-
-   
-
     //--------^^^^^^^^^^
 // 2. LISTENER PER GLI INPUT DELLE QUANTITÀ DEL KIT (Aggiorna Prezzo Dinamico Kit)
         document.querySelectorAll('#taglieInputContainer input[type="number"]').forEach(input => {
@@ -989,6 +940,52 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
             aggiornaUIPreventivo();
             calcolaPrezzoDinamico();
         });
+//----- LISTENER PER DTF----------
+        
+    //document.addEventListener('DOMContentLoaded', async () => {
+    // --- LISTENER PER LA SEZIONE DTF ---
+
+    // 1. Inizializzazione Info Box DTF
+    const dtfInfoContent = document.getElementById('dtfInfoContent');
+    const dtfInfoIcon = document.getElementById('dtfInfoIcon');
+
+    // Contenuto dei requisiti
+    const requisitiDTF = `
+        File formato PDF o PNG con sfondo trasparente.
+        Metodo colore CMYK.
+        Risoluzione 300dpi (misure reali).
+        Il file deve avere larghezza 55 cm x la lunghezza selezionata.
+        Sono da evitare sfumature trasparenti o traslucide, con trasparenze del 30/40%.
+        Si consiglia di mantenere i contorni della grafica sempre ben definiti.
+        N.B. Quando la grafica da stampare è di colore bianco, evitare assolutamente di inserire fondini di altri colori.
+        Per qualsiasi informazione contattaci o scrivici nel campo "Note".
+    `;
+    
+    // Inserisce il contenuto formattato (pre-wrap per mantenere i salti di riga)
+    if (dtfInfoContent) {
+        dtfInfoContent.innerHTML = `<pre style="white-space: pre-wrap; font-family: inherit; font-size: 0.9em; margin: 0;">${requisitiDTF}</pre>`;
+        dtfInfoContent.style.display = 'none'; // Nascondi all'inizio
+    }
+    
+    // Listener per mostrare/nascondere il contenuto (click su ℹ️)
+    if (dtfInfoIcon) {
+        dtfInfoIcon.addEventListener('click', () => {
+            if (dtfInfoContent.style.display === 'none') {
+                dtfInfoContent.style.display = 'block';
+            } else {
+                dtfInfoContent.style.display = 'none';
+            }
+        });
+    }
+
+    // 2. Listener per il Calcolo Dinamico (Metri e Copie)
+    document.getElementById('dtfMetri')?.addEventListener('input', calcolaPrezzoDinamicoDTF);
+    document.getElementById('dtfCopie')?.addEventListener('input', calcolaPrezzoDinamicoDTF);
+
+    // 3. Listener per l'Aggiunta al Carrello
+    document.getElementById('aggiungiDTFBtn')?.addEventListener('click', aggiungiDTFAlCarrello);
+
+   
 
 
       
