@@ -771,7 +771,7 @@ function calcolaPrezzoDinamico() {
 // ===========================================
 // FUNZIONI DI SUPPORTO PER LA STAMPA DTF
 // ===========================================
-// --- FUNZIONE DI CALCOLO DINAMICO DEL PREZZO DTF (Logica a Fasce) ---
+// --- FUNZIONE DI CALCOLO DINAMICO DEL PREZZO DTF (Logica a Fasce con Minimo Totale) ---
 function calcolaPrezzoDinamicoDTF() {
     const prezzoDinamicoSpan = document.getElementById('dtfPrezzoDinamico');
     const metriInput = document.getElementById('dtfMetri');
@@ -779,7 +779,6 @@ function calcolaPrezzoDinamicoDTF() {
 
     if (!prezzoDinamicoSpan || !metriInput || !copieInput) return;
 
-    // Conversione e pulizia degli input
     const lunghezzaCm = parseFloat(metriInput.value) || 0;
     const numeroCopie = parseInt(copieInput.value) || 1;
     
@@ -787,8 +786,8 @@ function calcolaPrezzoDinamicoDTF() {
     const lunghezzaTotaleMetri = (lunghezzaCm * numeroCopie) / 100;
     
     let prezzoMetro = 0;
-    let prezzoFinale = 0;
-
+    let costoFinaleBase = 0; // Utilizzeremo questa variabile per il costo prima del "minimo"
+    
     // 🛑 CONTROLLO MINIMO ORDINABILE (0.1 metri = 10 cm)
     if (lunghezzaTotaleMetri < MINIMO_METRI_DTF) {
         prezzoDinamicoSpan.textContent = `€ 0.00`;
@@ -796,22 +795,33 @@ function calcolaPrezzoDinamicoDTF() {
     }
     
     // 1. Trova il prezzo al metro in base alla lunghezza TOTALE in metri
-    // Per 4.0 metri, trova la fascia { max: 10.0, prezzo: 12.50 }
     const fasciaPrezzo = LISTINO_DTF_METRO.find(f => lunghezzaTotaleMetri <= f.max);
     
     if (fasciaPrezzo) {
         prezzoMetro = fasciaPrezzo.prezzo;
     } else {
-        // Se la quantità è enorme e non trova una fascia, usa il prezzo più basso (9.50)
         prezzoMetro = 9.50; 
     }
 
     // 2. Calcolo: Metri totali * Prezzo al Metro (corretto per fascia)
-    prezzoFinale = lunghezzaTotaleMetri * prezzoMetro; // 4.0 * 12.50 = 50.00
-    
-    // Assicurati di non applicare costi grafici o costi per copia se non necessari
+    const costoCalcolato = lunghezzaTotaleMetri * prezzoMetro;
 
-    prezzoDinamicoSpan.textContent = `€ ${prezzoFinale.toFixed(2)}`;
+
+    // 3. IMPLEMENTAZIONE DELLA REGOLA SPECIALE "COSTO TOTALE MINIMO DI €15.00 NELLA PRIMA FASCIA"
+    
+    // Se la quantità totale in metri è nella prima fascia (<= 3.0 m)
+    if (lunghezzaTotaleMetri <= 3.0) {
+        // Applica il prezzo di €15.00 (che è già il prezzo per metro, ma lo trattiamo come minimo totale)
+        // Se il costo calcolato è minore di 15.00, imponi 15.00. Altrimenti, usa il costo calcolato.
+        costoFinaleBase = Math.max(15.00, costoCalcolato);
+        
+    } else {
+        // Per le fasce successive, si usa il costo calcolato (che sarà già > 15.00)
+        costoFinaleBase = costoCalcolato;
+    }
+    
+    // Il costo finale è il costo base (o il minimo imposto)
+    prezzoDinamicoSpan.textContent = `€ ${costoFinaleBase.toFixed(2)}`;
 }
 
 // --- FUNZIONE DI AGGIUNTA DTF AL CARRELLO (con upload) ---
