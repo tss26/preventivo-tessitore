@@ -73,18 +73,20 @@ const LISTINO_COMPLETO = {
         },
         "COSTO_GRAFICO": 20.00 // Costo impianto grafico 
     },
-   }; 
+   // --- CONFIGURAZIONE DTF (NON la lista dei prezzi, che è in LISTINO_DTF_METRO) ---
+    "DTF": {
+        "LARGHEZZA_FISSA_CM": 60 // Per riferimento nei componenti
+    }
+ }; 
    
 // --- NUOVO LISTINO TIER PER DTF (MTR) ---
 const LISTINO_DTF_METRO = [
-    // La chiave 'max' è in metri, 'prezzo' è il costo per metro
-    { max: 3.0, prezzo: 15.00 }, // da 0.1 a 3 metri
-    { max: 10.0, prezzo: 12.50 }, // da 3.1 a 10 metri
-    { max: 9999.0, prezzo: 9.50 } // da 10.1 metri in poi
+    // La chiave 'max' è in metri, 'prezzo' è il costo per metro
+    { max: 3.0, prezzo: 15.00 }, // da 0.1 a 3 metri
+    { max: 10.0, prezzo: 12.50 }, // da 3.1 a 10 metri
+    { max: 9999.0, prezzo: 9.50 } // da 10.1 metri in poi
 ];
 const MINIMO_METRI_DTF = 0.1; // 10 cm
-
-
     
 
 // ===========================================
