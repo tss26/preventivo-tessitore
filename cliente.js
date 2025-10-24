@@ -834,7 +834,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('logoutBtn').addEventListener('click', handleLogout);
         document.getElementById('aggiungiBandiera').addEventListener('click', gestisciAggiuntaAlCarrello);
         document.getElementById('richiediPreventivo').addEventListener('click', gestisciCheckout);
-        
+        document.getElementById('aggiungiDTFBtn')?.addEventListener('click', aggiungiDTFAlCarrello);
+        
         document.getElementById('mieiOrdiniBtn').addEventListener('click', (e) => {
             e.preventDefault();
             mostraVistaOrdini();
@@ -935,7 +936,7 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
     document.getElementById('dtfCopie')?.addEventListener('input', calcolaPrezzoDinamicoDTF);
 
     // 3. Listener per l'Aggiunta al Carrello
-    document.getElementById('aggiungiDTFBtn')?.addEventListener('click', aggiungiDTFAlCarrello);
+    //--document.getElementById('aggiungiDTFBtn')?.addEventListener('click', aggiungiDTFAlCarrello);
 
     // ... (Chiamate finali: calcolaPrezzoDinamico(), calcolaPrezzoDinamicoKit())
    // calcolaPrezzoDinamicoDTF(); // Inizializzazione del prezzo DTF-----esattamente qua erano chiuse le 3 parentesi erratee
