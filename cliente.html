@@ -260,17 +260,45 @@
             </div>
         </div>
 
-        <div class="dtf-misure-qta" style="display: flex; gap: 20px; margin-top: 20px;">
+
+
+
+
+
+<div class="dtf-misure-qta" style="display: flex; gap: 20px; margin-top: 20px;">
             <div class="input-group">
                 <label for="dtfMetri">Lunghezza Stampa (cm, min. 10 cm):</label>
-                <input type="number" id="dtfMetri" value="10" min="10"> 
+                <input type="number" id="dtfMetri" value="10" min="10">
             </div>
-
-          
             <div class="input-group">
                 <label for="dtfCopie">Quantità Copie di Stampa:</label>
                 <input type="number" id="dtfCopie" value="1" min="1">
             </div>
+        </div>
+
+        <div class="dtf-prezzi-fasce" style="margin-top: 20px; border: 1px solid #ddd; padding: 10px; border-radius: 4px; background-color: #f8f9fa;">
+            <h4 style="margin-top: 0; margin-bottom: 10px; font-size: 1.1rem; color: #007bff;">Fasce di Prezzo DTF per Metro (Mt):</h4>
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
+                <tr>
+                    <th style="border: 1px solid #ddd; padding: 6px; background-color: #e9ecef;">Lunghezza (Mt)</th>
+                    <th style="border: 1px solid #ddd; padding: 6px; background-color: #e9ecef;">Prezzo/Mt</th>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 6px;">Da 0.1 mt a 3.0 mt</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; font-weight: bold;">€ 15.00</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 6px;">Da 3.1 mt a 10.0 mt</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; font-weight: bold;">€ 12.50</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 6px;">Da 10.1 mt in poi</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; font-weight: bold; color: green;">€ 9.50</td>
+                </tr>
+            </table>
+        </div>
+  
+          
         </div>
 
         <div style="margin-top: 20px;">
