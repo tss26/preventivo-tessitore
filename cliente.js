@@ -74,13 +74,18 @@ const LISTINO_COMPLETO = {
         "COSTO_GRAFICO": 20.00 // Costo impianto grafico 
     },
     
-    // --- NUOVO LISTINO DTF (Direct to Film) ---
-    "DTF": {
-        "PREZZO_AL_METRO_LINEARE": 15.00, 
-        "LARGHEZZA_FISSA_CM": 60,
-        // In questo listino non usiamo fasce/minimi per calcolare il costo (15€/m sempre)
-    }
-    
+   
+// --- NUOVO LISTINO TIER PER DTF (MTR) ---
+const LISTINO_DTF_METRO = [
+    // La chiave 'max' è in metri, 'prezzo' è il costo per metro
+    { max: 3.0, prezzo: 15.00 }, // da 0.1 a 3 metri
+    { max: 10.0, prezzo: 12.50 }, // da 3.1 a 10 metri
+    { max: 9999.0, prezzo: 9.50 } // da 10.1 metri in poi
+];
+const MINIMO_METRI_DTF = 0.1; // 10 cm
+
+
+    
 };
 // ===========================================
 
@@ -764,17 +769,13 @@ function calcolaPrezzoDinamico() {
 // ===========================================
 // FUNZIONI DI SUPPORTO PER LA STAMPA DTF
 // ===========================================
-
-// --- FUNZIONE DI CALCOLO DINAMICO DEL PREZZO DTF (15€/metro) ---
+// --- FUNZIONE DI CALCOLO DINAMICO DEL PREZZO DTF (Logica a Fasce) ---
 function calcolaPrezzoDinamicoDTF() {
     const prezzoDinamicoSpan = document.getElementById('dtfPrezzoDinamico');
     const metriInput = document.getElementById('dtfMetri');
     const copieInput = document.getElementById('dtfCopie');
 
     if (!prezzoDinamicoSpan || !metriInput || !copieInput) return;
-
-    // Recupera il prezzo base per metro lineare dal listino
-    const prezzoAlMetro = LISTINO_COMPLETO.DTF.PREZZO_AL_METRO_LINEARE;
 
     // Conversione e pulizia degli input
     const lunghezzaCm = parseFloat(metriInput.value) || 0;
@@ -783,18 +784,33 @@ function calcolaPrezzoDinamicoDTF() {
     // Calcolo della lunghezza totale in metri
     const lunghezzaTotaleMetri = (lunghezzaCm * numeroCopie) / 100;
     
+    let prezzoMetro = 0;
     let prezzoFinale = 0;
 
-    if (lunghezzaTotaleMetri > 0) {
-        // Calcolo: Metri totali * Prezzo al Metro
-        prezzoFinale = lunghezzaTotaleMetri * prezzoAlMetro;
-        
-        prezzoDinamicoSpan.textContent = `€ ${prezzoFinale.toFixed(2)}`;
-    } else {
+    // 🛑 CONTROLLO MINIMO ORDINABILE (0.1 metri = 10 cm)
+    if (lunghezzaTotaleMetri < MINIMO_METRI_DTF) {
         prezzoDinamicoSpan.textContent = `€ 0.00`;
+        return;
     }
-}
+    
+    // 1. Trova il prezzo al metro in base alla lunghezza TOTALE in metri
+    // Per 4.0 metri, trova la fascia { max: 10.0, prezzo: 12.50 }
+    const fasciaPrezzo = LISTINO_DTF_METRO.find(f => lunghezzaTotaleMetri <= f.max);
+    
+    if (fasciaPrezzo) {
+        prezzoMetro = fasciaPrezzo.prezzo;
+    } else {
+        // Se la quantità è enorme e non trova una fascia, usa il prezzo più basso (9.50)
+        prezzoMetro = 9.50; 
+    }
 
+    // 2. Calcolo: Metri totali * Prezzo al Metro (corretto per fascia)
+    prezzoFinale = lunghezzaTotaleMetri * prezzoMetro; // 4.0 * 12.50 = 50.00
+    
+    // Assicurati di non applicare costi grafici o costi per copia se non necessari
+
+    prezzoDinamicoSpan.textContent = `€ ${prezzoFinale.toFixed(2)}`;
+}
 
 // --- FUNZIONE DI AGGIUNTA DTF AL CARRELLO (con upload) ---
 async function gestisciAggiuntaDTF() {
