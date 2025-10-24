@@ -90,15 +90,15 @@ const LISTINO_DTF_METRO = [
     { max: 9999.0, prezzo: 9.50 } // da 10.1 metri in poi
 ];
 
-const LISTINO_COMPLETO = {
+//const LISTINO_COMPLETO = {
     // ... (Bandiere)
 
     // --- NUOVO LISTINO DTF ---
-    "DTF": {
-        "COSTO_GRAFICO": 0.00, // Rimosso (impostato a zero per coerenza)
-        "MINIMO_METRI": 0.1 // Minimo ordinabile (10 cm)
-    }
-};
+  //  "DTF": {
+   //     "COSTO_GRAFICO": 0.00, // Rimosso (impostato a zero per coerenza)
+   //     "MINIMO_METRI": 0.1 // Minimo ordinabile (10 cm)
+ //   }
+//};
 // ...listino dtf fine
 
 
