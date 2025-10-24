@@ -82,6 +82,27 @@ const LISTINO_COMPLETO = {
 // ===========================================
 
 
+// --- NUOVO LISTINO TIER PER DTF (MTR) ---
+const LISTINO_DTF_METRO = [
+    // La chiave 'max' è in metri, 'prezzo' è il costo per metro
+    { max: 3.0, prezzo: 15.00 }, // da 0.1 a 3 metri
+    { max: 10.0, prezzo: 12.50 }, // da 3.1 a 10 metri
+    { max: 9999.0, prezzo: 9.50 } // da 10.1 metri in poi
+];
+
+const LISTINO_COMPLETO = {
+    // ... (Bandiere)
+
+    // --- NUOVO LISTINO DTF ---
+    "DTF": {
+        "COSTO_GRAFICO": 0.00, // Rimosso (impostato a zero per coerenza)
+        "MINIMO_METRI": 0.1 // Minimo ordinabile (10 cm)
+    }
+};
+// ...listino dtf fine
+
+
+
 // ===========================================
 // FUNZIONI DI BASE CLIENTE (Verifica e Logout)
 // ... (omissis, rimane invariato)
@@ -760,6 +781,52 @@ function calcolaPrezzoDinamico() {
 }
 
 
+//--------------------------------
+// CALCOLA PREZZO DINAMICO DTF
+//--------------------------------
+function calcolaPrezzoDinamicoDTF() {
+    const centimetriInput = document.getElementById('dtfMetri')?.value; 
+    const copie = parseInt(document.getElementById('dtfCopie')?.value) || 1;
+    const prezzoDinamicoSpan = document.getElementById('dtfPrezzoDinamico');
+
+    // Conversione da Centimetri a Metri (Cruciale: 100 cm = 1 mt)
+    const metri = parseFloat(centimetriInput) / 100 || 0; 
+    
+    const listinoDTF = LISTINO_COMPLETO.DTF;
+
+    // 🛑 CONTROLLO MINIMO ORDINABILE (0.1 metri = 10 cm)
+    if (metri < listinoDTF.MINIMO_METRI || !prezzoDinamicoSpan) { 
+        prezzoDinamicoSpan.textContent = '€ 0.00';
+        return;
+    }
+    
+    // 1. Trova il prezzo al metro in base alla quantità (metri)
+    const fasciaPrezzo = LISTINO_DTF_METRO.find(f => metri <= f.max);
+    
+    let prezzoMetro = 0;
+    
+    if (fasciaPrezzo) {
+        prezzoMetro = fasciaPrezzo.prezzo;
+    } else {
+        // Usa il prezzo più basso (€9.50) se la quantità è enorme
+        prezzoMetro = 9.50; 
+    }
+
+    // 2. Calcolo del Costo Totale (Costo grafico fisso rimosso)
+    const costoTotaleBase = metri * prezzoMetro;
+    
+    // Calcoliamo solo le copie aggiuntive (se copie > 1)
+    const costoCopiaAggiuntiva = 0; // Se non c'è costo per copia, lasciamo 0
+    const copieAggiuntive = Math.max(0, copie - 1); 
+    const costoGestioneAggiuntiva = copieAggiuntive * costoCopiaAggiuntiva; // Assumendo che il costo sia zero
+
+    // Il costo totale è solo il costo base di stampa
+    const costoTotaleFinale = costoTotaleBase + costoGestioneAggiuntiva; 
+    
+    prezzoDinamicoSpan.textContent = `€ ${costoTotaleFinale.toFixed(2)}`;
+}
+
+
 
 
 
@@ -882,6 +949,63 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
             calcolaPrezzoDinamico();
         });
 
+
+//----- LISTENER PER DTF----------
+
+    //document.addEventListener('DOMContentLoaded', async () => {
+    // --- LISTENER PER LA SEZIONE DTF ---
+
+    // 1. Inizializzazione Info Box DTF
+    const dtfInfoContent = document.getElementById('dtfInfoContent');
+    const dtfInfoIcon = document.getElementById('dtfInfoIcon');
+
+    // Contenuto dei requisiti
+    const requisitiDTF = `
+        File formato PDF o PNG con sfondo trasparente.
+        Metodo colore CMYK.
+        Risoluzione 300dpi (misure reali).
+        Il file deve avere larghezza 55 cm x la lunghezza selezionata.
+        Sono da evitare sfumature trasparenti o traslucide, con trasparenze del 30/40%.
+        Si consiglia di mantenere i contorni della grafica sempre ben definiti.
+        N.B. Quando la grafica da stampare è di colore bianco, evitare assolutamente di inserire fondini di altri colori.
+        Per qualsiasi informazione contattaci o scrivici nel campo "Note".
+    `;
+    
+    // Inserisce il contenuto formattato (pre-wrap per mantenere i salti di riga)
+    if (dtfInfoContent) {
+        dtfInfoContent.innerHTML = `<pre style="white-space: pre-wrap; font-family: inherit; font-size: 0.9em; margin: 0;">${requisitiDTF}</pre>`;
+        dtfInfoContent.style.display = 'none'; // Nascondi all'inizio
+    }
+    
+    // Listener per mostrare/nascondere il contenuto (click su ℹ️)
+    if (dtfInfoIcon) {
+        dtfInfoIcon.addEventListener('click', () => {
+            if (dtfInfoContent.style.display === 'none') {
+                dtfInfoContent.style.display = 'block';
+            } else {
+                dtfInfoContent.style.display = 'none';
+            }
+        });
+    }
+
+    // 2. Listener per il Calcolo Dinamico (Metri e Copie)
+    document.getElementById('dtfMetri')?.addEventListener('input', calcolaPrezzoDinamicoDTF);
+    document.getElementById('dtfCopie')?.addEventListener('input', calcolaPrezzoDinamicoDTF);
+
+    // 3. Listener per l'Aggiunta al Carrello
+    document.getElementById('aggiungiDTFBtn')?.addEventListener('click', aggiungiDTFAlCarrello);
+
+    // ... (Chiamate finali: calcolaPrezzoDinamico(), calcolaPrezzoDinamicoKit())
+    calcolaPrezzoDinamicoDTF(); // Inizializzazione del prezzo DTF
+});//--------- fine listner dtf
+
+
+
+
+
+
+
+        
         aggiornaUIPreventivo();
         mostraVistaPreventivo();
         calcolaPrezzoDinamico(); // Inizializza il prezzo dinamico all'avvio
