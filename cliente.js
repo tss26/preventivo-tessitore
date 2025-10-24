@@ -74,7 +74,7 @@ const LISTINO_COMPLETO = {
             "351_500": { COMPLETINO: 13.00, MAGLIA_SOLA: 6.50, PANTALONCINO_SOLO: 6.50 }
         },
         "COSTO_GRAFICO": 20.00 // Costo impianto grafico 
-        "MINIMO_METRI": 0.1 // per calcolo DTF
+        //"MINIMO_METRI": 0.1 // per calcolo DTF
     }
 
 
