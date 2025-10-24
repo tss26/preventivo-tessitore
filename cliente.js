@@ -987,7 +987,7 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
     document.getElementById('aggiungiDTFBtn')?.addEventListener('click', aggiungiDTFAlCarrello);
 
     // ... (Chiamate finali: calcolaPrezzoDinamico(), calcolaPrezzoDinamicoKit())
-    calcolaPrezzoDinamicoDTF(); // Inizializzazione del prezzo DTF
+   // calcolaPrezzoDinamicoDTF(); // Inizializzazione del prezzo DTF
 });//--------- fine listner dtf
 
 
@@ -1001,5 +1001,6 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
         mostraVistaPreventivo();
         calcolaPrezzoDinamico(); // Inizializza il prezzo dinamico all'avvio
         calcolaPrezzoDinamicoKit(); // Inizializza il prezzo dinamico Kit all'avvio (dovrebbe essere 0)
+ calcolaPrezzoDinamicoDTF(); // Inizializzazione del prezzo DTF
     }
 });
