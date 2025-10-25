@@ -130,6 +130,7 @@ function renderOrderList(ordiniDaVisualizzare) { // <-- AGGIUNTA: Contiene la lo
                         <option value="Stampato" ${ordine.stato === 'Stampato' ? 'selected' : ''}>Stampato</option>
                         <option value="Completato" ${ordine.stato === 'Completato' ? 'selected' : ''}>Completato</option>
                         <option value="Spedito" ${ordine.stato === 'Spedito' ? 'selected' : ''}>Spedito</option>
+                        <option value="Annullato" ${ordine.stato === 'Annullato' ? 'selected' : ''}>Annullato</option>
                     </select>
                 </td>
                 <td>
