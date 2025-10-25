@@ -66,6 +66,65 @@
             grid-column: 1 / -1; 
             padding-top: 20px;
         }
+        
+        /* Stili per il modale (espanso per i campi utente) */
+        .modal-content.user-edit {
+            max-width: 900px; /* Allarga il modale Utenti */
+        }
+        .modal-content.user-edit input[type="text"], 
+        .modal-content.user-edit input[type="number"], 
+        .modal-content.user-edit select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .modal-content.user-edit input[disabled] {
+            background-color: #eee;
+            cursor: not-allowed;
+        }
+
+        /* Stili di base per il modale (Contenuto originale) */
+        .modal-backdrop {
+            position: fixed;
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5); /* Sfondo semi-trasparente */
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto; /* Centratura verticale/orizzontale */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%; /* Dimensione del modale su mobile */
+            max-width: 700px; /* Dimensione fissa su desktop */
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .close-button, .close-btn { 
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-button:hover,
+        .close-button:focus,
+        .close-btn:hover,
+        .close-btn:focus {
+            color: #000;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
@@ -128,6 +187,7 @@
                 <p>Verifica dei privilegi e caricamento ordini...</p>
             </div>
         </section>
+        
         <section id="users-section" class="content-section" style="display:none;">
             <h2>Elenco e Gestione Utenti Registrati</h2>
             
@@ -157,77 +217,89 @@
         </div>
     </div>
     <div id="userEditModal" class="modal-backdrop" style="display:none;">
-        <div class="modal-content">
+        <div class="modal-content user-edit">
             <span class="close-btn" onclick="document.getElementById('userEditModal').style.display='none';">&times;</span>
             <h3>Modifica Dati Utente</h3>
             
             <form id="editUserForm">
                 <input type="hidden" id="editUserId"> 
 
-                <label for="editUserEmail" style="display: block; margin-top: 10px; font-weight: bold;">Email (Non modificabile, per Supabase Auth):</label>
-                <input type="text" id="editUserEmail" disabled style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background-color: #eee; cursor: not-allowed;">
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 300px;">
+                        <h4>Dati di Base</h4>
+                        <label for="editUserEmail" style="display: block; margin-top: 10px; font-weight: bold;">Email (Non modificabile):</label>
+                        <input type="text" id="editUserEmail" disabled>
 
-                <label for="editUserRagioneSociale" style="display: block; margin-top: 10px; font-weight: bold;">Ragione Sociale:</label>
-                <input type="text" id="editUserRagioneSociale" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                        <label for="editUserRagioneSociale" style="display: block; margin-top: 10px; font-weight: bold;">Ragione Sociale:</label>
+                        <input type="text" id="editUserRagioneSociale">
 
-                <label for="editUserPartitaIva" style="display: block; margin-top: 10px; font-weight: bold;">Partita IVA:</label>
-                <input type="text" id="editUserPartitaIva" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                        <label for="editUserPartitaIva" style="display: block; margin-top: 10px; font-weight: bold;">Partita IVA:</label>
+                        <input type="text" id="editUserPartitaIva">
 
-                <label for="editUserTelefono" style="display: block; margin-top: 10px; font-weight: bold;">Telefono:</label>
-                <input type="text" id="editUserTelefono" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                
-                <label for="editUserPermessi" style="display: block; margin-top: 10px; font-weight: bold;">Permessi:</label>
-                <select id="editUserPermessi" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                    <option value="cliente">Cliente</option>
-                    <option value="admin">Admin</option>
-                    <option value="disattivato">Disattivato</option>
-                </select>
+                        <label for="editUserTelefono" style="display: block; margin-top: 10px; font-weight: bold;">Telefono:</label>
+                        <input type="text" id="editUserTelefono">
+                        
+                        <label for="editUserSdi" style="display: block; margin-top: 10px; font-weight: bold;">Codice SDI/PEC:</label>
+                        <input type="text" id="editUserSdi">
 
-                <button type="button" id="saveUserChangesBtn" style="padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px;">Salva Modifiche</button>
+                        <label for="editUserSconto" style="display: block; margin-top: 10px; font-weight: bold;">Percentuale Sconto (%):</label>
+                        <input type="number" id="editUserSconto" min="0" max="100">
+                        
+                        <label for="editUserPermessi" style="display: block; margin-top: 10px; font-weight: bold;">Permessi:</label>
+                        <select id="editUserPermessi">
+                            <option value="cliente">Cliente</option>
+                            <option value="admin">Admin</option>
+                            <option value="disattivato">Disattivato</option>
+                        </select>
+                    </div>
+
+                    <div style="flex: 1; min-width: 300px;">
+                        <h4>Indirizzo Legale (Fatturazione)</h4>
+                        <label for="editUserLegaleVia" style="display: block; margin-top: 10px; font-weight: bold;">Via/Civico:</label>
+                        <input type="text" id="editUserLegaleVia">
+                        <div style="display: flex; gap: 10px;">
+                            <div style="flex: 1;">
+                                <label for="editUserLegaleCap" style="display: block; margin-top: 10px; font-weight: bold;">CAP:</label>
+                                <input type="text" id="editUserLegaleCap">
+                            </div>
+                            <div style="flex: 2;">
+                                <label for="editUserLegaleCitta" style="display: block; margin-top: 10px; font-weight: bold;">Città:</label>
+                                <input type="text" id="editUserLegaleCitta">
+                            </div>
+                        </div>
+                        <label for="editUserLegaleProvincia" style="display: block; margin-top: 10px; font-weight: bold;">Provincia:</label>
+                        <input type="text" id="editUserLegaleProvincia">
+
+                        <hr style="margin: 20px 0;">
+                        
+                        <h4>Destinazione Merce</h4>
+                        <div style="margin-bottom: 15px;">
+                            <input type="checkbox" id="editUserStessoMerce" onchange="toggleMerceAddressFields(this.checked)" style="width: auto; margin-right: 5px;">
+                            <label for="editUserStessoMerce" style="display: inline; font-weight: normal;">Sede legale = Indirizzo merce</label>
+                        </div>
+
+                        <div id="merceAddressFields">
+                            <label for="editUserMerceVia" style="display: block; margin-top: 10px; font-weight: bold;">Via/Civico Merce:</label>
+                            <input type="text" id="editUserMerceVia">
+                            <div style="display: flex; gap: 10px;">
+                                <div style="flex: 1;">
+                                    <label for="editUserMerceCap" style="display: block; margin-top: 10px; font-weight: bold;">CAP Merce:</label>
+                                    <input type="text" id="editUserMerceCap">
+                                </div>
+                                <div style="flex: 2;">
+                                    <label for="editUserMerceCitta" style="display: block; margin-top: 10px; font-weight: bold;">Città Merce:</label>
+                                    <input type="text" id="editUserMerceCitta">
+                                </div>
+                            </div>
+                            <label for="editUserMerceProvincia" style="display: block; margin-top: 10px; font-weight: bold;">Provincia Merce:</label>
+                            <input type="text" id="editUserMerceProvincia">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" id="saveUserChangesBtn" style="padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 30px; width: 100%;">Salva Modifiche</button>
             </form>
         </div>
     </div>
-    <style>
-        /* Stili di base per il modale (Contenuto originale) */
-        .modal-backdrop {
-            position: fixed;
-            z-index: 1000; 
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.5); /* Sfondo semi-trasparente */
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto; /* Centratura verticale/orizzontale */
-            padding: 20px;
-            border: 1px solid #888;
-            width: 90%; /* Dimensione del modale su mobile */
-            max-width: 700px; /* Dimensione fissa su desktop */
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            position: relative;
-        }
-
-        /* Ho rinominato in 'close-btn' per uniformità con il nuovo modale, ma mantengo 'close-button' per l'originale se necessario */
-        .close-button, .close-btn { 
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .close-button:hover,
-        .close-button:focus,
-        .close-btn:hover,
-        .close-btn:focus {
-            color: #000;
-            text-decoration: none;
-        }
-    </style>
-</body>
+    </body>
 </html>
