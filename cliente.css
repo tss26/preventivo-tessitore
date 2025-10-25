@@ -319,6 +319,18 @@ body {
     text-align: center;
 }
 
+.stato-Richiesta-Inviata {
+    background-color: #ffff99;
+    color: #333;
+}
+.stato-Attesa-Pagamento {
+    background-color: #ffc107;
+    color: #333;
+}
+.stato-Convalida-Commerciale {
+    background-color: #0dcaf0;
+    color: white;
+}
 .stato-In-attesa-di-lavorazione {
     background-color: #ffc107;
     color: #333;
@@ -331,8 +343,16 @@ body {
     background-color: #28a745;
     color: white;
 }
+.stato-Stampato {
+    background-color: #17a2b8;
+    color: white;
+}
 .stato-Spedito {
     background-color: #007bff;
+    color: white;
+}
+.stato-Annullato {
+    background-color: #6f42c1;
     color: white;
 }
 
