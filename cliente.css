@@ -336,8 +336,8 @@ body {
     color: #333;
 }
 .stato-In-lavorazione {
-    background-color: #17a2b8;
-    color: white;
+    background-color: #ffc108;
+    color: #333;
 }
 .stato-Completato {
     background-color: #28a745;
