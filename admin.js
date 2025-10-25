@@ -605,7 +605,14 @@ async function saveUserChanges() {
     
     // Recupero nuovi campi
     const sdi = document.getElementById('editUserSdi').value;
-    const sconto = parseFloat(document.getElementById('editUserSconto').value);
+
+    // FIX PER ERRORE NUMERICO: Gestisce i valori vuoti/non validi, impostando 0 se vuoto.
+    const scontoInput = document.getElementById('editUserSconto').value.trim();
+    let sconto = 0; 
+    if (scontoInput !== '') {
+        const parsedSconto = parseFloat(scontoInput);
+        sconto = isNaN(parsedSconto) ? 0 : parsedSconto; 
+    }
 
     // Indirizzo Legale
     const legale_via = document.getElementById('editUserLegaleVia').value;
@@ -636,7 +643,7 @@ async function saveUserChanges() {
         telefono: telefono,
         permessi: permessi,
         sdi: sdi,
-        percentuale_sconto: sconto,
+        percentuale_sconto: sconto, // Ora è garantito essere un numero (o 0)
 
         // Indirizzo Legale
         indirizzo_legale_via: legale_via,
