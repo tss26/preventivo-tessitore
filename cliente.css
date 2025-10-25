@@ -324,7 +324,7 @@ body {
     color: #333;
 }
 .stato-Attesa-Pagamento {
-    background-color: #ffc109;
+    background-color: #f45a4b;
     color: #333;
 }
 .stato-Convalida-Commerciale {
@@ -344,7 +344,7 @@ body {
     color: white;
 }
 .stato-Stampato {
-    background-color: #17a2b8;
+    background-color: #20c997;
     color: white;
 }
 .stato-Spedito {
