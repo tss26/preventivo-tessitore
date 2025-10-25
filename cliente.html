@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Area Cliente - Tessitore</title>
-  <link rel="stylesheet" href="cliente.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Area Cliente - Tessitore</title>
+  <link rel="stylesheet" href="cliente.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     /* Stile per l'immagine del logo nell'header */
     .header .logo img {
@@ -23,7 +23,6 @@
         gap: 2rem;
         padding: 2rem;
     }
-    
     
 
     /* Stili generali dei blocchi ripristinati */
@@ -43,25 +42,26 @@
         gap: 15px;
         margin-top: 15px;
     }
-  </style>
+ </style>
 </head>
 <body>
-  <header class="header">
-    <div class="logo">
+  <header class="header">
+    <div class="logo">
       <a href="index.html">
         <img src="icon-192.png" alt="Logo Tessitore">
       </a>
     </div>
-    <nav class="nav">
-      <a href="index.html">Home</a>
+    <nav class="nav">
+      <a href="index.html">Nuovo Preventivo</a> <a href="#" id="mieiOrdiniBtn">I Miei Ordini</a>
       
-      <a href="#" id="mieiOrdiniBtn">I Miei Ordini</a>
-      <a href="#" id="logoutBtn" style="color: #dc3545; font-weight: 600;">Logout</a> 
-    </nav>
-  </header>
+      <a href="profilo.html">Il Mio Profilo</a> 
+      
+      <a href="#" id="logoutBtn" style="color: #dc3545; font-weight: 600;">Logout</a> 
+    </nav>
+  </header>
 
-  <main class="container">
-    
+  <main class="container">
+    
     <div class="galleria-prodotti-container" id="galleriaView">
         
         <section class="galleria-blocco" id="kitCalcioSection">
@@ -126,7 +126,7 @@
                 </tr>
             </tbody>
         </table>
-        
+      
         <h3>Tabella Taglie: DONNA</h3>
         <table class="taglie-table" data-genere="DONNA">
             <thead>
@@ -166,9 +166,9 @@
         <button class="btn-add" id="aggiungiKitCalcioBtn" style="margin-top: 20px;">Aggiungi Kit al Preventivo</button>
     </div>
 </section>
-     <input type="hidden" id="kitCostoTotaleFinale" value="0.00">       
+      <input type="hidden" id="kitCostoTotaleFinale" value="0.00">         
         <section class="galleria-blocco" id="bandiereSection">
-            <h2> "Bandiere" ed Espositori Drop</h2>
+            <h2> "Bandiere" ed Espositori Drop</h2>
             
             <p>Scegli la forma per visualizzare tutti i componenti.</p>
             <div class="forme">
@@ -226,7 +226,7 @@
                 Costo unitario stimato al netto di IVA: <span id="prezzoDinamico">€ 0.00</span>
               </div>
 
-            <button class="btn-add" id="aggiungiBandiera">Aggiungi al preventivo</button>
+            <button class="btn-add" id="aggiungiBandiera">Aggiungi al preventivo</button>
             
         </section>
 
@@ -298,7 +298,7 @@
             </table>
         </div>
   
-          
+            
         </div>
 
         <div style="margin-top: 20px;">
@@ -315,15 +315,15 @@
 </section>
         
         
-    </div>         <aside class="preventivo" id="sezioneCarrello">
-      <h2>Il tuo preventivo</h2>
-      <div class="preventivo-lista" id="preventivoLista">
-        </div>
-      <div class="totale">
-        <span>Totale parziale:</span>
-        <strong id="totaleParziale">€ 0.00</strong> </div>
-      <button class="btn-secondary" id="richiediPreventivo">Richiedi preventivo ufficiale</button>
-    </aside>
+    </div>          <aside class="preventivo" id="sezioneCarrello">
+        <h2>Il tuo preventivo</h2>
+        <div class="preventivo-lista" id="preventivoLista">
+          </div>
+        <div class="totale">
+          <span>Totale parziale:</span>
+          <strong id="totaleParziale">€ 0.00</strong> </div>
+        <button class="btn-secondary" id="richiediPreventivo">Richiedi preventivo ufficiale</button>
+      </aside>
     
     <section id="ordiniCliente" class="galleria-blocco" style="display: none; ">
         <h2>I Miei Ordini Recenti</h2>
@@ -332,14 +332,14 @@
         </div>
     </section>
 
-  </main>
+  </main>
 
-  <footer class="footer">
-    <p>© 2025 Tessitore SRL - Tutti i diritti riservati</p>
-  </footer>
+  <footer class="footer">
+    <p>© 2025 Tessitore SRL - Tutti i diritti riservati</p>
+  </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="cliente.js"></script> 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="cliente.js"></script> 
   <div id="orderDetailsModal" class="modal-backdrop" style="display: none;">
     <div class="modal-content">
         <span class="close-button" id="closeModalBtn">&times;</span>
