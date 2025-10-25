@@ -406,7 +406,7 @@ async function gestisciCheckout() {
             .insert([
                 {
                     num_ordine_prog: numeroOrdineGenerato,
-                    stato: 'Richiesa Inviata',
+                    stato: 'Richiesta Inviata',
                     totale: totaleCalcolato,
                     dettagli_prodotti: carrelloDaSalvare,
                     user_id: utenteCorrenteId,
