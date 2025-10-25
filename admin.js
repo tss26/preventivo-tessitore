@@ -122,8 +122,12 @@ function renderOrderList(ordiniDaVisualizzare) { // <-- AGGIUNTA: Contiene la lo
                 <td>€ ${ordine.totale ? ordine.totale.toFixed(2) : '0.00'}</td>
                 <td>
                     <select class="stato-select" data-id="${ordine.id}">
+                        <option value="Richiesta Inviata" ${ordine.stato === 'Richiesta Inviata' ? 'selected' : ''}>Richiesta Inviata</option>
+                        <option value="Attesa Pagamento" ${ordine.stato === 'Attesa Pagamento' ? 'selected' : ''}>Attesa Pagamento</option>
+                        <option value="Convalida Commerciale" ${ordine.stato === 'Convalida Commerciale' ? 'selected' : ''}>Convalida Commerciale</option>
                         <option value="In attesa di lavorazione" ${ordine.stato === 'In attesa di lavorazione' ? 'selected' : ''}>In attesa di lavorazione</option>
                         <option value="In lavorazione" ${ordine.stato === 'In lavorazione' ? 'selected' : ''}>In lavorazione</option>
+                        <option value="Stampato" ${ordine.stato === 'Stampato' ? 'selected' : ''}>Stampato</option>
                         <option value="Completato" ${ordine.stato === 'Completato' ? 'selected' : ''}>Completato</option>
                         <option value="Spedito" ${ordine.stato === 'Spedito' ? 'selected' : ''}>Spedito</option>
                     </select>
