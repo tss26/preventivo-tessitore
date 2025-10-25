@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin - Gestione Ordini</title>
+    <title>Dashboard Admin</title>
     <link rel="stylesheet" href="cliente.css"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
     <style>
         /* Stile aggiuntivo per rendere la tabella admin più leggibile */
         .admin-table {
@@ -34,6 +36,36 @@
             padding: 5px;
             border-radius: 4px;
         }
+
+        /* AGGIUNTA: Stili per la navigazione a schede */
+        .tab-nav {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+        .tab-nav a {
+            padding: 10px 15px;
+            text-decoration: none;
+            color: #555;
+            font-weight: bold;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        .tab-nav a:hover {
+            color: #007bff;
+        }
+        .tab-nav a.active { 
+            color: #007bff;
+            border-bottom: 2px solid #007bff;
+        }
+        .tab-nav i {
+            margin-right: 5px;
+        }
+        .content-section {
+             /* Per gestire le due sezioni separate, mantieni il layout a tutta larghezza */
+            grid-column: 1 / -1; 
+            padding-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -46,47 +78,64 @@
     </header>
 
     <main class="container">
-        <section style="grid-column: 1 / -1;"> 
-            <h1>Gestione Ordini Ricevuti</h1>
+        <h1>Pannello Amministrativo</h1>
 
-<div id="filtriOrdini" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background-color: #f4f6f9; display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
-    
-    <div style="flex-grow: 1; min-width: 200px;">
-        <label for="ricercaTesto" style="display: block; font-weight: bold; margin-bottom: 5px;">Ricerca (ID/Nome Cliente):</label>
-        <input type="text" id="ricercaTesto" placeholder="ID Ordine o Nome Cliente" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
-    </div>
-    
-    <div style="flex-grow: 1; min-width: 150px;">
-        <label for="filtroStato" style="display: block; font-weight: bold; margin-bottom: 5px;">Filtra per Stato:</label>
-        <select id="filtroStato" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
-            <option value="">Tutti gli Stati</option>
-            <option value="Richiesta Inviata">Richiesta Inviata</option>
-            <option value="Attesa Pagamento">Attesa Pagamento</option>
-            <option value="Convalida Commerciale">Convalida Commerciale</option>
-            <option value="In attesa di lavorazione">In attesa di lavorazione</option>
-            <option value="In lavorazione">In lavorazione</option>
-            <option value="Stampato">Stampato</option>
-            <option value="Completato">Completato</option>
-            <option value="Spedito">Spedito</option>
-            <option value="Annullato">Annullato</option>
-        </select>
-    </div>
+        <div class="tab-nav">
+            <a href="#" id="orders-tab" class="active" onclick="showSection('orders'); return false;">
+                <i class="fas fa-box-open"></i> Gestione Ordini
+            </a>
+            <a href="#" id="users-tab" onclick="showSection('users'); return false;">
+                <i class="fas fa-users"></i> Gestione Utenti
+            </a>
+        </div>
+        <section id="orders-section" class="content-section">
+            <h2>Ordini Ricevuti</h2>
 
-    <div>
-        <button id="applicaFiltriBtn" style="padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px;">
-            Applica Filtri
-        </button>
-        <button id="resetFiltriBtn" style="padding: 10px 15px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px;">
-            Reset
-        </button>
-    </div>
-</div>
-    
+            <div id="filtriOrdini" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background-color: #f4f6f9; display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
+                
+                <div style="flex-grow: 1; min-width: 200px;">
+                    <label for="ricercaTesto" style="display: block; font-weight: bold; margin-bottom: 5px;">Ricerca (ID/Nome Cliente):</label>
+                    <input type="text" id="ricercaTesto" placeholder="ID Ordine o Nome Cliente" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
+                </div>
+                
+                <div style="flex-grow: 1; min-width: 150px;">
+                    <label for="filtroStato" style="display: block; font-weight: bold; margin-bottom: 5px;">Filtra per Stato:</label>
+                    <select id="filtroStato" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
+                        <option value="">Tutti gli Stati</option>
+                        <option value="Richiesta Inviata">Richiesta Inviata</option>
+                        <option value="Attesa Pagamento">Attesa Pagamento</option>
+                        <option value="Convalida Commerciale">Convalida Commerciale</option>
+                        <option value="In attesa di lavorazione">In attesa di lavorazione</option>
+                        <option value="In lavorazione">In lavorazione</option>
+                        <option value="Stampato">Stampato</option>
+                        <option value="Completato">Completato</option>
+                        <option value="Spedito">Spedito</option>
+                        <option value="Annullato">Annullato</option>
+                    </select>
+                </div>
+
+                <div>
+                    <button id="applicaFiltriBtn" style="padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px;">
+                        Applica Filtri
+                    </button>
+                    <button id="resetFiltriBtn" style="padding: 10px 15px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px;">
+                        Reset
+                    </button>
+                </div>
+            </div>
+            
             <div id="ordiniLista" class="admin-table">
                 <p>Verifica dei privilegi e caricamento ordini...</p>
             </div>
         </section>
-    </main>
+        <section id="users-section" class="content-section" style="display:none;">
+            <h2>Elenco e Gestione Utenti Registrati</h2>
+            
+            <div id="utentiLista" class="admin-table">
+                <p>Caricamento lista utenti...</p>
+            </div>
+        </section>
+        </main>
 
     <footer class="footer">
         <p>© 2025 Tessitore SRL - Area Amministrativa</p>
@@ -97,54 +146,88 @@
     
     
     <div id="orderDetailsModal" class="modal-backdrop" style="display: none;">
-    <div class="modal-content">
-        <span class="close-button" id="closeModalBtn">&times;</span>
-        <h2>Dettagli Ordine Completo: <span id="modalOrderId" style="color: #6c757d; font-size: 0.9em;"></span></h2>
-        
-        <div id="modalOrderDetails" class="order-details-body" style="white-space: pre-wrap; margin-top: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9; max-height: 70vh; overflow-y: auto; cursor: text;">
+        <div class="modal-content">
+            <span class="close-button" id="closeModalBtn">&times;</span>
+            <h2>Dettagli Ordine Completo: <span id="modalOrderId" style="color: #6c757d; font-size: 0.9em;"></span></h2>
+            
+            <div id="modalOrderDetails" class="order-details-body" style="white-space: pre-wrap; margin-top: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9; max-height: 70vh; overflow-y: auto; cursor: text;">
             </div>
-        
-        <p style="margin-top: 15px; font-style: italic; color: #555;">Puoi selezionare e copiare il testo da questa finestra.</p>
+            
+            <p style="margin-top: 15px; font-style: italic; color: #555;">Puoi selezionare e copiare il testo da questa finestra.</p>
+        </div>
     </div>
-</div>
-<style>
-/* Stili di base per il modale (Puoi anche aggiungerli in cliente.css) */
-.modal-backdrop {
-    position: fixed;
-    z-index: 1000; 
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.5); /* Sfondo semi-trasparente */
-}
+    <div id="userEditModal" class="modal-backdrop" style="display:none;">
+        <div class="modal-content">
+            <span class="close-btn" onclick="document.getElementById('userEditModal').style.display='none';">&times;</span>
+            <h3>Modifica Dati Utente</h3>
+            
+            <form id="editUserForm">
+                <input type="hidden" id="editUserId"> 
 
-.modal-content {
-    background-color: #fefefe;
-    margin: 5% auto; /* Centratura verticale/orizzontale */
-    padding: 20px;
-    border: 1px solid #888;
-    width: 90%; /* Dimensione del modale su mobile */
-    max-width: 700px; /* Dimensione fissa su desktop */
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-    position: relative;
-}
+                <label for="editUserEmail" style="display: block; margin-top: 10px; font-weight: bold;">Email (Non modificabile, per Supabase Auth):</label>
+                <input type="text" id="editUserEmail" disabled style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background-color: #eee; cursor: not-allowed;">
 
-.close-button {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-}
+                <label for="editUserRagioneSociale" style="display: block; margin-top: 10px; font-weight: bold;">Ragione Sociale:</label>
+                <input type="text" id="editUserRagioneSociale" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
 
-.close-button:hover,
-.close-button:focus {
-    color: #000;
-    text-decoration: none;
-}
-</style>
+                <label for="editUserPartitaIva" style="display: block; margin-top: 10px; font-weight: bold;">Partita IVA:</label>
+                <input type="text" id="editUserPartitaIva" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+
+                <label for="editUserTelefono" style="display: block; margin-top: 10px; font-weight: bold;">Telefono:</label>
+                <input type="text" id="editUserTelefono" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                
+                <label for="editUserPermessi" style="display: block; margin-top: 10px; font-weight: bold;">Permessi:</label>
+                <select id="editUserPermessi" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                    <option value="cliente">Cliente</option>
+                    <option value="admin">Admin</option>
+                    <option value="disattivato">Disattivato</option>
+                </select>
+
+                <button type="button" id="saveUserChangesBtn" style="padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px;">Salva Modifiche</button>
+            </form>
+        </div>
+    </div>
+    <style>
+        /* Stili di base per il modale (Contenuto originale) */
+        .modal-backdrop {
+            position: fixed;
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5); /* Sfondo semi-trasparente */
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto; /* Centratura verticale/orizzontale */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%; /* Dimensione del modale su mobile */
+            max-width: 700px; /* Dimensione fissa su desktop */
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        /* Ho rinominato in 'close-btn' per uniformità con il nuovo modale, ma mantengo 'close-button' per l'originale se necessario */
+        .close-button, .close-btn { 
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-button:hover,
+        .close-button:focus,
+        .close-btn:hover,
+        .close-btn:focus {
+            color: #000;
+            text-decoration: none;
+        }
+    </style>
 </body>
 </html>
