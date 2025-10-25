@@ -467,8 +467,7 @@ function renderUserList(users) {
             <thead>
                 <tr>
                     <th>Nome / Ragione Sociale</th>
-                    <th>Email</th>
-                    <th>P. IVA</th>
+                    <th>Email</th> <th>P. IVA</th>
                     <th>Permessi</th>
                     <th>Azioni</th>
                 </tr>
@@ -479,8 +478,7 @@ function renderUserList(users) {
         html += `
             <tr data-id="${user.id}">
                 <td>${user.ragione_sociale || 'N/D'}</td> 
-                <td>${user.email}</td>
-                <td>${user.partita_iva || 'N/D'}</td>
+                <td>${user.email || 'N/D'}</td> <td>${user.partita_iva || 'N/D'}</td>
                 <td>
                     <select class="permessi-select" data-id="${user.id}">
                         <option value="cliente" ${user.permessi === 'cliente' ? 'selected' : ''}>Cliente</option>
@@ -600,8 +598,14 @@ async function saveUserChanges() {
     const userId = document.getElementById('editUserId').value;
     const ragione_sociale = document.getElementById('editUserRagioneSociale').value;
     const partita_iva = document.getElementById('editUserPartitaIva').value;
-    const telefono = document.getElementById('editUserTelefono').value;
+    const telefono = document.getElementById('editUserTelefono').value.trim(); // Trim per controllo
     const permessi = document.getElementById('editUserPermessi').value;
+    
+    // MODIFICA 2: CONTROLLO CAMPO TELEFONO OBBLIGATORIO
+    if (!telefono || telefono === '') {
+        alert("ATTENZIONE INSERIRE IL TELEFONO è OBBLIGATORIO");
+        return; // Blocca il salvataggio
+    }
     
     // Recupero nuovi campi
     const sdi = document.getElementById('editUserSdi').value;
@@ -640,10 +644,10 @@ async function saveUserChanges() {
     const updatedData = {
         ragione_sociale: ragione_sociale,
         partita_iva: partita_iva,
-        telefono: telefono,
+        telefono: telefono, // Valore ora garantito
         permessi: permessi,
         sdi: sdi,
-        percentuale_sconto: sconto, // Ora è garantito essere un numero (o 0)
+        percentuale_sconto: sconto, 
 
         // Indirizzo Legale
         indirizzo_legale_via: legale_via,
