@@ -348,6 +348,239 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         caricaOrdini();
+        
+        // ===========================================
+        // AGGIUNTA: Listener Modale Utenti e Inizializzazione Sezioni
+        // ===========================================
+        
+        // Listener per il pulsante di salvataggio del modale Utenti
+        const saveBtn = document.getElementById('saveUserChangesBtn');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', saveUserChanges);
+        }
+
+        // Listener per chiudere il modale Utenti cliccando fuori (se non gestito nell'HTML)
+        const userEditModal = document.getElementById('userEditModal');
+        window.addEventListener('click', (event) => {
+            if (event.target === userEditModal) {
+                userEditModal.style.display = 'none';
+            }
+        });
+
+        // Avvia la navigazione alla sezione Ordini (che chiama caricaOrdini() e imposta la tab attiva)
+        // La chiamata 'caricaOrdini()' subito sopra è ridondante ma la manteniamo per non alterare il tuo codice
+        // originale. showSection gestirà la logica delle tab.
+        showSection('orders');
     }
 
 });
+
+// ===========================================
+// AGGIUNTA: FUNZIONALITÀ UTENTI E PERMESSI
+// ===========================================
+
+let allUsers = []; // Variabile globale per salvare tutti gli utenti
+
+/**
+ * Funzione per cambiare sezione (Ordini o Utenti) e gestire la classe 'active' nella tab.
+ * Questa è cruciale per la navigazione.
+ */
+function showSection(sectionId) {
+    // 1. Nascondi tutte le sezioni di contenuto (presuppone la classe 'content-section' nell'HTML)
+    document.querySelectorAll('.content-section').forEach(section => {
+        section.style.display = 'none';
+    });
+
+    // 2. Mostra la sezione richiesta
+    const targetSection = document.getElementById(sectionId + '-section');
+    if (targetSection) {
+        targetSection.style.display = 'block';
+    }
+
+    // 3. Gestione della tab attiva visuale (per la classe 'active' nell'HTML)
+    document.querySelectorAll('.tab-nav a').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    const activeTab = document.getElementById(sectionId + '-tab');
+    if (activeTab) {
+        activeTab.classList.add('active');
+    }
+
+    // 4. Carica i dati specifici della sezione
+    if (sectionId === 'orders') {
+        caricaOrdini();
+    } else if (sectionId === 'users') {
+        caricaUtenti();
+    }
+}
+
+
+/**
+ * 1. Recupera tutti gli utenti dalla tabella 'utenti' e avvia la visualizzazione.
+ */
+async function caricaUtenti() {
+    const container = document.getElementById('utentiLista');
+    if (!container) return;
+    
+    container.innerHTML = '<h2>Caricamento utenti in corso...</h2>';
+    
+    const { data: utenti, error } = await supabase
+        .from('utenti')
+        .select(`id, email, ragione_sociale, partita_iva, telefono, permessi`)
+        .order('ragione_sociale', { ascending: true }); 
+
+    if (error) {
+        container.innerHTML = `<p style="color: red;">Errore nel recupero utenti: ${error.message}.</p>`;
+        return;
+    }
+
+    allUsers = utenti || []; 
+    renderUserList(allUsers); 
+}
+
+/**
+ * 2. Visualizza la tabella degli utenti.
+ */
+function renderUserList(users) {
+    const container = document.getElementById('utentiLista');
+    if (!container) return;
+
+    if (users.length === 0) {
+        container.innerHTML = '<h2>Nessun utente trovato.</h2>';
+        return;
+    }
+
+    let html = `
+    <div class="admin-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome / Ragione Sociale</th>
+                    <th>Email</th>
+                    <th>P. IVA</th>
+                    <th>Permessi</th>
+                    <th>Azioni</th>
+                </tr>
+            </thead>
+            <tbody>`;
+    
+    users.forEach(user => {
+        html += `
+            <tr data-id="${user.id}">
+                <td>${user.ragione_sociale || 'N/D'}</td> 
+                <td>${user.email}</td>
+                <td>${user.partita_iva || 'N/D'}</td>
+                <td>
+                    <select class="permessi-select" data-id="${user.id}">
+                        <option value="cliente" ${user.permessi === 'cliente' ? 'selected' : ''}>Cliente</option>
+                        <option value="admin" ${user.permessi === 'admin' ? 'selected' : ''}>Admin</option>
+                        <option value="disattivato" ${user.permessi === 'disattivato' ? 'selected' : ''}>Disattivato</option>
+                    </select>
+                </td>
+                <td>
+                    <button onclick="openEditUserModal('${user.id}')" class="btn-secondary" style="padding: 5px 10px;">Modifica Dati</button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+    
+    // Aggiungi i listener per l'update dei permessi
+    document.querySelectorAll('.permessi-select').forEach(select => {
+        select.addEventListener('change', (e) => aggiornaPermessiUtente(e.target.dataset.id, e.target.value));
+    });
+}
+
+/**
+ * 3. Aggiorna i permessi di un utente nel DB.
+ */
+async function aggiornaPermessiUtente(userId, nuovoPermesso) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user && user.id === userId && nuovoPermesso !== 'admin') {
+        alert("Non puoi declassare o disattivare i tuoi stessi permessi di amministratore.");
+        caricaUtenti(); 
+        return;
+    }
+    
+    if (!confirm(`Confermi il cambio permessi per l'utente ${userId.substring(0, 8)} a "${nuovoPermesso}"?`)) {
+        caricaUtenti(); 
+        return;
+    }
+    
+    const { error } = await supabase
+        .from('utenti')
+        .update({ permessi: nuovoPermesso })
+        .eq('id', userId);
+    
+    if (error) {
+        alert(`Errore nell'aggiornamento dei permessi: ${error.message}.`);
+    } else {
+        console.log(`Permessi utente ${userId} aggiornati a: ${nuovoPermesso}`);
+        caricaUtenti(); 
+    }
+}
+
+/**
+ * 4. Apri e popola il modale per la modifica di tutti i dati dell'utente.
+ */
+function openEditUserModal(userId) {
+    const user = allUsers.find(u => u.id === userId);
+    if (!user) {
+        alert('Utente non trovato nell\'elenco.');
+        return;
+    }
+
+    const modal = document.getElementById('userEditModal');
+    if (!modal) {
+        alert('Modale di modifica utente non trovato.');
+        return;
+    }
+    
+    document.getElementById('editUserId').value = user.id;
+    document.getElementById('editUserEmail').value = user.email || '';
+    document.getElementById('editUserRagioneSociale').value = user.ragione_sociale || '';
+    document.getElementById('editUserPartitaIva').value = user.partita_iva || '';
+    document.getElementById('editUserTelefono').value = user.telefono || '';
+    document.getElementById('editUserPermessi').value = user.permessi || 'cliente';
+    
+    modal.style.display = 'block';
+}
+
+/**
+ * 5. Salva i dati modificati dall'apposito modale.
+ */
+async function saveUserChanges() {
+    const userId = document.getElementById('editUserId').value;
+    const ragione_sociale = document.getElementById('editUserRagioneSociale').value;
+    const partita_iva = document.getElementById('editUserPartitaIva').value;
+    const telefono = document.getElementById('editUserTelefono').value;
+    const permessi = document.getElementById('editUserPermessi').value;
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user && user.id === userId && permessi !== 'admin') {
+        alert("Non puoi declassare i tuoi stessi permessi. Modifica fallita.");
+        return;
+    }
+
+    const updatedData = {
+        ragione_sociale: ragione_sociale,
+        partita_iva: partita_iva,
+        telefono: telefono,
+        permessi: permessi,
+    };
+    
+    const { error } = await supabase
+        .from('utenti')
+        .update(updatedData)
+        .eq('id', userId);
+    
+    if (error) {
+        alert(`Errore nel salvataggio dei dati utente: ${error.message}.`);
+    } else {
+        alert('Dati utente aggiornati con successo!');
+        document.getElementById('userEditModal').style.display = 'none'; // Chiudi modale
+        caricaUtenti(); // Ricarica la lista per mostrare le modifiche
+    }
+}
