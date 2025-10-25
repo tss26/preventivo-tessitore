@@ -141,7 +141,7 @@ async function handleLogout() {
     if (!confirm("Sei sicuro di voler uscire?")) { return; }
     const { error } = await supabase.auth.signOut();
     if (error) { console.error('Errore durante il logout:', error); } 
-    else { localStorage.removeItem('carrello'); window.location.href = 'login.html'; }
+    else { localStorage.removeItem('carrello'); window.location.href = 'https://tss26.github.io/preventivo-tessitore/login.html'; }
 }
 
 
