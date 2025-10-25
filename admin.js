@@ -366,10 +366,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 userEditModal.style.display = 'none';
             }
         });
+        
+        // Aggiunta la funzione di toggle per l'indirizzo merce al listener della checkbox
+        const sameMerceCheckbox = document.getElementById('editUserStessoMerce');
+        if (sameMerceCheckbox) {
+             sameMerceCheckbox.addEventListener('change', (e) => toggleMerceAddressFields(e.target.checked));
+        }
 
         // Avvia la navigazione alla sezione Ordini (che chiama caricaOrdini() e imposta la tab attiva)
-        // La chiamata 'caricaOrdini()' subito sopra è ridondante ma la manteniamo per non alterare il tuo codice
-        // originale. showSection gestirà la logica delle tab.
         showSection('orders');
     }
 
@@ -383,7 +387,6 @@ let allUsers = []; // Variabile globale per salvare tutti gli utenti
 
 /**
  * Funzione per cambiare sezione (Ordini o Utenti) e gestire la classe 'active' nella tab.
- * Questa è cruciale per la navigazione.
  */
 function showSection(sectionId) {
     // 1. Nascondi tutte le sezioni di contenuto (presuppone la classe 'content-section' nell'HTML)
@@ -424,12 +427,20 @@ async function caricaUtenti() {
     
     container.innerHTML = '<h2>Caricamento utenti in corso...</h2>';
     
+    // AGGIORNAMENTO: Includi tutti i nuovi campi nella SELECT
     const { data: utenti, error } = await supabase
         .from('utenti')
-        .select(`id, email, ragione_sociale, partita_iva, telefono, permessi`)
+        .select(`
+            id, email, ragione_sociale, partita_iva, telefono, permessi,
+            indirizzo_legale_via, indirizzo_legale_cap, indirizzo_legale_citta, indirizzo_legale_provincia,
+            stesso_indirizzo_merce,
+            indirizzo_merce_via, indirizzo_merce_cap, indirizzo_merce_citta, indirizzo_merce_provincia,
+            percentuale_sconto, sdi
+        `)
         .order('ragione_sociale', { ascending: true }); 
 
     if (error) {
+        // L'errore ora dovrebbe mostrare il messaggio completo
         container.innerHTML = `<p style="color: red;">Errore nel recupero utenti: ${error.message}.</p>`;
         return;
     }
@@ -523,6 +534,18 @@ async function aggiornaPermessiUtente(userId, nuovoPermesso) {
 }
 
 /**
+ * Nasconde/Mostra i campi dell'indirizzo di destinazione merce a seconda della checkbox.
+ */
+function toggleMerceAddressFields(isSame) {
+    const fieldsContainer = document.getElementById('merceAddressFields');
+    if (fieldsContainer) {
+        // Se la checkbox è spuntata (stesso indirizzo), nascondi i campi
+        fieldsContainer.style.display = isSame ? 'none' : 'block';
+    }
+}
+
+
+/**
  * 4. Apri e popola il modale per la modifica di tutti i dati dell'utente.
  */
 function openEditUserModal(userId) {
@@ -545,6 +568,28 @@ function openEditUserModal(userId) {
     document.getElementById('editUserTelefono').value = user.telefono || '';
     document.getElementById('editUserPermessi').value = user.permessi || 'cliente';
     
+    // AGGIUNTA: Popolamento dei nuovi campi anagrafici e logistici
+    document.getElementById('editUserSdi').value = user.sdi || '';
+    document.getElementById('editUserSconto').value = user.percentuale_sconto || 0;
+
+    // Indirizzo Legale
+    document.getElementById('editUserLegaleVia').value = user.indirizzo_legale_via || '';
+    document.getElementById('editUserLegaleCap').value = user.indirizzo_legale_cap || '';
+    document.getElementById('editUserLegaleCitta').value = user.indirizzo_legale_citta || '';
+    document.getElementById('editUserLegaleProvincia').value = user.indirizzo_legale_provincia || '';
+
+    // Indirizzo Spedizione (Checkbox e campi)
+    const isSameAddress = user.stesso_indirizzo_merce === true;
+    document.getElementById('editUserStessoMerce').checked = isSameAddress;
+    
+    document.getElementById('editUserMerceVia').value = user.indirizzo_merce_via || '';
+    document.getElementById('editUserMerceCap').value = user.indirizzo_merce_cap || '';
+    document.getElementById('editUserMerceCitta').value = user.indirizzo_merce_citta || '';
+    document.getElementById('editUserMerceProvincia').value = user.indirizzo_merce_provincia || '';
+    
+    // Chiama una funzione per nascondere/mostrare l'indirizzo merce
+    toggleMerceAddressFields(isSameAddress);
+
     modal.style.display = 'block';
 }
 
@@ -558,6 +603,27 @@ async function saveUserChanges() {
     const telefono = document.getElementById('editUserTelefono').value;
     const permessi = document.getElementById('editUserPermessi').value;
     
+    // Recupero nuovi campi
+    const sdi = document.getElementById('editUserSdi').value;
+    const sconto = parseFloat(document.getElementById('editUserSconto').value);
+
+    // Indirizzo Legale
+    const legale_via = document.getElementById('editUserLegaleVia').value;
+    const legale_cap = document.getElementById('editUserLegaleCap').value;
+    const legale_citta = document.getElementById('editUserLegaleCitta').value;
+    const legale_provincia = document.getElementById('editUserLegaleProvincia').value;
+
+    // Checkbox Merce
+    const stesso_merce = document.getElementById('editUserStessoMerce').checked;
+
+    // Indirizzo Merce (solo se diverso)
+    // Se è uguale, copiamo i valori legali per assicurare che il DB sia coerente
+    const merce_via = stesso_merce ? legale_via : document.getElementById('editUserMerceVia').value;
+    const merce_cap = stesso_merce ? legale_cap : document.getElementById('editUserMerceCap').value;
+    const merce_citta = stesso_merce ? legale_citta : document.getElementById('editUserMerceCitta').value;
+    const merce_provincia = stesso_merce ? legale_provincia : document.getElementById('editUserMerceProvincia').value;
+
+    
     const { data: { user } } = await supabase.auth.getUser();
     if (user && user.id === userId && permessi !== 'admin') {
         alert("Non puoi declassare i tuoi stessi permessi. Modifica fallita.");
@@ -569,6 +635,21 @@ async function saveUserChanges() {
         partita_iva: partita_iva,
         telefono: telefono,
         permessi: permessi,
+        sdi: sdi,
+        percentuale_sconto: sconto,
+
+        // Indirizzo Legale
+        indirizzo_legale_via: legale_via,
+        indirizzo_legale_cap: legale_cap,
+        indirizzo_legale_citta: legale_citta,
+        indirizzo_legale_provincia: legale_provincia,
+        
+        // Indirizzo Merce
+        stesso_indirizzo_merce: stesso_merce,
+        indirizzo_merce_via: merce_via,
+        indirizzo_merce_cap: merce_cap,
+        indirizzo_merce_citta: merce_citta,
+        indirizzo_merce_provincia: merce_provincia,
     };
     
     const { error } = await supabase
