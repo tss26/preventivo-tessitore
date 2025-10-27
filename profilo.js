@@ -6,19 +6,20 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 let currentUserId = null;
+const LOGIN_REDIRECT_URL = 'login.html'; // Utilizza la variabile per il reindirizzamento
 
 // ===========================================
 // FUNZIONI DI UTILITY
 // ===========================================
 
 /**
- * Gestisce il logout.
+ * Gestisce il logout (reindirizza all'URL specifico).
  */
 async function handleLogout() {
     if (!confirm("Sei sicuro di voler uscire?")) { return; }
     const { error } = await supabase.auth.signOut();
     if (error) { console.error('Errore durante il logout:', error); } 
-    else { window.location.href = 'index.html'; }
+    else { window.location.href = LOGIN_REDIRECT_URL; }
 }
 
 /**
@@ -28,10 +29,9 @@ function toggleMerceAddressFields(isSame) {
     const fieldsContainer = document.getElementById('merceAddressFields');
     if (!fieldsContainer) return;
 
-    // Se la checkbox è spuntata, nascondi
     fieldsContainer.style.display = isSame ? 'none' : 'block';
     
-    // Rimuovi/Aggiungi l'attributo 'required' dinamicamente per il form HTML
+    // Rimuovi/Aggiungi l'attributo 'required' dinamicamente per la validazione del browser
     fieldsContainer.querySelectorAll('input').forEach(input => {
         if (isSame) {
             input.removeAttribute('required');
@@ -54,18 +54,14 @@ async function loadUserProfile() {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-        window.location.href = 'login.html';
+        window.location.href = LOGIN_REDIRECT_URL;
         return;
     }
     
     currentUserId = user.id;
 
-    // Aggiorna il logo (se necessario)
     const logoElement = document.querySelector('.logo');
-    if (logoElement) { 
-         logoElement.innerHTML = `<img src="icon-192.png" alt="Logo Tessitore" style="height: 40px; vertical-align: middle;"> Profilo: ${user.email}`; 
-    }
-
+    
     // Carica il profilo dalla tabella 'utenti'
     const { data: profile, error } = await supabase
         .from('utenti')
@@ -78,8 +74,7 @@ async function loadUserProfile() {
         .single();
 
     if (error || !profile) {
-        alert('Errore nel caricamento del profilo. Controlla le policy RLS.');
-        // Continua per permettere all'utente di salvare i dati se il profilo è vuoto
+        console.warn("Profilo utente non trovato in 'utenti'. Potrebbe essere una nuova registrazione.");
     }
     
     // Blocco utenti disattivati (sicurezza critica)
@@ -90,15 +85,20 @@ async function loadUserProfile() {
              alert('Sei un Amministratore. Usa la dashboard Admin.');
          }
          await supabase.auth.signOut();
-         window.location.href = 'login.html';
+         window.location.href = LOGIN_REDIRECT_URL;
          return;
     }
 
 
     // Popola il form con dati esistenti (o vuoti se profile è nullo)
     document.getElementById('userId').value = currentUserId;
-    // L'email di auth.users è il fallback più sicuro
     document.getElementById('email').value = profile?.email || user.email; 
+    
+    // Aggiorna il logo dopo aver ottenuto la ragione sociale
+    if (logoElement) { 
+         logoElement.innerHTML = `<img src="icon-192.png" alt="Logo Tessitore" style="height: 40px; vertical-align: middle;"> Profilo: ${profile?.ragione_sociale || user.email}`; 
+    }
+    
     document.getElementById('ragione_sociale').value = profile?.ragione_sociale || '';
     document.getElementById('partita_iva').value = profile?.partita_iva || '';
     document.getElementById('telefono').value = profile?.telefono || '';
@@ -158,12 +158,12 @@ async function saveUserProfile(event) {
     const merce_citta = stesso_merce ? legale_citta : document.getElementById('merce_citta').value;
     const merce_provincia = stesso_merce ? legale_provincia : document.getElementById('merce_provincia').value;
 
-    // Il campo sconto e permessi non viene modificato qui, solo dall'admin.
+    // I campi 'permessi' e 'percentuale_sconto' sono ESCLUSI da updatedData
 
     const updatedData = {
         ragione_sociale: ragione_sociale,
         partita_iva: partita_iva,
-        telefono: telefono, // Valore ora garantito
+        telefono: telefono, 
         sdi: sdi,
         
         // Indirizzo Legale
@@ -180,14 +180,14 @@ async function saveUserProfile(event) {
         indirizzo_merce_provincia: merce_provincia,
     };
     
-    // Salva su Supabase: RLS deve permettere all'utente loggato di aggiornare la propria riga
+    // Salva su Supabase
     const { error } = await supabase
         .from('utenti')
         .update(updatedData)
         .eq('id', userId);
     
     if (error) {
-        alert(`Errore nel salvataggio del profilo: ${error.message}. Assicurati di avere la policy RLS (UPDATE) corretta.`);
+        alert(`Errore nel salvataggio del profilo: ${error.message}.`);
     } else {
         alert('Profilo aggiornato con successo!');
         // Ricarica per visualizzare i nuovi dati
