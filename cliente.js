@@ -121,7 +121,7 @@ async function verificaCliente() {
     if (profilo.permessi === 'disattivato') {
         alert('Accesso negato. Il tuo account è stato disattivato.');
         await supabase.auth.signOut();
-        window.location.href = 'login.html';
+        window.location.href = 'https://tss26.github.io/preventivo-tessitore/login.html';
         return false;
     }
 
@@ -207,21 +207,33 @@ function aggiornaUIPreventivo() {
 // ===========================================
 
 async function generaNumeroOrdineTemporaneo() {
-    const { data } = await supabase
-        .from('ordini')
-        .select('num_ordine_prog')
-        .order('data_ordine', { ascending: false })
-        .limit(1)
-        .single();
+    // MODIFICA RPC: Chiamata alla nuova funzione di database per ottenere l'ultimo numero globale.
+    const { data: ultimoOrdineNumero, error } = await supabase.rpc('leggi_ultimo_numero_ordine_generale');
+    
+    if (error) {
+        console.error("Errore RPC nel recupero dell'ultimo numero d'ordine generale:", error);
+        alert("Errore critico: Impossibile generare il numero d'ordine progressivo. Riprova più tardi.");
+        return 'ERR/0000'; 
+    }
+
     const annoCorrente = new Date().getFullYear().toString().substring(2); 
     let prossimoNumero = 1;
-    if (data && data.num_ordine_prog) {
-        const ultimoOrdine = data.num_ordine_prog; 
+
+    // Lavora con il risultato della RPC (Stringa o null)
+    if (ultimoOrdineNumero) {
+        const ultimoOrdine = String(ultimoOrdineNumero); 
         const parti = ultimoOrdine.split('/');
-        if (parti.length === 2 && parti[0] === annoCorrente && !isNaN(parseInt(parti[1]))) {
-            prossimoNumero = parseInt(parti[1]) + 1;
-        }
+
+        // 1. Controlla che l'anno sia quello corrente
+        if (parti.length === 2 && parti[0] === annoCorrente) {
+            const ultimoNumero = parseInt(parti[1]);
+            if (!isNaN(ultimoNumero)) {
+                prossimoNumero = ultimoNumero + 1;
+            }
+        } 
+        // 2. Altrimenti (se l'anno è cambiato), prossimoNumero resta 1 (per il nuovo anno)
     }
+
     const numeroFormattato = prossimoNumero.toString().padStart(4, '0');
     return `${annoCorrente}/${numeroFormattato}`; 
 }
