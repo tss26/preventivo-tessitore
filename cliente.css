@@ -482,7 +482,7 @@ html {
     align-items: center;
     font-size: 1.5rem; 
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Ombra per farlo risaltare */
-    z-index: 1001; /* Assicura che sia sopra gli altri elementi */
+    z-index: 100; /* Assicura che sia sopra gli altri elementi */
     text-decoration: none; 
     transition: background-color 0.2s;
 }
