@@ -456,3 +456,35 @@ body {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     text-align: center;
 }
+
+/* Rende lo scorrimento più fluido */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Stile per il pulsante del carrello fluttuante */
+.floating-cart-btn {
+    /* Posizionamento fisso rispetto alla viewport */
+    position: fixed; 
+    bottom: 20px; /* Distanza dal fondo */
+    right: 20px; /* Distanza da destra */
+    
+    /* Stile del "pallino" */
+    background-color: #ffc107; /* Colore giallo/arancio */
+    color: #333; 
+    border-radius: 50%; /* Rende l'elemento un cerchio */
+    width: 50px; 
+    height: 50px; 
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Ombra per farlo risaltare */
+    z-index: 1000; /* Assicura che sia sopra gli altri elementi */
+    text-decoration: none; 
+    transition: background-color 0.2s;
+}
+
+.floating-cart-btn:hover {
+    background-color: #ffca2c;
+}
