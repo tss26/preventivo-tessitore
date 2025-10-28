@@ -434,3 +434,38 @@ body {
     color: #000;
     text-decoration: none;
 }
+
+/* ======================================= */
+/* STILI PER IL BOTTONE CARRELLO FLUTTUANTE */
+/* ======================================= */
+
+.floating-cart-btn {
+    /* 🔑 Posizionamento Fisso e Z-Index */
+    position: fixed; /* Lo fissa rispetto alla finestra del browser */
+    bottom: 30px;    /* 30px dal fondo */
+    right: 30px;     /* 30px da destra */
+    
+    /* CHIAVE ANTI-CONFLITTO: z-index > 1000 */
+    /* Lo impostiamo a 1010 per avere un margine di sicurezza */
+    z-index: 1010;   
+    
+    /* Stile Visivo del Bottone */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 65px; /* Leggermente più grande */
+    height: 65px;
+    font-size: 30px; /* Icona Carrello grande */
+    background-color: #dc3545; /* Un colore che spicchi (Rosso/Carrello) */
+    color: white;
+    border-radius: 50%; /* Circolare */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); /* Ombra pronunciata */
+    text-decoration: none;
+    transition: transform 0.2s, background-color 0.2s;
+    border: 4px solid white; /* Aggiunge un bordo bianco per staccarlo */
+}
+
+.floating-cart-btn:hover {
+    background-color: #c82333; /* Scurisce al passaggio del mouse */
+    transform: scale(1.1); /* Piccolo effetto di ingrandimento/salto */
+}
