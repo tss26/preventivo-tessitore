@@ -456,7 +456,7 @@ body {
     width: 65px; /* Leggermente più grande */
     height: 65px;
     font-size: 30px; /* Icona Carrello grande */
-    background-color: #dc3545; /* Un colore che spicchi (Rosso/Carrello) */
+    background-color: #007bff; /* Un colore che spicchi (Rosso/Carrello) */
     color: white;
     border-radius: 50%; /* Circolare */
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); /* Ombra pronunciata */
