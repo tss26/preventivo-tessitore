@@ -187,14 +187,3 @@ h1, h2, h3 {
         padding-top: 80px; /* Assicurati che ci sia abbastanza spazio per il gruppo */
     }
 }
-
-/* Nuova classe per il secondo box con meno margine superiore */
-.info-container {
-    max-width: 400px;
-    margin: 30px auto; /* Margine ridotto per avvicinarlo */
-    padding: 20px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    text-align: center;
-}
