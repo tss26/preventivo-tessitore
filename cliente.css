@@ -456,7 +456,7 @@ body {
     width: 65px; /* Leggermente più grande */
     height: 65px;
     font-size: 30px; /* Icona Carrello grande */
-    background-color: #007bff; /* Un colore che spicchi (Rosso/Carrello) */
+    background-color: #24b6ff; /* Un colore che spicchi (Rosso/Carrello) */
     color: white;
     border-radius: 50%; /* Circolare */
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); /* Ombra pronunciata */
@@ -466,6 +466,6 @@ body {
 }
 
 .floating-cart-btn:hover {
-    background-color: #c82333; /* Scurisce al passaggio del mouse */
+    background-color: #007bff; /* #c82333 Scurisce al passaggio del mouse */
     transform: scale(1.1); /* Piccolo effetto di ingrandimento/salto */
 }
