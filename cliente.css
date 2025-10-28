@@ -257,6 +257,17 @@ body {
   margin-top: 2rem;
 }
 
+/* RESPONSIVE: Le regole media query sono ora obsolete e possono essere rimosse */
+/* CANCELLATO: @media (max-width: 960px) { ... } */
+ 
+.galleria-prodotti-container {
+   /* Regole obsolete rimosse */
+}
+
+.categorie,
+.forme {
+  /* Regole obsolete rimosse */
+}
 
 
 /* CLIENTE.CSS - Stili per la sezione ordini */
@@ -355,10 +366,6 @@ body {
     table-layout: fixed; /* Assicura che le colonne abbiano larghezza uniforme */
     border-collapse: collapse;
     margin-bottom: 20px;
-  /* NUOVO: Bordo esterno per delimitare l'intera tabella */
-    border: 1px solid #dee2e6; 
-    border-radius: 6px; 
-    overflow: hidden;
 }
 
 /* Larghezza minima per le celle che contengono le taglie e i campi input */
@@ -367,9 +374,7 @@ body {
     text-align: center;
     white-space: nowrap; /* Evita che il testo vada a capo */
     width: 10%; /* Larghezza proporzionale a ogni colonna taglia */
-    border: 1px solid #dee2e6;/* NUOVO: Bordo tra le celle per chiarezza */
 }
-
 
 /* Stile per i campi di input quantità */
 .taglie-table input[type="number"] {
