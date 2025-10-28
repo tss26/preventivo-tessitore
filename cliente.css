@@ -370,14 +370,7 @@ body {
     border: 1px solid #dee2e6;/* NUOVO: Bordo tra le celle per chiarezza */
 }
 
-/*------------ Stile per l'intestazione---------------- */
-.taglie-table thead tr {
-    /* NUOVO: Sfondo leggero per l'intestazione */
-    background-color: #f8f9fa; 
-    font-weight: 600;
-    color: #343a40;
-}
-/*---------------*/
+
 /* Stile per i campi di input quantità */
 .taglie-table input[type="number"] {
     /* Imposta una larghezza fissa molto piccola per gli input */
