@@ -993,7 +993,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             mostraVistaOrdini();
         });
         
-        document.querySelector('.nav a[href="index.html"]').addEventListener('click', (e) => {
+        document.querySelector('.nav a[href="cliente.html"]').addEventListener('click', (e) => {
              if (document.getElementById('ordiniCliente').style.display !== 'none') {
                  e.preventDefault();
                  mostraVistaPreventivo();
