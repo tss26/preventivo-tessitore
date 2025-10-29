@@ -713,15 +713,15 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
         const ivaDovuta = totaleImponibileNumerico * ivaRate;
         const totaleFinale = totaleImponibileNumerico + ivaDovuta;
         
-        dettagliHtml += `\n-----------------------------------------------------------------------------------------\n`;
+        dettagliHtml += `\n-------------------------------------------------------------------------\n`;
         dettagliHtml += `\nTOTALE IMPONIBILE (Netto): € ${totaleImponibileNumerico.toFixed(2)}`;
         dettagliHtml += `\nIVA (22%): € ${ivaDovuta.toFixed(2)}`;
         dettagliHtml += `\nTOTALE DOVUTO (IVA Incl.): € ${totaleFinale.toFixed(2)}\n`;
-        dettagliHtml += `\n-----------------------------------------------------------------------------------------\n`;
+        dettagliHtml += `\n-------------------------------------------------------------------------\n`;
     } else {
-        dettagliHtml += `\n-----------------------------------------------------------------------------------------\n`;
+        dettagliHtml += `\n-------------------------------------------------------------------------\n`;
         dettagliHtml += `\nTotale non disponibile (importo lordo: ${totaleImponibileNumerico.toFixed(2)}).\n`;
-        dettagliHtml += `\n-----------------------------------------------------------------------------------------\n`;
+        dettagliHtml += `\n-------------------------------------------------------------------------\n`;
     }
     
     // Aggiorna e mostra il modale
