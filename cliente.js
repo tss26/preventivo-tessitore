@@ -639,8 +639,8 @@ async function caricaMieiOrdini() {
     let html = `<div class="lista-ordini-table-wrapper"><table><thead><tr><th>N. Ordine</th><th>Data</th><th>Totale</th><th>Stato</th><th>Dettagli</th></tr></thead><tbody>`;
     ordini.forEach(ordine => {
         const numeroOrdine = ordine.num_ordine_prog ? ordine.num_ordine_prog : ordine.id.substring(0, 8).toUpperCase(); 
-        // MODIFICA QUI: PASSAGGIO DEL NUMERO ORDINE PROGRESSIVO
-        html += `<tr data-id="${ordine.id}"><td>${numeroOrdine}</td><td>${new Date(ordine.data_ordine).toLocaleString()}</td><td>€ ${ordine.totale ? ordine.totale.toFixed(2) : '0.00'}</td><td><span class="stato-ordine stato-${ordine.stato.replace(/\s/g, '-')}">${ordine.stato}</span></td><td><button onclick="mostraDettagliOrdine('${ordine.id}', '${JSON.stringify(ordine.dettagli_prodotti).replace(/"/g, '&quot;')}', '${ordine.num_ordine_prog}')" class="btn-primary" style="padding: 5px 10px;">Vedi Dettagli</button></td></tr>`;
+        // MODIFICA QUI: PASSAGGIO DEL NUMERO ORDINE PROGRESSIVO E DEL TOTALE
+        html += `<tr data-id="${ordine.id}"><td>${numeroOrdine}</td><td>${new Date(ordine.data_ordine).toLocaleString()}</td><td>€ ${ordine.totale ? ordine.totale.toFixed(2) : '0.00'}</td><td><span class="stato-ordine stato-${ordine.stato.replace(/\s/g, '-')}">${ordine.stato}</span></td><td><button onclick="mostraDettagliOrdine('${ordine.id}', '${JSON.stringify(ordine.dettagli_prodotti).replace(/"/g, '&quot;')}', '${ordine.num_ordine_prog}', ${ordine.totale || 0})" class="btn-primary" style="padding: 5px 10px;">Vedi Dettagli</button></td></tr>`;
     });
     html += '</tbody></table></div>';
     container.innerHTML = html;
@@ -658,15 +658,17 @@ async function caricaMieiOrdini() {
 
 /**
  * 4. Mostra i dettagli dell'ordine in un modale HTML selezionabile.
- * MODIFICATA PER ACCETTARE E VISUALIZZARE numeroOrdineProg
+ * MODIFICATA PER ACCETTARE, VISUALIZZARE numeroOrdineProg E CALCOLARE IVA
  */
-function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg) {
+function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg, totaleImponibile) {
     const dettagli = JSON.parse(dettagliProdottiString); 
     const modal = document.getElementById('orderDetailsModal');
     const modalBody = document.getElementById('modalOrderDetails');
     const modalTitle = document.getElementById('modalOrderId');
 
-    let dettagliHtml = `Ordine ID: ${ordineId.substring(0, 8)}...\n\nDETTAGLI PRODOTTI:\n`; 
+    // Modifica 1: Inclusione del Numero Ordine accanto all'ID all'interno del body
+    const numeroOrdineVisualizzato = numeroOrdineProg && numeroOrdineProg !== 'null' ? `N. ${numeroOrdineProg} / ` : '';
+    let dettagliHtml = `Ordine ID: ${numeroOrdineVisualizzato}${ordineId.substring(0, 8)}...\n\nDETTAGLI PRODOTTI:\n`; 
     
     dettagli.forEach(item => {
         dettagliHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
@@ -696,17 +698,35 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
             dettagliHtml += `File: Nessun file collegato direttamente.\n`;
         }
     });
-//---------------------- AGGIUNGI QUI LA TUA RIGA DI TESTO FINALE--------------------
-        
-        dettagliHtml += '\n-----------------------------------------------------------------------------------------\n'; // Puoi personalizzare le formattazioni
-        dettagliHtml += '\n Per procedere con l ordine effettuare Bonifico intestato a : Tessitore s.r.l.  \n';
-        dettagliHtml += '\n BANCA : SELLA  IBAN : IT56 O032 6804 6070 5227 9191 820 \n';
-        dettagliHtml += '\n-----------------------------------------------------------------------------------------\n';
 
+    // **********************************************
+    // AGGIUNTA TESTO BONIFICO E CALCOLO TOTALI (MODIFICA 2)
+    // **********************************************
+    dettagliHtml += '\n-----------------------------------------------------------------------------------------\n'; 
+    dettagliHtml += '\n Per procedere con l\'ordine effettuare Bonifico intestato a : Tessitore s.r.l.  \n';
+    dettagliHtml += '\n BANCA : SELLA  IBAN : IT56 O032 6804 6070 5227 9191 820 \n';
+    
+    const ivaRate = 0.22; // 22%
+    let totaleImponibileNumerico = parseFloat(totaleImponibile) || 0; // Prende il totale passato
+    
+    if (totaleImponibileNumerico > 0) {
+        const ivaDovuta = totaleImponibileNumerico * ivaRate;
+        const totaleFinale = totaleImponibileNumerico + ivaDovuta;
         
+        dettagliHtml += `\n-----------------------------------------------------------------------------------------\n`;
+        dettagliHtml += `\nTOTALE IMPONIBILE (Netto): € ${totaleImponibileNumerico.toFixed(2)}`;
+        dettagliHtml += `\nIVA (22%): € ${ivaDovuta.toFixed(2)}`;
+        dettagliHtml += `\nTOTALE DOVUTO (IVA Incl.): € ${totaleFinale.toFixed(2)}\n`;
+        dettagliHtml += `\n-----------------------------------------------------------------------------------------\n`;
+    } else {
+        dettagliHtml += `\n-----------------------------------------------------------------------------------------\n`;
+        dettagliHtml += `\nTotale non disponibile (importo lordo: ${totaleImponibileNumerico.toFixed(2)}).\n`;
+        dettagliHtml += `\n-----------------------------------------------------------------------------------------\n`;
+    }
+    
     // Aggiorna e mostra il modale
-    // CAMBIO APPLICATO QUI: Usa numeroOrdineProg se disponibile
-    modalTitle.textContent = numeroOrdineProg ? `Ordine N. ${numeroOrdineProg}` : `Ordine ID: ${ordineId.substring(0, 8).toUpperCase()}...`;
+    // CAMBIO APPLICATO QUI: Usa numeroOrdineProg se disponibile
+    modalTitle.textContent = numeroOrdineProg && numeroOrdineProg !== 'null' ? `Dettagli Ordine Completo: N. ${numeroOrdineProg}` : `Dettagli Ordine Completo (ID: ${ordineId.substring(0, 8)}...)`;
     modalBody.textContent = dettagliHtml; // Usiamo textContent per prevenire problemi di injection
     modal.style.display = 'block';
 }
