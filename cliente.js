@@ -127,8 +127,8 @@ async function verificaCliente() {
 
     // AZIONE CRITICA 2: Reindirizza l'admin alla dashboard Admin
     if (profilo.permessi === 'admin') {
-         window.location.href = 'admin.html';
-         return false;
+           window.location.href = 'admin.html';
+           return false;
     }
 
     const logoElement = document.querySelector('.logo');
@@ -203,27 +203,27 @@ function aggiornaUIPreventivo() {
 
 
 // ===========================================
-// NUOVA FUNZIONE DI UTILITY (GENERAZIONE N. ORDINE)
+// FUNZIONE DI UTILITY (GENERAZIONE N. ORDINE) - AGGIORNATA PER USARE RPC
 // ===========================================
 
+/**
+ * Chiama la funzione RPC di Supabase per incrementare il contatore globale
+ * e ottenere il prossimo numero d'ordine formattato (es. 25/0001).
+ * La logica è gestita dal database per bypassare l'RLS.
+ */
 async function generaNumeroOrdineTemporaneo() {
-    const { data } = await supabase
-        .from('ordini')
-        .select('num_ordine_prog')
-        .order('data_ordine', { ascending: false })
-        .limit(1)
-        .single();
-    const annoCorrente = new Date().getFullYear().toString().substring(2); 
-    let prossimoNumero = 1;
-    if (data && data.num_ordine_prog) {
-        const ultimoOrdine = data.num_ordine_prog; 
-        const parti = ultimoOrdine.split('/');
-        if (parti.length === 2 && parti[0] === annoCorrente && !isNaN(parseInt(parti[1]))) {
-            prossimoNumero = parseInt(parti[1]) + 1;
-        }
+    // Chiama la funzione RPC sul database. Assicurati che la funzione 
+    // 'incrementa_e_genera_num_ordine' sia stata creata in Supabase come SECURITY DEFINER.
+    const { data: numeroOrdine, error } = await supabase.rpc('incrementa_e_genera_num_ordine');
+
+    if (error) {
+        console.error("Errore RPC nella generazione del numero d'ordine:", error);
+        // È cruciale che l'ordine non venga inviato con un numero non valido
+        throw new Error("Impossibile generare un numero d'ordine univoco. Riprova.");
     }
-    const numeroFormattato = prossimoNumero.toString().padStart(4, '0');
-    return `${annoCorrente}/${numeroFormattato}`; 
+    
+    // 'numeroOrdine' conterrà il valore formattato es. "25/0001"
+    return numeroOrdine; 
 }
 
 
@@ -426,7 +426,18 @@ async function gestisciCheckout() {
     if (carrelloDaSalvare.length === 0) { alert("Il preventivo è vuoto."); return; }
     
     const totaleCalcolato = calcolaTotaleParziale();
-    const numeroOrdineGenerato = await generaNumeroOrdineTemporaneo();
+    
+    // *** CHIAMATA ALLA FUNZIONE AGGIORNATA ***
+    let numeroOrdineGenerato;
+    try {
+        numeroOrdineGenerato = await generaNumeroOrdineTemporaneo();
+    } catch (e) {
+        alert(e.message);
+        return; // Blocca il checkout in caso di errore RPC
+    }
+    
+    // FINE CHIAMATA ALLA FUNZIONE AGGIORNATA
+    
 
     if (!confirm(`Confermi l'invio del preventivo N. ${numeroOrdineGenerato} per € ${totaleCalcolato.toFixed(2)}?`)) { return; }
     
