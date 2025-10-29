@@ -702,7 +702,7 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
         dettagliHtml += '\n Per procedere con l ordine effettuare Bonifico intestato a : Tessitore s.r.l.  \n';
         dettagliHtml += '\n BANCA : SELLA  IBAN : IT56 O032 6804 6070 5227 9191 820 \n';
         dettagliHtml += '\n---------------------------------------------------------\n';
-  \n';
+
         
     // Aggiorna e mostra il modale
     // CAMBIO APPLICATO QUI: Usa numeroOrdineProg se disponibile
