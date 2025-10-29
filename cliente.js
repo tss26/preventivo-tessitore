@@ -696,7 +696,14 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
             dettagliHtml += `File: Nessun file collegato direttamente.\n`;
         }
     });
-
+//---------------------- AGGIUNGI QUI LA TUA RIGA DI TESTO FINALE--------------------
+        
+        dettagliHtml += '\n---------------------------------------------------------\n'; // Puoi personalizzare le formattazioni
+        dettagliHtml += '\n Per procedere con l'ordine effettuare Bonifico intestato a : Tessitore s.r.l.  \n';
+        dettagliHtml += '\n BANCA : SELLA  IBAN : IT56 O032 6804 6070 5227 9191 820 \n';
+        dettagliHtml += '\n---------------------------------------------------------\n';
+  \n';
+        
     // Aggiorna e mostra il modale
     // CAMBIO APPLICATO QUI: Usa numeroOrdineProg se disponibile
     modalTitle.textContent = numeroOrdineProg ? `Ordine N. ${numeroOrdineProg}` : `Ordine ID: ${ordineId.substring(0, 8).toUpperCase()}...`;
