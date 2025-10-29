@@ -357,6 +357,73 @@ body {
 }
 
 /* ======================================= */
+/* --- NUOVI STILI PER IL BANNER DI NAVIGAZIONE INIZIALE --- */
+
+.banner-iniziale-nav {
+    /* Stile generale del blocco (simile agli altri .galleria-blocco) */
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 2rem; /* Spazio sotto il blocco */
+}
+
+.banner-grid {
+    /* Layout a griglia 3 colonne */
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem; /* Spazio tra i blocchi */
+}
+
+.banner-item {
+    /* Stile per ogni blocco/card cliccabile */
+    display: block; /* Rende tutto il blocco cliccabile */
+    text-decoration: none;
+    color: inherit;
+    border-radius: 12px;
+    overflow: hidden; /* Assicura che l'immagine non sborderà */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 100%;
+}
+
+.banner-item:hover {
+    transform: translateY(-3px); /* Effetto sollevamento al passaggio del mouse */
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+}
+
+.banner-item img {
+    /* Stile per le immagini interne */
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover; /* Assicura che l'immagine copra lo spazio senza distorsioni */
+    border-radius: 12px;
+}
+
+.banner-item-content {
+    /* Per un testo opzionale sotto l'immagine (se non usi solo l'immagine) */
+    padding: 1rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* 📱 RESPONSIVE - Su schermi piccoli (cellulare) */
+@media (max-width: 768px) {
+    .banner-grid {
+        /* Passa a una colonna singola su schermi più stretti */
+        grid-template-columns: 1fr;
+    }
+}
+
+
+
+
+
+
+
+
+/* ======================================= */
 /* STILI PER TABELLE TAGLIE KIT CALCIO */
 /* ======================================= */
 
