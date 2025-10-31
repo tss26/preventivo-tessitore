@@ -1124,7 +1124,7 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
             if (content.style.display === 'block') {
                 content.style.display = 'none';
             } else {
-                content.innerHTML = `<p><strong>Prezzo:</strong> €${prezzo.toFixed(2)} al metro lineare (Fascia Minima).</p><p><strong>Larghezza Fissa:</strong> ${larghezza} cm.</p><p><strong>Requisiti File:</strong> Vettoriale (.PDF) o Raster (.PNG ad alta risoluzione, 300dpi).</p>`;
+                content.innerHTML = `<p><strong>Prezzo:</strong> €${prezzo.toFixed(2)} al metro lineare (Fascia Minima).</p><p><strong>Larghezza Fissa:</strong> ${larghezza} cm.</p><p><strong>Requisiti File:</strong> Vettoriale (.PDF) o Raster (.PNG ad alta risoluzione, 300dpi).</p><p><strong>I File caricati non verranno controllati e neanche modificati</p>`;
                 content.style.display = 'block';
             }
         });
