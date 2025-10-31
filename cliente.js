@@ -1000,12 +1000,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('logoutBtn').addEventListener('click', handleLogout);
         document.getElementById('aggiungiBandiera').addEventListener('click', gestisciAggiuntaAlCarrello);
         document.getElementById('richiediPreventivo').addEventListener('click', gestisciCheckout);
-        /*
+        
         document.getElementById('mieiOrdiniBtn').addEventListener('click', (e) => {
             e.preventDefault();
             mostraVistaOrdini();
         });
-        */
+        
         document.querySelector('.nav a[href="cliente.html"]').addEventListener('click', (e) => {
              if (document.getElementById('ordiniCliente').style.display !== 'none') {
                  e.preventDefault();
@@ -1124,13 +1124,12 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
             if (content.style.display === 'block') {
                 content.style.display = 'none';
             } else {
-                content.innerHTML = `<p><strong>Prezzo:</strong> €${prezzo.toFixed(2)} al metro lineare (Fascia Minima).</p><p><strong>Larghezza Fissa:</strong> ${larghezza} cm.</p><p><strong>Requisiti File:</strong> Vettoriale (.PDF) o Raster (.PNG ad alta risoluzione, 300dpi).</p><p><strong>I File caricati non verranno controllati e neanche modificati</p>`;
+                content.innerHTML = `<p><strong>Prezzo:</strong> €${prezzo.toFixed(2)} al metro lineare (Fascia Minima).</p><p><strong>Larghezza Fissa:</strong> ${larghezza} cm.</p><p><strong>Requisiti File:</strong> Vettoriale (.PDF) o Raster (.PNG ad alta risoluzione, 300dpi).</p>`;
                 content.style.display = 'block';
             }
         });
 
         aggiornaUIPreventivo();
-        
         mostraVistaPreventivo();
         calcolaPrezzoDinamico(); // Inizializza il prezzo dinamico all'avvio (Bandiere)
         calcolaPrezzoDinamicoKit(); // Inizializza il prezzo dinamico Kit all'avvio
