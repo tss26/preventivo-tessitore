@@ -726,7 +726,7 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
     
     // Aggiorna e mostra il modale
     // CAMBIO APPLICATO QUI: Usa numeroOrdineProg se disponibile
-    modalTitle.textContent = numeroOrdineProg && numeroOrdineProg !== 'null' ? `Dettagli Ordine Completo: N. ${numeroOrdineProg}` : `Dettagli Ordine Completo (ID: ${ordineId.substring(0, 8)}...)`;
+    modalTitle.textContent = numeroOrdineProg && numeroOrdineProg !== 'null' ? `Dettagli Ordine Completo: N. ${numeroOrdineProg}` : ` (ID: ${ordineId.substring(0, 8)}...)`;
     modalBody.textContent = dettagliHtml; // Usiamo textContent per prevenire problemi di injection
     modal.style.display = 'block';
 }
