@@ -208,6 +208,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', handleLogout);
     }
+
+const mieiOrdiniBtn = document.getElementById('mieiOrdiniBtn');
+if (mieiOrdiniBtn) {
+    mieiOrdiniBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        // Reindirizza a cliente.html e aggiunge un hash per indicare di aprire gli ordini
+        window.location.href = 'cliente.html#ordini'; 
+    });
+}
+
+    
     
     // Listener per il submit del form
     const profileForm = document.getElementById('profileForm');
