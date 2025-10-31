@@ -1130,13 +1130,7 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
         });
 
         aggiornaUIPreventivo();
-        // *** INIZIO MODIFICA ***
-        if (window.location.hash === '#imieiordini') {
-            mostraVistaOrdini();
-        } else {
-            mostraVistaPreventivo();
-        }
-        // *** FINE MODIFICA ***
+        
         mostraVistaPreventivo();
         calcolaPrezzoDinamico(); // Inizializza il prezzo dinamico all'avvio (Bandiere)
         calcolaPrezzoDinamicoKit(); // Inizializza il prezzo dinamico Kit all'avvio
