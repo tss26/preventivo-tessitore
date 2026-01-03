@@ -99,7 +99,10 @@ async function caricaOrdini() { // <-- MODIFICATA: Ora salva in allOrders e chia
 /**
  * Funzione di utilità per disegnare la tabella degli ordini, usata da caricaOrdini e applyFilters.
  */
-function renderOrderList(ordiniDaVisualizzare) { // <-- AGGIUNTA: Contiene la logica di visualizzazione
+/**
+ * Funzione di utilità per disegnare la tabella degli ordini
+ */
+function renderOrderList(ordiniDaVisualizzare) { 
     const container = document.getElementById('ordiniLista');
     
     if (ordiniDaVisualizzare.length === 0) {
@@ -115,7 +118,7 @@ function renderOrderList(ordiniDaVisualizzare) { // <-- AGGIUNTA: Contiene la lo
     ordiniDaVisualizzare.forEach(ordine => {
         const dettagliProdotti = JSON.stringify(ordine.dettagli_prodotti).replace(/"/g, '&quot;');
         
-        // --- LOGICA DI VISUALIZZAZIONE ---
+        // Calcolo del numero ordine leggibile (es. 26/0012)
         const numeroOrdine = ordine.num_ordine_prog 
             ? ordine.num_ordine_prog 
             : ordine.id.substring(0, 8).toUpperCase(); 
@@ -126,7 +129,6 @@ function renderOrderList(ordiniDaVisualizzare) { // <-- AGGIUNTA: Contiene la lo
             : 'ID: ' + (ordine.user_id ? ordine.user_id.substring(0, 8) : 'N/D'); 
         
         const clientePiva = (ordine.utente && ordine.utente.partita_iva) || 'N/D';
-        // --- FINE LOGICA DI VISUALIZZAZIONE ---
         
         html += `
             <tr data-id="${ordine.id}">
@@ -149,7 +151,7 @@ function renderOrderList(ordiniDaVisualizzare) { // <-- AGGIUNTA: Contiene la lo
                     </select>
                 </td>
                 <td>
-                    <button onclick="mostraDettagli('${ordine.id}', '${dettagliProdotti}')" class="btn-primary" style="padding: 5px 10px;">Vedi Dettagli</button>
+                    <button onclick="mostraDettagli('${ordine.id}', '${dettagliProdotti}', '${numeroOrdine}')" class="btn-primary" style="padding: 5px 10px;">Vedi Dettagli</button>
                 </td>
             </tr>
         `;
@@ -158,7 +160,6 @@ function renderOrderList(ordiniDaVisualizzare) { // <-- AGGIUNTA: Contiene la lo
     html += '</tbody></table></div>';
     container.innerHTML = html;
     
-    // Ri-aggiungi i listener per l'update dello stato
     document.querySelectorAll('.stato-select').forEach(select => {
         select.addEventListener('change', (e) => aggiornaStatoOrdine(e.target.dataset.id, e.target.value));
     });
@@ -248,27 +249,33 @@ async function aggiornaStatoOrdine(ordineId, nuovoStato) {
 /**
  * 4. Mostra i dettagli dell'ordine in un modale HTML selezionabile.
  */
-function mostraDettagli(ordineId, dettagliProdottiString) {
+/**
+ * 4. Mostra i dettagli dell'ordine in un modale.
+ * MODIFICATA: Ora accetta numeroOrdineVisibile
+ */
+function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile) {
     const dettagli = JSON.parse(dettagliProdottiString); 
     const modal = document.getElementById('orderDetailsModal');
     const modalBody = document.getElementById('modalOrderDetails');
     const modalTitle = document.getElementById('modalOrderId');
 
     if (!modal || !modalBody || !modalTitle) {
-        // Fallback: se gli elementi del modale non esistono nell'HTML, usa alert
         console.error("Elementi modale non trovati in admin.html!");
         alert("Errore nel caricamento del modale. Controllare l'HTML.");
         return; 
     }
     
-    let dettagliHtml = `Ordine ID: ${ordineId.substring(0, 8)}...\n\nDETTAGLI PRODOTTI:\n`; 
+    // Se per qualche motivo il numero visibile non arriva, usiamo l'ID tronco come fallback
+    const labelOrdine = numeroOrdineVisibile || ordineId.substring(0, 8).toUpperCase();
+
+    // Aggiorniamo il corpo del testo per includere il numero leggibile
+    let dettagliHtml = `Riferimento Ordine: ${labelOrdine}\n(ID Univoco DB: ${ordineId})\n\nDETTAGLI PRODOTTI:\n`; 
  
     dettagli.forEach(item => {
         dettagliHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
         dettagliHtml += `Componenti: ${item.componenti.join(', ')}\n`;
         dettagliHtml += `Prezzo netto cad.: € ${item.prezzo_unitario}\n`;
   
-        // Logica Taglie (per Kit Calcio)
         if (item.dettagli_taglie && Object.keys(item.dettagli_taglie).length > 0) {
             dettagliHtml += `\nDettagli Taglie:\n`;
             for (const genere in item.dettagli_taglie) {
@@ -279,12 +286,10 @@ function mostraDettagli(ordineId, dettagliProdottiString) {
             }
         }
         
-        // Logica Note
         if (item.note && item.note.trim() !== '') {
             dettagliHtml += `Note Cliente: ${item.note}\n`;
         }
 
-        // Logica File
         if (item.personalizzazione_url && item.personalizzazione_url !== 'Nessun file collegato direttamente.') {
            dettagliHtml += `File: COPIA E APRI L'URL:\n${item.personalizzazione_url}\n`;
         } else {
@@ -292,24 +297,17 @@ function mostraDettagli(ordineId, dettagliProdottiString) {
         }
     });
 
-    // Aggiorna titolo e corpo del modale
-    modalTitle.textContent = ordineId.substring(0, 8).toUpperCase() + '...';
+    // Aggiorna titolo del modale con il numero leggibile (es. 26/0012)
+    modalTitle.textContent = labelOrdine;
     modalBody.textContent = dettagliHtml;
 
-    // ============================================================
-    // NUOVA PARTE AGGIUNTA: LOGICA TASTO STAMPA
-    // ============================================================
-    
-    // 1. Controlliamo se il bottone esiste già per evitare duplicati
+    // --- LOGICA TASTO STAMPA ---
     let btnStampa = document.getElementById('btnStampaOrdine');
-    
     if (!btnStampa) {
-        // 2. Creiamo il bottone se non esiste
         btnStampa = document.createElement('button');
-        btnStampa.id = 'btnStampaOrdine'; // ID fondamentale per il CSS @media print
+        btnStampa.id = 'btnStampaOrdine'; 
         btnStampa.textContent = '🖨️ Stampa Ordine';
         
-        // 3. Stile inline (pulsante Grigio scuro per coerenza Admin)
         btnStampa.style.marginTop = '15px';
         btnStampa.style.padding = '10px 20px';
         btnStampa.style.backgroundColor = '#6c757d'; 
@@ -320,17 +318,13 @@ function mostraDettagli(ordineId, dettagliProdottiString) {
         btnStampa.style.fontSize = '1rem';
         btnStampa.style.float = 'right'; 
         
-        // 4. Evento Click: Lancia la stampa del browser
         btnStampa.onclick = function() {
             window.print();
         };
-
-        // 5. Inseriamo il bottone DOPO il div del testo (modalBody)
         modalBody.parentNode.insertBefore(btnStampa, modalBody.nextSibling);
     }
-    // ============================================================
+    // ----------------------------
 
-    // Mostra il modale
     modal.style.display = 'block';
 }
 
