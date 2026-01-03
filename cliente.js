@@ -1209,8 +1209,26 @@ function getMargine(qty) {
     return 0.30;
 }
 
+
+// A) LA MAPPA DEI NOMI (Aggiungila qui sotto alle costanti)
+const labelMap = {
+    K6: "Ricamo lato cuore", K7: "Ricamo lato opposto", K1: "Ricamo Centro Petto",
+    K8: "Ricamo manica SX", K9: "Ricamo manica DX", K4: "Ricamo Coscia SX",
+    K5: "Ricamo Coscia DX", K10: "Ricamo sottocollo", K11: "Ricamo spalle",
+    M6: "Nome ricamato", K14: "Stampa fronte A4", M14: "Stampa fronte A3",
+    K15: "Stampa lato cuore", K21: "Stampa Centro Petto", K16: "Stampa manica SX",
+    K17: "Stampa manica DX", K18: "Stampa sottocollo", K19: "Stampa spalle A4",
+    M19: "Stampa spalle A3", M15: "Stampa nome", K22: "Stampa Coscia SX",
+    K23: "Stampa Coscia DX"
+};
+
+
+
+
+
+// B) RICALCOLO (Legge prezziLavorazioni e quantitaList)
 function ricalcolaPrezzoRiga(riga) {
-    const prezzoAcquisto = parseFloat(riga.querySelector('.calc-codice-interno').value) || 0;
+    const prezzoAcquisto = parseFloat(riga.querySelector('.calc-codice-interno').value.replace(',', '.')) || 0;
     const qty = parseInt(riga.querySelector('.calc-qty').value) || 1;
     const rigaId = riga.dataset.id || 'default';
     const persAttive = statoPersonalizzazioni[rigaId] || [];
@@ -1219,64 +1237,61 @@ function ricalcolaPrezzoRiga(riga) {
     let i = quantitaList.findIndex(v => qty <= v);
     if (i === -1) i = quantitaList.length - 1;
 
-    let numStampe = 0;
-    let numRicami = 0;
-
     persAttive.forEach(key => {
-        if (prezziLavorazioni[key]) costoPers += prezziLavorazioni[key][i];
-        if (key.startsWith('K14') || key.startsWith('M14') || key.startsWith('K15') || key.startsWith('K21')) numStampe++;
-        if (key.startsWith('K6') || key.startsWith('K1') || key.startsWith('K11')) numRicami++;
+        if (prezziLavorazioni[key]) {
+            costoPers += prezziLavorazioni[key][i]; // <--- Qui usa la tua tabella!
+        }
     });
 
-    let prezzoConMargine = prezzoAcquisto * (1 + getMargine(qty));
-    let prezzoBase = prezzoConMargine + costoPers;
-    if (numStampe === 1 && numRicami === 0) prezzoBase *= 1.12;
-
+    let prezzoBase = (prezzoAcquisto * (1 + getMargine(qty))) + costoPers;
     riga.querySelector('.price-suggested').innerText = prezzoBase.toFixed(2);
 }
 
+// C) INVIO AL CARRELLO (Aggiornata per nomi reali e protezione NaN)
 function confermaEInviaAlCarrello(riga) {
-    const descBase = riga.querySelector('.calc-descrizione').value || "Articolo personalizzato";
+    const descBase = riga.querySelector('.calc-descrizione').value.trim() || "Articolo";
     const qty = parseInt(riga.querySelector('.calc-qty').value) || 1;
-    const prezzoSuggerito = parseFloat(riga.querySelector('.price-suggested').innerText);
-    const prezzoManuale = parseFloat(riga.querySelector('.calc-prezzo-finale').value);
-    const prezzoFinale = prezzoManuale > 0 ? prezzoManuale : prezzoSuggerito;
+    const prezzoSugg = parseFloat(riga.querySelector('.price-suggested').innerText) || 0;
+    const prezzoManu = parseFloat(riga.querySelector('.calc-prezzo-finale').value.replace(',', '.')) || 0;
+    const prezzoFinale = prezzoManu > 0 ? prezzoManu : prezzoSugg;
 
-    if (prezzoFinale <= 0) {
-        alert("Inserisci un prezzo valido");
-        return;
-    }
+    const rigaId = riga.dataset.id || 'default';
+    const elencoNomi = (statoPersonalizzazioni[rigaId] || []).map(k => labelMap[k] || k).join(', ');
+    const descFinale = elencoNomi ? `${descBase} [${elencoNomi}]` : descBase;
 
-    // Qui chiama la tua funzione aggiungiAlCarrello esistente alla riga 174
-    aggiungiAlCarrello(descBase, qty, prezzoFinale);
+    if (prezzoFinale <= 0) { alert("Prezzo non valido"); return; }
+
+    aggiungiAlCarrello(descFinale, qty, prezzoFinale);
     
-    // Reset veloce
+    // Reset
     riga.querySelector('.calc-codice-interno').value = "";
     riga.querySelector('.calc-prezzo-finale').value = "";
+    statoPersonalizzazioni[rigaId] = [];
+    ricalcolaTutteLeRighe();
 }
 
+
+// D) POPUP (Usa labelMap per mostrarti i nomi invece dei codici)
 window.apriPopupPersonalizzazioni = function(riga) {
     const rigaId = riga.dataset.id || 'default';
     const overlay = document.createElement('div');
-    overlay.className = "modal-backdrop"; // Uso la tua classe esistente per lo stile
-    overlay.style.display = "flex";
-    overlay.style.alignItems = "center";
-    overlay.style.justifyContent = "center";
+    overlay.className = "modal-backdrop";
+    overlay.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; display:flex; align-items:center; justify-content:center;";
     
-    let htmlPulsanti = `<div class="modal-content" style="max-width:500px;">
-        <h3>Personalizzazioni</h3>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:15px;">`;
+    let html = `<div class="modal-content" style="background:white; padding:20px; border-radius:10px; max-width:550px; max-height:80vh; overflow-y:auto;">
+                <h3 style="color:#009dff;margin-top:0">Personalizzazioni</h3>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">`;
 
-    for (let key in prezziLavorazioni) {
-        const checked = (statoPersonalizzazioni[rigaId] || []).includes(key) ? 'checked' : '';
-        htmlPulsanti += `<label><input type="checkbox" value="${key}" ${checked} onchange="togglePers('${rigaId}', '${key}')"> ${key}</label>`;
+    for (let cod in prezziLavorazioni) {
+        const checked = (statoPersonalizzazioni[rigaId] || []).includes(cod) ? 'checked' : '';
+        html += `<label style="display:flex; align-items:center; gap:8px; border:1px solid #eee; padding:8px; border-radius:5px; cursor:pointer; background:#f9f9f9;">
+                    <input type="checkbox" value="${cod}" ${checked} onchange="togglePers('${rigaId}', '${cod}')"> 
+                    <span style="font-size:12px;"><strong>${cod}</strong><br>${labelMap[cod] || cod}</span>
+                 </label>`;
     }
 
-    htmlPulsanti += `</div>
-        <button onclick="this.closest('.modal-backdrop').remove(); ricalcolaTutteLeRighe();" class="btn-primary" style="margin-top:20px; width:100%;">APPLICA</button>
-    </div>`;
-
-    overlay.innerHTML = htmlPulsanti;
+    html += `</div><button onclick="this.closest('.modal-backdrop').remove(); ricalcolaTutteLeRighe();" class="btn-primary" style="margin-top:20px; width:100%; padding:10px;">APPLICA</button></div>`;
+    overlay.innerHTML = html;
     document.body.appendChild(overlay);
 }
 
