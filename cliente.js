@@ -1320,7 +1320,7 @@ function aggiungiAlCarrello(nome, qta, prezzo) {
     // 3. Aggiorna l'interfaccia
     aggiornaUIPreventivo();
 }*/
-function aggiungiAlCarrello(param1, param2, param3) {
+/*----------------------------------------------function aggiungiAlCarrello(param1, param2, param3) {
     let item;
 
     // Se param1 è un OGGETTO (caso Kit Calcio)
@@ -1359,7 +1359,7 @@ function aggiungiAlCarrello(param1, param2, param3) {
     carrello.push(item);
     localStorage.setItem('carrello', JSON.stringify(carrello));
     aggiornaUIPreventivo();
-}
+}----------------------------------------------*/
 
 // ============================================================
 // LOGICA CONFIGURATORE RAPIDO (Inizio)***********
@@ -1458,6 +1458,64 @@ function parsePrezzo(valore) {
     // Se il risultato non è un numero, restituisce 0
     return isNaN(n) ? 0 : n;
 }
+
+// 2. Versione corretta e "corazzata" della funzione
+function aggiungiAlCarrello(param1, param2, param3) {
+    console.log("Dati ricevuti in aggiungiAlCarrello:", param1);
+    
+    // Inizializziamo il carrello se per qualche motivo fosse sparito
+    if (typeof carrello === 'undefined') {
+        carrello = JSON.parse(localStorage.getItem('carrello')) || [];
+    }
+
+    let item;
+
+    // CASO A: Riceve un OGGETTO (Kit Calcio)
+    if (typeof param1 === 'object' && param1 !== null) {
+        item = {
+            prodotto: param1.prodotto || param1.nome || "Kit Personalizzato",
+            quantita: parseInt(param1.quantita || param1.qta) || 1,
+            prezzo_unitario: parsePrezzo(param1.prezzo_unitario || param1.prezzo || 0),
+            note: param1.note || "",
+            componenti: param1.componenti || [],
+            dettagli_taglie: param1.dettagli_taglie || {},
+            personalizzazione_url: param1.personalizzazione_url || ""
+        };
+    } 
+    // CASO B: Riceve PARAMETRI (Configuratore Rapido)
+    else {
+        item = {
+            prodotto: param1 || "Articolo",
+            quantita: parseInt(param2) || 1,
+            prezzo_unitario: parsePrezzo(param3),
+            note: "Ordine Rapido",
+            componenti: [],
+            dettagli_taglie: {},
+            personalizzazione_url: ""
+        };
+    }
+
+    // Controllo finale anti-blocco
+    if (isNaN(item.prezzo_unitario)) item.prezzo_unitario = 0;
+    
+    // AGGIUNTA EFFETTIVA
+    carrello.push(item);
+    
+    // SALVATAGGIO
+    localStorage.setItem('carrello', JSON.stringify(carrello));
+    
+    console.log("Carrello dopo aggiunta:", carrello);
+
+    // AGGIORNAMENTO INTERFACCIA
+    if (typeof aggiornaUIPreventivo === 'function') {
+        aggiornaUIPreventivo();
+    } else {
+        console.error("La funzione aggiornaUIPreventivo non esiste!");
+    }
+}
+
+
+
 
 
 
