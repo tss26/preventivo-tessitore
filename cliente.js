@@ -1151,5 +1151,159 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
         calcolaPrezzoDinamico(); // Inizializza il prezzo dinamico all'avvio (Bandiere)
         calcolaPrezzoDinamicoKit(); // Inizializza il prezzo dinamico Kit all'avvio
         calcolaPrezzoDinamicoDTF(); // Inizializza il prezzo dinamico DTF all'avvio
+
+        // --- INIZIO INTEGRAZIONE CONFIGURATORE********** ---
+        // Attiva la logica per la prima riga del configuratore rapido
+        const primaRiga = document.querySelector('.order-row');
+        if (primaRiga) {
+            setupRigaEvents(primaRiga);
+        }
+        // --- FINE INTEGRAZIONE CONFIGURATORE ---
+        
     }
 });
+
+
+// ============================================================
+// LOGICA CONFIGURATORE RAPIDO (Inizio)***********
+// ============================================================
+const quantitaList = [5, 12, 20, 25, 30, 50, 75, 100];
+const prezziLavorazioni = {
+    K1: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3], K4: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3],
+    K5: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3], K6: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3],
+    K7: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3], K8: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3],
+    K9: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3], K10: [5, 5, 5, 4.5, 4.2, 3.8, 3.3, 3.3],
+    K11: [10, 10, 10, 8.5, 8.3, 7.5, 8, 8], M6: [3.5, 3.2, 3, 2.8, 2.6, 2.4, 2.2, 2],
+    K14: [4.5, 4, 1.9, 1.85, 1.65, 1.48, 1.24, 1.05], K21: [4.5, 4, 1.9, 1.85, 1.65, 1.48, 1.24, 1.05],
+    K22: [4.5, 4, 1.9, 1.85, 1.65, 1.48, 1.24, 1.05], K23: [4.5, 4, 1.9, 1.85, 1.65, 1.48, 1.24, 1.05],
+    K15: [4.5, 4, 1.9, 1.85, 1.65, 1.48, 1.24, 1.05], K16: [4.5, 4, 1.9, 1.85, 1.65, 1.48, 1.24, 1.05],
+    K17: [4.5, 4, 1.9, 1.85, 1.65, 1.48, 1.24, 1.05], K18: [4.5, 4, 1.9, 1.85, 1.65, 1.48, 1.24, 1.05],
+    K19: [4.5, 4, 1.9, 1.85, 1.65, 1.48, 1.24, 1.05], M19: [6, 4.8, 4.2, 3.2, 2.9, 2.5, 2.5, 2.5],
+    M14: [4.8, 4.3, 3.5, 3.25, 2.75, 2.5, 2.2, 1.55], M15: [1.7, 1.6, 1.5, 1.4, 1.3, 1.2, 1.1, 1]
+};
+
+let statoPersonalizzazioni = {};
+
+function setupRigaEvents(riga) {
+    if (!riga) return;
+    const inputs = riga.querySelectorAll('.calc-codice-interno, .calc-qty');
+    inputs.forEach(input => {
+        input.addEventListener('input', () => ricalcolaPrezzoRiga(riga));
+    });
+
+    const btnAdd = riga.querySelector('.btn-confirm-row');
+    btnAdd.addEventListener('click', () => confermaEInviaAlCarrello(riga));
+
+    const btnPopup = riga.querySelector('.btn-open-popup');
+    btnPopup.addEventListener('click', () => apriPopupPersonalizzazioni(riga));
+}
+
+function getMargine(qty) {
+    if (qty <= 5) return 0.9;
+    if (qty <= 12) return 0.75;
+    if (qty <= 20) return 0.5;
+    if (qty <= 25) return 0.4;
+    if (qty <= 30) return 0.35;
+    if (qty <= 50) return 0.33;
+    if (qty <= 75) return 0.32;
+    return 0.30;
+}
+
+function ricalcolaPrezzoRiga(riga) {
+    const prezzoAcquisto = parseFloat(riga.querySelector('.calc-codice-interno').value) || 0;
+    const qty = parseInt(riga.querySelector('.calc-qty').value) || 1;
+    const rigaId = riga.dataset.id || 'default';
+    const persAttive = statoPersonalizzazioni[rigaId] || [];
+
+    let costoPers = 0;
+    let i = quantitaList.findIndex(v => qty <= v);
+    if (i === -1) i = quantitaList.length - 1;
+
+    let numStampe = 0;
+    let numRicami = 0;
+
+    persAttive.forEach(key => {
+        if (prezziLavorazioni[key]) costoPers += prezziLavorazioni[key][i];
+        if (key.startsWith('K14') || key.startsWith('M14') || key.startsWith('K15') || key.startsWith('K21')) numStampe++;
+        if (key.startsWith('K6') || key.startsWith('K1') || key.startsWith('K11')) numRicami++;
+    });
+
+    let prezzoConMargine = prezzoAcquisto * (1 + getMargine(qty));
+    let prezzoBase = prezzoConMargine + costoPers;
+    if (numStampe === 1 && numRicami === 0) prezzoBase *= 1.12;
+
+    riga.querySelector('.price-suggested').innerText = prezzoBase.toFixed(2);
+}
+
+function confermaEInviaAlCarrello(riga) {
+    const descBase = riga.querySelector('.calc-descrizione').value || "Articolo personalizzato";
+    const qty = parseInt(riga.querySelector('.calc-qty').value) || 1;
+    const prezzoSuggerito = parseFloat(riga.querySelector('.price-suggested').innerText);
+    const prezzoManuale = parseFloat(riga.querySelector('.calc-prezzo-finale').value);
+    const prezzoFinale = prezzoManuale > 0 ? prezzoManuale : prezzoSuggerito;
+
+    if (prezzoFinale <= 0) {
+        alert("Inserisci un prezzo valido");
+        return;
+    }
+
+    // Qui chiama la tua funzione aggiungiAlCarrello esistente alla riga 174
+    aggiungiAlCarrello(descBase, qty, prezzoFinale);
+    
+    // Reset veloce
+    riga.querySelector('.calc-codice-interno').value = "";
+    riga.querySelector('.calc-prezzo-finale').value = "";
+}
+
+window.apriPopupPersonalizzazioni = function(riga) {
+    const rigaId = riga.dataset.id || 'default';
+    const overlay = document.createElement('div');
+    overlay.className = "modal-backdrop"; // Uso la tua classe esistente per lo stile
+    overlay.style.display = "flex";
+    overlay.style.alignItems = "center";
+    overlay.style.justifyContent = "center";
+    
+    let htmlPulsanti = `<div class="modal-content" style="max-width:500px;">
+        <h3>Personalizzazioni</h3>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:15px;">`;
+
+    for (let key in prezziLavorazioni) {
+        const checked = (statoPersonalizzazioni[rigaId] || []).includes(key) ? 'checked' : '';
+        htmlPulsanti += `<label><input type="checkbox" value="${key}" ${checked} onchange="togglePers('${rigaId}', '${key}')"> ${key}</label>`;
+    }
+
+    htmlPulsanti += `</div>
+        <button onclick="this.closest('.modal-backdrop').remove(); ricalcolaTutteLeRighe();" class="btn-primary" style="margin-top:20px; width:100%;">APPLICA</button>
+    </div>`;
+
+    overlay.innerHTML = htmlPulsanti;
+    document.body.appendChild(overlay);
+}
+
+window.togglePers = function(rigaId, key) {
+    if (!statoPersonalizzazioni[rigaId]) statoPersonalizzazioni[rigaId] = [];
+    const index = statoPersonalizzazioni[rigaId].indexOf(key);
+    (index > -1) ? statoPersonalizzazioni[rigaId].splice(index, 1) : statoPersonalizzazioni[rigaId].push(key);
+};
+
+window.ricalcolaTutteLeRighe = function() {
+    document.querySelectorAll('.order-row').forEach(riga => {
+        ricalcolaPrezzoRiga(riga);
+        const rigaId = riga.dataset.id || 'default';
+        riga.querySelector('.active-tags').innerHTML = (statoPersonalizzazioni[rigaId] || []).map(t => `<small style="background:#eee; padding:2px; margin:2px; display:inline-block;">${t}</small>`).join('');
+    });
+};
+
+function aggiungiNuovaRigaConfiguratore() {
+    const container = document.getElementById('order-rows-container');
+    const nuova = container.querySelector('.order-row').cloneNode(true);
+    nuova.dataset.id = Date.now();
+    nuova.querySelectorAll('input, textarea').forEach(i => i.value = "");
+    nuova.querySelector('.price-suggested').innerText = "0.00";
+    nuova.querySelector('.active-tags').innerHTML = "";
+    container.appendChild(nuova);
+    setupRigaEvents(nuova);
+}
+// ============================================================
+// LOGICA CONFIGURATORE RAPIDO (Fine gli * segnano le parti collegate)**********
+// ============================================================
