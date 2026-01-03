@@ -171,36 +171,48 @@ async function handleLogout() {
     localStorage.setItem('carrello', JSON.stringify(carrello));
     aggiornaUIPreventivo(); 
 }vecchio funzione cjhe gestiva solo un oggetto in entrata come parametro*/
+
 function aggiungiAlCarrello(param1, param2, param3) {
     let item;
 
-    // Se il primo parametro è un oggetto (caso Kit Calcio / Bandiere)
+    // CASO A: Riceve un OGGETTO (Kit Calcio, Bandiere, DTF)
     if (typeof param1 === 'object' && param1 !== null) {
+        console.log("Aggiunta da Oggetto:", param1);
         item = {
-            prodotto: param1.prodotto || "Articolo",
-            quantita: parseInt(param1.quantita) || 1,
-            prezzo_unitario: parseFloat(param1.prezzo_unitario) || 0,
+            prodotto: param1.prodotto || param1.nome || "Articolo",
+            quantita: parseInt(param1.quantita || param1.qta) || 1,
+            // Usiamo parsePrezzo per pulire simboli € o virgole
+            prezzo_unitario: parsePrezzo(param1.prezzo_unitario || param1.prezzo || 0),
             note: param1.note || "",
             componenti: param1.componenti || []
         };
     } 
-    // Se riceve 3 parametri (caso Configuratore Rapido)
+    // CASO B: Riceve 3 PARAMETRI (Configuratore Rapido)
     else {
+        console.log("Aggiunta da Parametri:", param1, param2, param3);
         item = {
             prodotto: param1,
             quantita: parseInt(param2) || 1,
-            prezzo_unitario: parseFloat(param3) || 0,
-            componenti: [] // Vuoto per configuratore rapido
+            prezzo_unitario: parsePrezzo(param3),
+            note: "Configuratore Rapido",
+            componenti: []
         };
     }
 
-    // Aggiunta e salvataggio
+    // Controllo finale anti-NaN
+    if (isNaN(item.prezzo_unitario)) item.prezzo_unitario = 0;
+
+    // Aggiunta all'array globale
     carrello.push(item);
+    
+    // Sincronizzazione LocalStorage
     localStorage.setItem('carrello', JSON.stringify(carrello));
     
-    // Feedback visivo
+    // Aggiornamento UI
     aggiornaUIPreventivo();
-    alert("Articolo aggiunto al preventivo!");
+    
+    // Opzionale: feedback all'utente
+    // alert("Aggiunto al carrello!");
 }
 
 
