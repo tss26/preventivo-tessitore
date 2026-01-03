@@ -709,41 +709,34 @@ async function gestisciAggiuntaKitCalcio() {
     container.innerHTML = html;
 }*/
 
-// Aggiungi questa variabile in alto nel file, fuori dalle funzioni
-let ordiniCaricatiLocali = []; 
+let ordiniCaricatiLocali = []; // Variabile di appoggio
 
 async function caricaMieiOrdini() {
     const container = document.getElementById('ordiniListaCliente');
-    if (!utenteCorrenteId) { container.innerHTML = `<p style="color: red;">ID utente non disponibile.</p>`; return; }
-    
-    container.innerHTML = '<p>Caricamento ordini in corso...</p>';
-    
+    if (!utenteCorrenteId) return;
+
     const { data: ordini, error } = await supabase
         .from('ordini')
-        .select(`*`)
+        .select('*')
         .eq('user_id', utenteCorrenteId)
-        .order('data_ordine', { ascending: false }); 
+        .order('data_ordine', { ascending: false });
 
-    if (error) { container.innerHTML = `<p style="color: red;">Errore: ${error.message}</p>`; return; }
-    if (ordini.length === 0) { container.innerHTML = '<p>Non hai ancora effettuato ordini.</p>'; return; }
-
-    // Salviamo gli ordini in locale per poterli riprendere senza passare stringhe pesanti nell'HTML
-    ordiniCaricatiLocali = ordini;
+    if (error) { console.error(error); return; }
+    
+    ordiniCaricatiLocali = ordini; // Salviamo i dati qui
 
     let html = `<div class="lista-ordini-table-wrapper"><table><thead><tr><th>N. Ordine</th><th>Data</th><th>Totale</th><th>Stato</th><th>Dettagli</th></tr></thead><tbody>`;
     
     ordini.forEach(ordine => {
-        const numeroOrdine = ordine.num_ordine_prog || ordine.id.substring(0, 8).toUpperCase(); 
-        
-        // MODIFICA: Chiamiamo una funzione passandogli solo l'ID
+        const numeroOrdine = ordine.num_ordine_prog || ordine.id.substring(0, 8).toUpperCase();
         html += `
-            <tr data-id="${ordine.id}">
+            <tr>
                 <td>${numeroOrdine}</td>
                 <td>${new Date(ordine.data_ordine).toLocaleString()}</td>
                 <td>€ ${ordine.totale ? ordine.totale.toFixed(2) : '0.00'}</td>
                 <td><span class="stato-ordine stato-${ordine.stato.replace(/\s/g, '-')}">${ordine.stato}</span></td>
                 <td>
-                    <button onclick="preparaEApriModale('${ordine.id}')" class="btn-primary" style="padding: 5px 10px;">
+                    <button onclick="apriDettagliOrdine('${ordine.id}')" class="btn-primary" style="padding: 5px 10px;">
                         Vedi Dettagli
                     </button>
                 </td>
@@ -752,6 +745,14 @@ async function caricaMieiOrdini() {
     html += '</tbody></table></div>';
     container.innerHTML = html;
 }
+
+// Nuova funzione per gestire l'apertura pulita
+window.apriDettagliOrdine = function(id) {
+    const ordine = ordiniCaricatiLocali.find(o => o.id === id);
+    if (ordine) {
+        mostraDettagliOrdine(ordine.id, JSON.stringify(ordine.dettagli_prodotti), ordine.num_ordine_prog, ordine.totale);
+    }
+};
 
 // Funzione ponte per aprire il modale senza errori di sintassi
 function preparaEApriModale(idOrdine) {
