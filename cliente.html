@@ -343,46 +343,46 @@
     <h2 style="color: #009dff;">Configuratore Rapido Articolo</h2>
     
     <div id="order-rows-container">
-        <div class="order-row" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; padding: 15px; background: #fff; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px;">
+        <div class="order-row" data-id="riga-1" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; padding: 15px; background: #fff; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px;">
             
             <div style="flex: 2; min-width: 250px;">
-                <label>Codice Interno (Acquisto):</label>
-                <input type="number" class="calc-codice-interno" step="0.01" placeholder="Prezzo d'acquisto €">
+                <label>Prezzo Acquisto (€):</label>
+                <input type="text" class="calc-codice-interno" placeholder="Es: 5,50" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
                 
-                <label style="margin-top: 10px; display: block;">Descrizione Lavorazione / Note:</label>
-                <textarea class="calc-descrizione" style="height: 60px;" placeholder="Es: T-shirt blu con stampa bianca..."></textarea>
+                <label style="margin-top: 10px; display: block;">Descrizione Articolo / Note:</label>
+                <textarea class="calc-descrizione" style="height: 60px; width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" placeholder="Es: T-shirt cotone fruit bianca..."></textarea>
             </div>
 
             <div style="flex: 1; min-width: 120px; text-align: center;">
                 <label>Personalizza</label>
-                <button type="button" class="btn-open-popup" style="width: 100%; font-size: 20px; padding: 10px; background: #009dff; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                    + Opzioni
+                <button type="button" class="btn-open-popup" style="width: 100%; font-size: 14px; padding: 10px; background: #009dff; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                    + OPZIONI
                 </button>
-                <div class="active-tags" style="font-size: 12px; color: #666; margin-top: 5px; min-height: 15px;"></div>
+                <div class="active-tags" style="font-size: 11px; color: #666; margin-top: 5px; min-height: 15px; line-height: 1.2;"></div>
             </div>
 
             <div style="flex: 1; min-width: 100px;">
                 <label>Quantità:</label>
-                <input type="number" class="calc-qty" value="1" min="1">
+                <input type="number" class="calc-qty" value="1" min="1" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
                 
-                <div style="margin-top: 10px; padding: 5px; background: #e8f5e9; border-radius: 4px; text-align: center;">
-                    <small>Suggerito:</small><br>
-                    <span class="price-suggested" style="color: #2e7d32; font-weight: bold; font-size: 1.1em;">0.00</span>€
+                <div style="margin-top: 10px; padding: 5px; background: #e8f5e9; border-radius: 4px; text-align: center; border: 1px solid #c8e6c9;">
+                    <small style="color: #2e7d32;">Suggerito:</small><br>
+                    <span style="color: #2e7d32; font-weight: bold; font-size: 1.1em;">€ <span class="price-suggested">0.00</span></span>
                 </div>
             </div>
 
             <div style="flex: 1; min-width: 130px;">
-                <label>Prezzo Finale:</label>
-                <input type="number" class="calc-prezzo-finale" step="0.01" placeholder="Prezzo vendita" style="border: 2px solid #009dff;">
+                <label>Prezzo Vendita (€):</label>
+                <input type="text" class="calc-prezzo-finale" placeholder="Vuoto = usa sugg." style="width: 100%; padding: 8px; border: 2px solid #009dff; border-radius: 4px;">
                 
-                <button type="button" class="btn-confirm-row" style="width: 100%; margin-top: 15px; background: #28a745; color: white; border: none; padding: 10px; border-radius: 5px; font-weight: bold; cursor: pointer;">
-                    🛒 Aggiungi
+                <button type="button" class="btn-confirm-row" style="width: 100%; margin-top: 15px; background: #28a745; color: white; border: none; padding: 12px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: background 0.2s;">
+                    🛒 AGGIUNGI
                 </button>
             </div>
         </div>
     </div>
     
-    <button type="button" onclick="aggiungiNuovaRigaConfiguratore()" style="margin-top: 10px; background: #666; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">
+    <button type="button" onclick="aggiungiNuovaRigaConfiguratore()" style="margin-top: 10px; background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: 500;">
         + Aggiungi un altro articolo
     </button>
 </section>
