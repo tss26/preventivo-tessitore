@@ -1170,7 +1170,14 @@ function aggiungiAlCarrello(nome, qta, prezzo) {
         quantita: qta,
         prezzo_unitario: prezzo
     };
+
+    // 1. Aggiungi all'array in memoria
     carrello.push(item);
+
+    // 2. SALVA NEL LOCALSTORAGE (Fondamentale per gestisciCheckout)
+    localStorage.setItem('carrello', JSON.stringify(carrello));
+
+    // 3. Aggiorna l'interfaccia
     aggiornaUIPreventivo();
 }
 
