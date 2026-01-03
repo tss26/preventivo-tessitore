@@ -539,24 +539,23 @@ body {
 
 
 
-/*---STILI PER LA STAMPA DA MODALE LATO CLIENTE--*/
 /* ======================================= */
 /* STILI PER LA STAMPA (PRINT) */
 /* ======================================= */
 
-/* Nascondi il bottone di stampa e di chiusura quando si sta stampando */
 @media print {
+    /* Nascondi tutto il corpo della pagina */
     body * {
         visibility: hidden;
     }
     
-    /* Rendi visibile solo il modale e il suo contenuto */
+    /* Rendi visibile SOLO il modale e il suo contenuto */
     #orderDetailsModal, 
     #orderDetailsModal * {
         visibility: visible;
     }
 
-    /* Posiziona il modale in alto a sinistra e rimuovi scroll */
+    /* Posiziona il modale in alto a sinistra per riempire il foglio A4 */
     #orderDetailsModal {
         position: absolute;
         left: 0;
@@ -565,9 +564,9 @@ body {
         height: auto;
         margin: 0;
         padding: 0;
-        background: white;
+        background: white; /* Assicura sfondo bianco per risparmio inchiostro */
         z-index: 9999;
-        overflow: visible !important; /* Mostra tutto il contenuto lungo */
+        overflow: visible !important; 
     }
 
     .modal-content {
@@ -579,19 +578,16 @@ body {
         padding: 0;
     }
 
-    /* Rimuovi scroll e limiti di altezza per stampare tutto il testo */
+    /* Rimuovi scrollbar per stampare tutto il testo lungo */
     #modalOrderDetails {
         max-height: none !important; 
         overflow: visible !important;
         border: none;
     }
 
-    /* Nascondi i bottoni durante la stampa */
+    /* Nascondi il bottone di chiusura (X) e il bottone di stampa stesso sul foglio */
     .close-button, 
     #btnStampaOrdine {
         display: none !important;
     }
 }
-
-
-
