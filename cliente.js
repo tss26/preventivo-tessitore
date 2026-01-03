@@ -237,7 +237,7 @@ function rimuoviDalCarrello(index) {
 
 /**
  * Aggiorna la sezione "Il tuo preventivo".
- */
+ 
 function aggiornaUIPreventivo() {
     const lista = document.getElementById('preventivoLista');
     const totaleStrong = document.getElementById('totaleParziale');
@@ -266,6 +266,48 @@ function aggiornaUIPreventivo() {
             rimuoviDalCarrello(e.target.getAttribute('data-index'));
         });
     });
+}*/
+
+function aggiornaUIPreventivo() {
+    const lista = document.getElementById('listaPreventivo');
+    const totaleElemento = document.getElementById('totalePreventivo');
+    if (!lista) return;
+
+    lista.innerHTML = '';
+    let totaleGenerale = 0;
+
+    // Usiamo la variabile globale carrello
+    carrello.forEach((item, index) => {
+        // --- IL FILTRO ANTI-NaN ---
+        // Cerchiamo il prezzo in tutte le sue possibili declinazioni
+        const prezzoSorgente = item.prezzo_unitario || item.prezzo || 0;
+        const prezzoPulito = parseFloat(prezzoSorgente) || 0;
+        const qtaPulita = parseInt(item.quantita || item.qta) || 0;
+        
+        const subtotale = qtaPulita * prezzoPulito;
+        totaleGenerale += subtotale;
+
+        const li = document.createElement('li');
+        li.style.borderBottom = "1px solid #eee";
+        li.style.padding = "10px 0";
+        li.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="flex:1;">
+                    <strong>${item.prodotto || item.nome || 'Articolo'}</strong><br>
+                    <small>${qtaPulita} pz x € ${prezzoPulito.toFixed(2)}</small>
+                </div>
+                <div style="text-align:right;">
+                    <span style="font-weight:bold;">€ ${subtotale.toFixed(2)}</span>
+                    <button onclick="rimuoviDalCarrello(${index})" style="background:none; border:none; color:red; cursor:pointer; margin-left:10px;">&times;</button>
+                </div>
+            </div>
+        `;
+        lista.appendChild(li);
+    });
+
+    if (totaleElemento) {
+        totaleElemento.innerText = totaleGenerale.toFixed(2);
+    }
 }
 
 
@@ -1351,12 +1393,33 @@ function parsePrezzo(stringa) {
     // Sostituisce la virgola con il punto e rimuove caratteri non numerici
     const valore = parseFloat(stringa.replace(',', '.'));
     return isNaN(valore) ? 0 : valore;
-}*/
+}-----
 function parsePrezzo(valore) {
     if (typeof valore === 'number') return valore;
     if (!valore) return 0;
     let s = valore.toString().replace('€', '').replace(/\s/g, '').replace(',', '.');
     return parseFloat(s) || 0;
+}*/
+// ============================================================
+// 1. FUNZIONE DI PULIZIA PREZZI (Fondamentale per evitare NaN)
+// ============================================================
+function parsePrezzo(valore) {
+    // Se è già un numero, lo restituisce subito
+    if (typeof valore === 'number') return valore;
+    
+    // Se è vuoto, null o undefined, restituisce 0
+    if (!valore) return 0;
+
+    // Se è una stringa (es: "€ 15,50"), la pulisce
+    let s = String(valore)
+        .replace('€', '')   // Toglie simbolo Euro
+        .replace(/\s/g, '') // Toglie tutti gli spazi
+        .replace(',', '.'); // Cambia virgola in punto
+
+    let n = parseFloat(s);
+    
+    // Se il risultato non è un numero, restituisce 0
+    return isNaN(n) ? 0 : n;
 }
 
 
