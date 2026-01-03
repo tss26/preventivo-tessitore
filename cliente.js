@@ -1163,6 +1163,17 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
     }
 });
 
+//Questa funzione è il "cuore" del sistema perché mette in comunicazione il configuratore con il carrello (preventivo).
+function aggiungiAlCarrello(nome, qta, prezzo) {
+    const item = {
+        prodotto: nome,
+        quantita: qta,
+        prezzo_unitario: prezzo
+    };
+    carrello.push(item);
+    aggiornaUIPreventivo();
+}
+
 
 // ============================================================
 // LOGICA CONFIGURATORE RAPIDO (Inizio)***********
@@ -1226,46 +1237,95 @@ const labelMap = {
 
 
 
+
+// Funzione di utilità per pulire i numeri
+function parsePrezzo(stringa) {
+    if (!stringa) return 0;
+    // Sostituisce la virgola con il punto e rimuove caratteri non numerici
+    const valore = parseFloat(stringa.replace(',', '.'));
+    return isNaN(valore) ? 0 : valore;
+}
+
+
+
 // B) RICALCOLO (Legge prezziLavorazioni e quantitaList)
 function ricalcolaPrezzoRiga(riga) {
-    const prezzoAcquisto = parseFloat(riga.querySelector('.calc-codice-interno').value.replace(',', '.')) || 0;
+    // 1. Recupero il prezzo d'acquisto usando la funzione parsePrezzo
+    const prezzoAcquisto = parsePrezzo(riga.querySelector('.calc-codice-interno').value);
+    
+    // 2. Recupero la quantità (default a 1 se vuoto o errato)
     const qty = parseInt(riga.querySelector('.calc-qty').value) || 1;
+    
     const rigaId = riga.dataset.id || 'default';
     const persAttive = statoPersonalizzazioni[rigaId] || [];
 
+    // 3. Calcolo il costo delle personalizzazioni in base alla fascia di quantità
     let costoPers = 0;
+    
+    // Troviamo l'indice corretto nella tabella sconti (5, 12, 20...)
     let i = quantitaList.findIndex(v => qty <= v);
-    if (i === -1) i = quantitaList.length - 1;
+    if (i === -1) i = quantitaList.length - 1; // Se la quantità supera 100, prende l'ultima fascia
 
     persAttive.forEach(key => {
         if (prezziLavorazioni[key]) {
-            costoPers += prezziLavorazioni[key][i]; // <--- Qui usa la tua tabella!
+            // Aggiunge il costo della lavorazione specifica per quella fascia
+            costoPers += prezziLavorazioni[key][i]; 
         }
     });
 
+    // 4. Calcolo finale: (Prezzo Acquisto + Margine variabile) + Costi Personalizzazione
     let prezzoBase = (prezzoAcquisto * (1 + getMargine(qty))) + costoPers;
-    riga.querySelector('.price-suggested').innerText = prezzoBase.toFixed(2);
+    
+    // 5. Aggiorno lo span visibile (prezzo suggerito) con due decimali
+    const spanSugg = riga.querySelector('.price-suggested');
+    if (spanSugg) {
+        spanSugg.innerText = prezzoBase.toFixed(2);
+    }
 }
+
+
 
 // C) INVIO AL CARRELLO (Aggiornata per nomi reali e protezione NaN)
 function confermaEInviaAlCarrello(riga) {
-    const descBase = riga.querySelector('.calc-descrizione').value.trim() || "Articolo";
-    const qty = parseInt(riga.querySelector('.calc-qty').value) || 1;
-    const prezzoSugg = parseFloat(riga.querySelector('.price-suggested').innerText) || 0;
-    const prezzoManu = parseFloat(riga.querySelector('.calc-prezzo-finale').value.replace(',', '.')) || 0;
+    // Recupero i campi
+    const inputDesc = riga.querySelector('.calc-descrizione');
+    const inputQty = riga.querySelector('.calc-qty');
+    const spanSugg = riga.querySelector('.price-suggested');
+    const inputManu = riga.querySelector('.calc-prezzo-finale');
+
+    // Pulizia Dati
+    const descBase = inputDesc ? inputDesc.value.trim() : "Articolo";
+    const qty = inputQty ? (parseInt(inputQty.value) || 1) : 1;
+    
+    // Usiamo parsePrezzo per sicurezza su suggerito e manuale
+    const prezzoSugg = parsePrezzo(spanSugg.innerText);
+    const prezzoManu = parsePrezzo(inputManu.value);
+
+    // Se l'utente non ha scritto nulla nel prezzo finale, usa quello suggerito
     const prezzoFinale = prezzoManu > 0 ? prezzoManu : prezzoSugg;
 
+    // Gestione Nomi Personalizzazioni (labelMap)
     const rigaId = riga.dataset.id || 'default';
-    const elencoNomi = (statoPersonalizzazioni[rigaId] || []).map(k => labelMap[k] || k).join(', ');
+    const elencoNomi = (statoPersonalizzazioni[rigaId] || [])
+        .map(k => labelMap[k] || k)
+        .join(', ');
+    
     const descFinale = elencoNomi ? `${descBase} [${elencoNomi}]` : descBase;
 
-    if (prezzoFinale <= 0) { alert("Prezzo non valido"); return; }
+    // Controllo sicurezza
+    if (prezzoFinale <= 0) { 
+        alert("Inserisci un prezzo valido (es. 10.50)"); 
+        return; 
+    }
 
+    // INVIO AL CARRELLO
+    // Nota: Passiamo i 3 parametri separati se la tua funzione aggiungiAlCarrello li accetta così
     aggiungiAlCarrello(descFinale, qty, prezzoFinale);
     
-    // Reset
+    // RESET RIGA
+    if(inputDesc) inputDesc.value = "";
+    if(inputManu) inputManu.value = "";
     riga.querySelector('.calc-codice-interno').value = "";
-    riga.querySelector('.calc-prezzo-finale').value = "";
     statoPersonalizzazioni[rigaId] = [];
     ricalcolaTutteLeRighe();
 }
