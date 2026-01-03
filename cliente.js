@@ -166,11 +166,45 @@ async function handleLogout() {
 // GESTIONE CARRELLO (LOGICA)
 // ===========================================
 
-function aggiungiAlCarrello(articolo) {
+/*function aggiungiAlCarrello(articolo) {
     carrello.push(articolo);
     localStorage.setItem('carrello', JSON.stringify(carrello));
     aggiornaUIPreventivo(); 
+}vecchio funzione cjhe gestiva solo un oggetto in entrata come parametro*/
+function aggiungiAlCarrello(param1, param2, param3) {
+    let item;
+
+    // Se il primo parametro è un oggetto (caso Kit Calcio / Bandiere)
+    if (typeof param1 === 'object' && param1 !== null) {
+        item = {
+            prodotto: param1.prodotto || "Articolo",
+            quantita: parseInt(param1.quantita) || 1,
+            prezzo_unitario: parseFloat(param1.prezzo_unitario) || 0,
+            note: param1.note || "",
+            componenti: param1.componenti || []
+        };
+    } 
+    // Se riceve 3 parametri (caso Configuratore Rapido)
+    else {
+        item = {
+            prodotto: param1,
+            quantita: parseInt(param2) || 1,
+            prezzo_unitario: parseFloat(param3) || 0,
+            componenti: [] // Vuoto per configuratore rapido
+        };
+    }
+
+    // Aggiunta e salvataggio
+    carrello.push(item);
+    localStorage.setItem('carrello', JSON.stringify(carrello));
+    
+    // Feedback visivo
+    aggiornaUIPreventivo();
+    alert("Articolo aggiunto al preventivo!");
 }
+
+
+
 
 function calcolaTotaleParziale() {
     return carrello.reduce((totale, item) => {
