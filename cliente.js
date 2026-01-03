@@ -267,8 +267,13 @@ function aggiornaUIPreventivo() {
 }*/
 
 function aggiornaUIPreventivo() {
-    const lista = document.getElementById('listaPreventivo');
-    const totaleElemento = document.getElementById('totalePreventivo');
+    // CORREZIONE 1: Usa l'ID corretto presente nel tuo HTML (riga 263 circa)
+    const lista = document.getElementById('preventivoLista');
+    
+    // CORREZIONE 2: Usa l'ID corretto presente nel tuo HTML (riga 266 circa)
+    const totaleElemento = document.getElementById('totaleParziale');
+
+    // Se la lista non esiste nel DOM, esce per evitare errori
     if (!lista) return;
 
     lista.innerHTML = '';
@@ -285,10 +290,11 @@ function aggiornaUIPreventivo() {
         const subtotale = qtaPulita * prezzoPulito;
         totaleGenerale += subtotale;
 
-        const li = document.createElement('li');
-        li.style.borderBottom = "1px solid #eee";
-        li.style.padding = "10px 0";
-        li.innerHTML = `
+        // Nota: Uso 'div' invece di 'li' perché il contenitore padre nel tuo HTML è un <div>, non un <ul>
+        const riga = document.createElement('div');
+        riga.style.borderBottom = "1px solid #eee";
+        riga.style.padding = "10px 0";
+        riga.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div style="flex:1;">
                     <strong>${item.prodotto || item.nome || 'Articolo'}</strong><br>
@@ -296,18 +302,18 @@ function aggiornaUIPreventivo() {
                 </div>
                 <div style="text-align:right;">
                     <span style="font-weight:bold;">€ ${subtotale.toFixed(2)}</span>
-                    <button onclick="rimuoviDalCarrello(${index})" style="background:none; border:none; color:red; cursor:pointer; margin-left:10px;">&times;</button>
+                    <button onclick="rimuoviDalCarrello(${index})" style="background:none; border:none; color:red; cursor:pointer; margin-left:10px; font-size: 1.2em;">&times;</button>
                 </div>
             </div>
         `;
-        lista.appendChild(li);
+        lista.appendChild(riga);
     });
 
     if (totaleElemento) {
-        totaleElemento.innerText = totaleGenerale.toFixed(2);
+        // CORREZIONE 3: Aggiungo il simbolo dell'Euro per mantenere lo stile
+        totaleElemento.innerText = '€ ' + totaleGenerale.toFixed(2);
     }
 }
-
 
 // ===========================================
 // FUNZIONE DI UTILITY (GENERAZIONE N. ORDINE) - AGGIORNATA PER USARE RPC
