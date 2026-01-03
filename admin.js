@@ -262,13 +262,11 @@ function mostraDettagli(ordineId, dettagliProdottiString) {
     }
     
     let dettagliHtml = `Ordine ID: ${ordineId.substring(0, 8)}...\n\nDETTAGLI PRODOTTI:\n`; 
-
  
     dettagli.forEach(item => {
         dettagliHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
         dettagliHtml += `Componenti: ${item.componenti.join(', ')}\n`;
         dettagliHtml += `Prezzo netto cad.: € ${item.prezzo_unitario}\n`;
-
   
         // Logica Taglie (per Kit Calcio)
         if (item.dettagli_taglie && Object.keys(item.dettagli_taglie).length > 0) {
@@ -294,9 +292,45 @@ function mostraDettagli(ordineId, dettagliProdottiString) {
         }
     });
 
-    // Aggiorna e mostra il modale
+    // Aggiorna titolo e corpo del modale
     modalTitle.textContent = ordineId.substring(0, 8).toUpperCase() + '...';
     modalBody.textContent = dettagliHtml;
+
+    // ============================================================
+    // NUOVA PARTE AGGIUNTA: LOGICA TASTO STAMPA
+    // ============================================================
+    
+    // 1. Controlliamo se il bottone esiste già per evitare duplicati
+    let btnStampa = document.getElementById('btnStampaOrdine');
+    
+    if (!btnStampa) {
+        // 2. Creiamo il bottone se non esiste
+        btnStampa = document.createElement('button');
+        btnStampa.id = 'btnStampaOrdine'; // ID fondamentale per il CSS @media print
+        btnStampa.textContent = '🖨️ Stampa Ordine';
+        
+        // 3. Stile inline (pulsante Grigio scuro per coerenza Admin)
+        btnStampa.style.marginTop = '15px';
+        btnStampa.style.padding = '10px 20px';
+        btnStampa.style.backgroundColor = '#6c757d'; 
+        btnStampa.style.color = 'white';
+        btnStampa.style.border = 'none';
+        btnStampa.style.borderRadius = '5px';
+        btnStampa.style.cursor = 'pointer';
+        btnStampa.style.fontSize = '1rem';
+        btnStampa.style.float = 'right'; 
+        
+        // 4. Evento Click: Lancia la stampa del browser
+        btnStampa.onclick = function() {
+            window.print();
+        };
+
+        // 5. Inseriamo il bottone DOPO il div del testo (modalBody)
+        modalBody.parentNode.insertBefore(btnStampa, modalBody.nextSibling);
+    }
+    // ============================================================
+
+    // Mostra il modale
     modal.style.display = 'block';
 }
 
