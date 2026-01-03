@@ -680,7 +680,7 @@ async function gestisciAggiuntaKitCalcio() {
 // ===========================================
 
 
-async function caricaMieiOrdini() {
+/*async function caricaMieiOrdini() {
     const container = document.getElementById('ordiniListaCliente');
     if (!utenteCorrenteId) { container.innerHTML = `<p style="color: red;">ID utente non disponibile.</p>`; return; }
     container.innerHTML = '<p>Caricamento ordini in corso...</p>';
@@ -695,16 +695,65 @@ async function caricaMieiOrdini() {
     });
     html += '</tbody></table></div>';
     container.innerHTML = html;
+}*/
+
+// Aggiungi questa variabile in alto nel file, fuori dalle funzioni
+let ordiniCaricatiLocali = []; 
+
+async function caricaMieiOrdini() {
+    const container = document.getElementById('ordiniListaCliente');
+    if (!utenteCorrenteId) { container.innerHTML = `<p style="color: red;">ID utente non disponibile.</p>`; return; }
+    
+    container.innerHTML = '<p>Caricamento ordini in corso...</p>';
+    
+    const { data: ordini, error } = await supabase
+        .from('ordini')
+        .select(`*`)
+        .eq('user_id', utenteCorrenteId)
+        .order('data_ordine', { ascending: false }); 
+
+    if (error) { container.innerHTML = `<p style="color: red;">Errore: ${error.message}</p>`; return; }
+    if (ordini.length === 0) { container.innerHTML = '<p>Non hai ancora effettuato ordini.</p>'; return; }
+
+    // Salviamo gli ordini in locale per poterli riprendere senza passare stringhe pesanti nell'HTML
+    ordiniCaricatiLocali = ordini;
+
+    let html = `<div class="lista-ordini-table-wrapper"><table><thead><tr><th>N. Ordine</th><th>Data</th><th>Totale</th><th>Stato</th><th>Dettagli</th></tr></thead><tbody>`;
+    
+    ordini.forEach(ordine => {
+        const numeroOrdine = ordine.num_ordine_prog || ordine.id.substring(0, 8).toUpperCase(); 
+        
+        // MODIFICA: Chiamiamo una funzione passandogli solo l'ID
+        html += `
+            <tr data-id="${ordine.id}">
+                <td>${numeroOrdine}</td>
+                <td>${new Date(ordine.data_ordine).toLocaleString()}</td>
+                <td>€ ${ordine.totale ? ordine.totale.toFixed(2) : '0.00'}</td>
+                <td><span class="stato-ordine stato-${ordine.stato.replace(/\s/g, '-')}">${ordine.stato}</span></td>
+                <td>
+                    <button onclick="preparaEApriModale('${ordine.id}')" class="btn-primary" style="padding: 5px 10px;">
+                        Vedi Dettagli
+                    </button>
+                </td>
+            </tr>`;
+    });
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
 }
 
-// QUESTA PRIMA OCCORRENZA DELLA FUNZIONE E' STATA RIMOSSA PER EVITARE DUPLICATI
-/* function mostraDettagliOrdine(ordineId, dettagliProdottiString) {
-    const dettagli = JSON.parse(dettagliProdottiString); 
-    let dettagliHtml = `Ordine ID: ${ordineId.substring(0, 8)}...\n\nDETTAGLI PRODOTTI:\n`; 
-    // ... (omesso)
-    alert(dettagliHtml); 
+// Funzione ponte per aprire il modale senza errori di sintassi
+function preparaEApriModale(idOrdine) {
+    const ordine = ordiniCaricatiLocali.find(o => o.id === idOrdine);
+    if (ordine) {
+        // Richiama la tua funzione originale passandogli i dati puliti
+        mostraDettagliOrdine(
+            ordine.id, 
+            JSON.stringify(ordine.dettagli_prodotti), 
+            ordine.num_ordine_prog, 
+            ordine.totale
+        );
+    }
 }
-*/
 
 
 /**
