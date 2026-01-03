@@ -536,3 +536,62 @@ body {
     background-color: #007bff; /* #c82333 Scurisce al passaggio del mouse */
     transform: scale(1.1); /* Piccolo effetto di ingrandimento/salto */
 }
+
+
+
+/*---STILI PER LA STAMPA DA MODALE LATO CLIENTE--*/
+/* ======================================= */
+/* STILI PER LA STAMPA (PRINT) */
+/* ======================================= */
+
+/* Nascondi il bottone di stampa e di chiusura quando si sta stampando */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    
+    /* Rendi visibile solo il modale e il suo contenuto */
+    #orderDetailsModal, 
+    #orderDetailsModal * {
+        visibility: visible;
+    }
+
+    /* Posiziona il modale in alto a sinistra e rimuovi scroll */
+    #orderDetailsModal {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: auto;
+        margin: 0;
+        padding: 0;
+        background: white;
+        z-index: 9999;
+        overflow: visible !important; /* Mostra tutto il contenuto lungo */
+    }
+
+    .modal-content {
+        border: none;
+        box-shadow: none;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Rimuovi scroll e limiti di altezza per stampare tutto il testo */
+    #modalOrderDetails {
+        max-height: none !important; 
+        overflow: visible !important;
+        border: none;
+    }
+
+    /* Nascondi i bottoni durante la stampa */
+    .close-button, 
+    #btnStampaOrdine {
+        display: none !important;
+    }
+}
+
+
+
