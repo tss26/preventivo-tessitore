@@ -1332,7 +1332,7 @@ function aggiungiAlCarrello(param1, param2, param3) {
             // Cerchiamo la quantità (può essere .quantita o .qta)
             quantita: parseInt(param1.quantita || param1.qta) || 1,
             // Cerchiamo il prezzo (può essere .prezzo_unitario o .prezzo) e lo puliamo
-            prezzo_unitario: safeParseFloat(param1.prezzo_unitario || param1.prezzo || 0),
+            prezzo_unitario: parsePrezzo(param1.prezzo_unitario || param1.prezzo || 0),
             note: param1.note || "",
             // Manteniamo gli array del Kit
             componenti: param1.componenti || [],
@@ -1345,7 +1345,7 @@ function aggiungiAlCarrello(param1, param2, param3) {
         item = {
             prodotto: param1,
             quantita: parseInt(param2) || 1,
-            prezzo_unitario: safeParseFloat(param3),
+            prezzo_unitario: parsePrezzo(param3),
             note: "Ordine Rapido",
             componenti: [],
             dettagli_taglie: {},
