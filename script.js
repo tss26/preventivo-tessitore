@@ -1,3 +1,4 @@
+//--sviluppo il JS per il file abbigliamento e le sue funzioni di calcolo
 document.addEventListener("DOMContentLoaded", function () {
   const quantitaList = [5, 12, 20, 25, 30, 50, 75, 100];
   const personalizzazioni = {};
