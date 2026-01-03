@@ -172,47 +172,51 @@ async function handleLogout() {
     aggiornaUIPreventivo(); 
 }vecchio funzione cjhe gestiva solo un oggetto in entrata come parametro*/
 
+/**
+ * FUNZIONE UNIVERSALE PER AGGIUNGERE AL CARRELLO
+ * Gestisce sia gli oggetti (Kit/Bandiere) che i parametri singoli (Configuratore)
+ */
 function aggiungiAlCarrello(param1, param2, param3) {
     let item;
 
-    // CASO A: Riceve un OGGETTO (Kit Calcio, Bandiere, DTF)
+    // CASO A: Riceve un OGGETTO (Dai Kit Calcio, Bandiere, DTF)
     if (typeof param1 === 'object' && param1 !== null) {
-        console.log("Aggiunta da Oggetto:", param1);
+        console.log("Aggiunta via Oggetto:", param1);
         item = {
             prodotto: param1.prodotto || param1.nome || "Articolo",
             quantita: parseInt(param1.quantita || param1.qta) || 1,
-            // Usiamo parsePrezzo per pulire simboli € o virgole
+            // Cerchiamo il prezzo in tutte le varianti possibili e lo puliamo
             prezzo_unitario: parsePrezzo(param1.prezzo_unitario || param1.prezzo || 0),
             note: param1.note || "",
-            componenti: param1.componenti || []
+            componenti: param1.componenti || [],
+            dettagli_taglie: param1.dettagli_taglie || {}, // Importante per i Kit
+            personalizzazione_url: param1.personalizzazione_url || ""
         };
     } 
-    // CASO B: Riceve 3 PARAMETRI (Configuratore Rapido)
+    // CASO B: Riceve 3 PARAMETRI (Dal Configuratore Rapido)
     else {
-        console.log("Aggiunta da Parametri:", param1, param2, param3);
+        console.log("Aggiunta via Parametri:", param1, param2, param3);
         item = {
             prodotto: param1,
             quantita: parseInt(param2) || 1,
             prezzo_unitario: parsePrezzo(param3),
             note: "Configuratore Rapido",
-            componenti: []
+            componenti: [],
+            dettagli_taglie: {},
+            personalizzazione_url: ""
         };
     }
 
-    // Controllo finale anti-NaN
+    // Controllo di sicurezza finale sui numeri
     if (isNaN(item.prezzo_unitario)) item.prezzo_unitario = 0;
+    if (isNaN(item.quantita)) item.quantita = 1;
 
-    // Aggiunta all'array globale
+    // Aggiunta e Salvataggio
     carrello.push(item);
-    
-    // Sincronizzazione LocalStorage
     localStorage.setItem('carrello', JSON.stringify(carrello));
     
-    // Aggiornamento UI
+    // Aggiorna la grafica
     aggiornaUIPreventivo();
-    
-    // Opzionale: feedback all'utente
-    // alert("Aggiunto al carrello!");
 }
 
 
