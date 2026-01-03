@@ -1341,12 +1341,18 @@ const labelMap = {
 
 
 
-// Funzione di utilità per pulire i numeri
+/*// Funzione di utilità per pulire i numeri
 function parsePrezzo(stringa) {
     if (!stringa) return 0;
     // Sostituisce la virgola con il punto e rimuove caratteri non numerici
     const valore = parseFloat(stringa.replace(',', '.'));
     return isNaN(valore) ? 0 : valore;
+}*/
+function parsePrezzo(valore) {
+    if (typeof valore === 'number') return valore;
+    if (!valore) return 0;
+    let s = valore.toString().replace('€', '').replace(/\s/g, '').replace(',', '.');
+    return parseFloat(s) || 0;
 }
 
 
