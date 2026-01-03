@@ -1304,7 +1304,7 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
         
     }
 });
-
+/*----ERRATAAAAA----------------------------------------------------------------------------------------
 //Questa funzione è il "cuore" del sistema perché mette in comunicazione il configuratore con il carrello (preventivo).
 function aggiungiAlCarrello(nome, qta, prezzo) {
     const item = {
@@ -1321,7 +1321,7 @@ function aggiungiAlCarrello(nome, qta, prezzo) {
 
     // 3. Aggiorna l'interfaccia
     aggiornaUIPreventivo();
-}
+}*/
 
 
 // ============================================================
