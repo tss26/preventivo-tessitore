@@ -175,7 +175,7 @@ async function handleLogout() {
 /**
  * FUNZIONE UNIVERSALE PER AGGIUNGERE AL CARRELLO
  * Gestisce sia gli oggetti (Kit/Bandiere) che i parametri singoli (Configuratore)
- */
+ ************************************************************************************************************
 function aggiungiAlCarrello(param1, param2, param3) {
     let item;
 
@@ -215,7 +215,7 @@ function aggiungiAlCarrello(param1, param2, param3) {
     carrello.push(item);
     localStorage.setItem('carrello', JSON.stringify(carrello));
     aggiornaUIPreventivo();
-}
+}*/
 
 
 
@@ -1320,7 +1320,46 @@ function aggiungiAlCarrello(nome, qta, prezzo) {
     // 3. Aggiorna l'interfaccia
     aggiornaUIPreventivo();
 }*/
+function aggiungiAlCarrello(param1, param2, param3) {
+    let item;
 
+    // Se param1 è un OGGETTO (caso Kit Calcio)
+    if (typeof param1 === 'object' && param1 !== null) {
+        console.log("Rilevato Kit/Oggetto complesso:", param1);
+        
+        item = {
+            prodotto: param1.prodotto || param1.nome || "Kit Personalizzato",
+            // Cerchiamo la quantità (può essere .quantita o .qta)
+            quantita: parseInt(param1.quantita || param1.qta) || 1,
+            // Cerchiamo il prezzo (può essere .prezzo_unitario o .prezzo) e lo puliamo
+            prezzo_unitario: safeParseFloat(param1.prezzo_unitario || param1.prezzo || 0),
+            note: param1.note || "",
+            // Manteniamo gli array del Kit
+            componenti: param1.componenti || [],
+            dettagli_taglie: param1.dettagli_taglie || {},
+            personalizzazione_url: param1.personalizzazione_url || ""
+        };
+    } 
+    // Se riceve 3 PARAMETRI (caso Configuratore Rapido)
+    else {
+        item = {
+            prodotto: param1,
+            quantita: parseInt(param2) || 1,
+            prezzo_unitario: safeParseFloat(param3),
+            note: "Ordine Rapido",
+            componenti: [],
+            dettagli_taglie: {},
+            personalizzazione_url: ""
+        };
+    }
+
+    // SICUREZZA: Se dopo il parsing qualcosa è ancora NaN, lo forziamo a 0
+    if (isNaN(item.prezzo_unitario)) item.prezzo_unitario = 0;
+    
+    carrello.push(item);
+    localStorage.setItem('carrello', JSON.stringify(carrello));
+    aggiornaUIPreventivo();
+}
 
 // ============================================================
 // LOGICA CONFIGURATORE RAPIDO (Inizio)***********
