@@ -823,54 +823,54 @@ function preparaEApriModale(idOrdine) {
  * 4. Mostra i dettagli dell'ordine in un modale HTML selezionabile.
  * MODIFICATA PER ACCETTARE, VISUALIZZARE numeroOrdineProg E CALCOLARE IVA
  */
+
+
 function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg, totaleImponibile) {
-    const dettagli = JSON.parse(dettagliProdottiString); 
-    const modal = document.getElementById('orderDetailsModal');
-    const modalBody = document.getElementById('modalOrderDetails');
-    const modalTitle = document.getElementById('modalOrderId');
+    const dettagli = JSON.parse(dettagliProdottiString); 
+    const modal = document.getElementById('orderDetailsModal');
+    const modalBody = document.getElementById('modalOrderDetails');
+    const modalTitle = document.getElementById('modalOrderId');
 
-    // Modifica 1: Inclusione del Numero Ordine accanto all'ID all'interno del body
+    // Modifica 1: Inclusione del Numero Ordine accanto all'ID
     const numeroOrdineVisualizzato = numeroOrdineProg && numeroOrdineProg !== 'null' ? `N. ${numeroOrdineProg} / ` : '';
-    let dettagliHtml = `Ordine ID: ${numeroOrdineVisualizzato}${ordineId.substring(0, 8)}...\n\nDETTAGLI PRODOTTI:\n`; 
-    
-    dettagli.forEach(item => {
-        dettagliHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
-        dettagliHtml += `Componenti: ${item.componenti.join(', ')}\n`;
-        dettagliHtml += `Prezzo netto cad.: € ${item.prezzo_unitario}\n`;
-        
-        // 1. Logica Taglie (Riusata dal tuo codice precedente)
-        if (item.dettagli_taglie && Object.keys(item.dettagli_taglie).length > 0) {
-            dettagliHtml += `\nDettagli Taglie:\n`;
-            for (const genere in item.dettagli_taglie) {
-                const taglie = Object.entries(item.dettagli_taglie[genere])
-                    .map(([taglia, qty]) => `${taglia}: ${qty}`)
-                    .join(', ');
-                dettagliHtml += `  - ${genere}: ${taglie}\n`;
-            }
-        }
-        
-        // 2. Logica Note
-        if (item.note && item.note.trim() !== '') {
-            dettagliHtml += `Note Cliente: ${item.note}\n`;
-        }
+    let dettagliHtml = `Ordine ID: ${numeroOrdineVisualizzato}${ordineId.substring(0, 8)}...\n\nDETTAGLI PRODOTTI:\n`; 
+    
+    dettagli.forEach(item => {
+        dettagliHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
+        dettagliHtml += `Componenti: ${item.componenti.join(', ')}\n`;
+        dettagliHtml += `Prezzo netto cad.: € ${item.prezzo_unitario}\n`;
+        
+        // 1. Logica Taglie
+        if (item.dettagli_taglie && Object.keys(item.dettagli_taglie).length > 0) {
+            dettagliHtml += `\nDettagli Taglie:\n`;
+            for (const genere in item.dettagli_taglie) {
+                const taglie = Object.entries(item.dettagli_taglie[genere])
+                    .map(([taglia, qty]) => `${taglia}: ${qty}`)
+                    .join(', ');
+                dettagliHtml += `  - ${genere}: ${taglie}\n`;
+            }
+        }
+        
+        // 2. Logica Note
+        if (item.note && item.note.trim() !== '') {
+            dettagliHtml += `Note Cliente: ${item.note}\n`;
+        }
 
-        // 3. Logica File
-        if (item.personalizzazione_url && item.personalizzazione_url !== 'Nessun file collegato direttamente.') {
-            dettagliHtml += `File: COPIA E APRI L'URL:\n${item.personalizzazione_url}\n`;
-        } else {
-            dettagliHtml += `File: Nessun file collegato direttamente.\n`;
-        }
-    });
+        // 3. Logica File
+        if (item.personalizzazione_url && item.personalizzazione_url !== 'Nessun file collegato direttamente.') {
+            dettagliHtml += `File: COPIA E APRI L'URL:\n${item.personalizzazione_url}\n`;
+        } else {
+            dettagliHtml += `File: Nessun file collegato direttamente.\n`;
+        }
+    });
 
-    // **********************************************
-    // AGGIUNTA TESTO BONIFICO E CALCOLO TOTALI (MODIFICA 2)
-    // **********************************************
-    dettagliHtml += '\n-----------------------------------------------------------------------------------------\n'; 
-    dettagliHtml += '\n Per procedere con l\'ordine effettuare Bonifico intestato a : Tessitore s.r.l.  \n';
-    dettagliHtml += '\n BANCA : SELLA  IBAN : IT56 O032 6804 6070 5227 9191 820 \n';
-    
+    // TESTO BONIFICO E CALCOLO TOTALI
+    dettagliHtml += '\n-----------------------------------------------------------------------------------------\n'; 
+    dettagliHtml += '\n Per procedere con l\'ordine effettuare Bonifico intestato a : Tessitore s.r.l.  \n';
+    dettagliHtml += '\n BANCA : SELLA  IBAN : IT56 O032 6804 6070 5227 9191 820 \n';
+    
     const ivaRate = 0.22; // 22%
-    let totaleImponibileNumerico = parseFloat(totaleImponibile) || 0; // Prende il totale passato
+    let totaleImponibileNumerico = parseFloat(totaleImponibile) || 0; 
     
     if (totaleImponibileNumerico > 0) {
         const ivaDovuta = totaleImponibileNumerico * ivaRate;
@@ -887,11 +887,42 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
         dettagliHtml += `\n-------------------------------------------------------------------------\n`;
     }
     
-    // Aggiorna e mostra il modale
-    // CAMBIO APPLICATO QUI: Usa numeroOrdineProg se disponibile
-    modalTitle.textContent = numeroOrdineProg && numeroOrdineProg !== 'null' ? `Dettagli Ordine Completo: N. ${numeroOrdineProg}` : ` (ID: ${ordineId.substring(0, 8)}...)`;
-    modalBody.textContent = dettagliHtml; // Usiamo textContent per prevenire problemi di injection
-    modal.style.display = 'block';
+    // Aggiorna titolo e corpo
+    modalTitle.textContent = numeroOrdineProg && numeroOrdineProg !== 'null' ? `Dettagli Ordine Completo: N. ${numeroOrdineProg}` : ` (ID: ${ordineId.substring(0, 8)}...)`;
+    modalBody.textContent = dettagliHtml; 
+
+    // === NUOVA LOGICA: AGGIUNTA TASTO STAMPA ===
+    // Controlliamo se il bottone esiste già per non duplicarlo se l'utente apre/chiude più volte
+    let btnStampa = document.getElementById('btnStampaOrdine');
+    
+    if (!btnStampa) {
+        // Creiamo il bottone se non esiste
+        btnStampa = document.createElement('button');
+        btnStampa.id = 'btnStampaOrdine';
+        btnStampa.textContent = '🖨️ Stampa Ordine / Salva PDF';
+        
+        // Stile inline per renderlo subito carino
+        btnStampa.style.marginTop = '15px';
+        btnStampa.style.padding = '10px 20px';
+        btnStampa.style.backgroundColor = '#6c757d'; // Grigio
+        btnStampa.style.color = 'white';
+        btnStampa.style.border = 'none';
+        btnStampa.style.borderRadius = '5px';
+        btnStampa.style.cursor = 'pointer';
+        btnStampa.style.fontSize = '1rem';
+        btnStampa.style.float = 'right'; 
+        
+        // Evento Click: Lancia la stampa del browser
+        btnStampa.onclick = function() {
+            window.print();
+        };
+
+        // Inseriamo il bottone DOPO il div del testo (modalBody)
+        modalBody.parentNode.insertBefore(btnStampa, modalBody.nextSibling);
+    }
+
+    // Mostra il modale
+    modal.style.display = 'block';
 }
 
 
