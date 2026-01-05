@@ -594,3 +594,70 @@ body {
         display: none !important;
     }
 }
+
+
+/* ======================================= */
+/* STILI PER IL BLOCCO RIVENDITORI (Lucchetto) */
+/* ======================================= */
+
+/* 1. Classe per il contenitore padre (la section) */
+.elemento-bloccabile {
+    position: relative !important; /* Fondamentale per posizionare la maschera */
+    /* Non mettiamo overflow:hidden qui per evitare di tagliare eventuali ombre, 
+       ma la maschera coprirà tutto */
+}
+
+/* 2. La Mascherina (Overlay) */
+.overlay-lock {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    /* Effetto sfocato e sfondo semi-trasparente */
+    background-color: rgba(255, 255, 255, 0.6); 
+    backdrop-filter: blur(4px); /* Sfocatura moderna */
+    -webkit-backdrop-filter: blur(4px); /* Per Safari */
+    
+    /* Centrare il contenuto */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    
+    z-index: 999; /* Sopra a tutto il resto nella sezione */
+    border-radius: 16px; /* Segue il bordo delle tue section */
+    cursor: not-allowed;
+}
+
+/* 3. Contenitore del messaggio centrale */
+.lock-message-box {
+    background-color: #333;
+    color: #fff;
+    padding: 15px 25px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    transform: translateY(-20px);
+}
+
+.lock-icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.lock-title {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 1.1rem;
+    color: #ffd700; /* Oro */
+}
+
+.lock-subtitle {
+    font-size: 0.85rem;
+    margin-top: 5px;
+    color: #ccc;
+    font-weight: 400;
+}
