@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            handleLogin(email, password);
+            handleLogin(email, password);    
         });
     }
 
@@ -154,4 +154,76 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'cliente.html';
         }
     });
+
+
+
+
+
+// ===========================================
+    // LOGICA RESET PASSWORD (NUOVA AGGIUNTA)
+    // ===========================================
+    const modalReset = document.getElementById('modalResetPassword');
+    const btnForgot = document.getElementById('btnPasswordDimenticata');
+    const btnCloseReset = document.getElementById('closeResetModal'); // Assicurati che l'icona X nel modale abbia questo ID
+    const btnInviaRecupero = document.getElementById('btnInviaRecupero');
+
+    // 1. APERTURA MODALE
+    if (btnForgot && modalReset) {
+        btnForgot.addEventListener('click', (e) => {
+            e.preventDefault();
+            modalReset.style.display = 'flex'; // Usa flex per centrare se hai impostato il css flex nel modale
+        });
+    }
+
+    // 2. CHIUSURA MODALE (X)
+    // Nota: Aggiungi id="closeResetModal" alla X nel tuo HTML se non c'è già, oppure usa l'onclick inline che avevi
+    if (btnCloseReset && modalReset) {
+        btnCloseReset.addEventListener('click', () => {
+            modalReset.style.display = 'none';
+        });
+    }
+    
+    // 3. CHIUSURA CLICCANDO FUORI
+    window.addEventListener('click', (e) => {
+        if (modalReset && e.target === modalReset) {
+            modalReset.style.display = 'none';
+        }
+    });
+
+    // 4. INVIO EMAIL A SUPABASE
+    if (btnInviaRecupero) {
+        btnInviaRecupero.addEventListener('click', async () => {
+            const email = document.getElementById('emailRecupero').value.trim();
+            
+            if (!email) {
+                alert("Inserisci un'email valida.");
+                return;
+            }
+
+            // Feedback visivo
+            btnInviaRecupero.textContent = "Invio in corso...";
+            btnInviaRecupero.disabled = true;
+
+            // URL dove l'utente atterrerà (il file che creeremo dopo)
+            const redirectUrl = 'https://tss26.github.io/preventivo-tessitore/nuova_password.html';
+
+            const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: redirectUrl,
+            });
+
+            if (error) {
+                alert("Errore: " + error.message);
+                btnInviaRecupero.textContent = "Invia Link Reset";
+                btnInviaRecupero.disabled = false;
+            } else {
+                alert("Controlla la tua email! Se l'indirizzo è registrato, riceverai un link per reimpostare la password.");
+                if(modalReset) modalReset.style.display = 'none';
+                btnInviaRecupero.textContent = "Invia Link Reset";
+                btnInviaRecupero.disabled = false;
+            }
+        });
+    }
+
+
+
 });
