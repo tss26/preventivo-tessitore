@@ -371,7 +371,7 @@ body {
 .banner-grid {
     /* Layout a griglia 3 colonne */
     display: grid;
-    grid-template-columns: repeat(3, 1fr);/*impostato cosi vuol dire che ci sono 3 colonne per n righe*/
+    grid-template-columns: repeat(4, 1fr);/*impostato cosi vuol dire che ci sono 4 colonne per n righe*/
     gap: 1.5rem; /* Spazio tra i blocchi */
   /* --- MODIFICA per gestire la larghezza delle immagini  nel menu iniziale   --- */
     max-width: 450px; 
