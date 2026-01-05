@@ -373,6 +373,9 @@ body {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem; /* Spazio tra i blocchi */
+  /* --- MODIFICA per gestire la larghezza delle immagini  nel menu iniziale   --- */
+    max-width: 800px; 
+    margin: 0 auto;   /* Questo serve a centrare il blocco nella pagina */
 }
 
 .banner-item {
