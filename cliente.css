@@ -374,7 +374,7 @@ body {
     grid-template-columns: repeat(3, 1fr);/*impostato cosi vuol dire che ci sono 3 colonne per n righe*/
     gap: 1.5rem; /* Spazio tra i blocchi */
   /* --- MODIFICA per gestire la larghezza delle immagini  nel menu iniziale   --- */
-    max-width: 200px; 
+    max-width: 450px; 
     margin: 0 auto;   /* Questo serve a centrare il blocco nella pagina */
 }
 
