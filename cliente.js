@@ -150,7 +150,43 @@ async function verificaCliente() {
 
     const logoElement = document.querySelector('.logo');
     if (logoElement) { logoElement.innerHTML = `<img src="icon-192.png" alt="Logo Tessitore" style="height: 40px; vertical-align: middle;"> Cliente: ${profilo?.ragione_sociale || user.email}`; }
-    
+
+
+    // ============================================================
+    // NUOVA LOGICA: BLOCCO QUICK ORDER SE PERMESSO == 'cliente'
+    // ============================================================
+    
+    if (profilo.permessi === 'cliente') {
+        // 1. Selezioniamo la sezione da bloccare tramite il suo ID
+        const sezioneQuick = document.getElementById('quick-order-section');
+        
+        if (sezioneQuick) {
+            // Aggiungiamo la classe per il posizionamento
+            sezioneQuick.classList.add('elemento-bloccabile');
+            
+            // Disabilitiamo i click sugli elementi interni
+            sezioneQuick.style.pointerEvents = 'none';
+            // (Opzionale) Opacità leggera per far capire che è inattivo sotto la maschera
+            // sezioneQuick.style.opacity = '0.7'; 
+
+            // Creiamo l'HTML della maschera
+            const htmlMaschera = `
+                <div class="overlay-lock">
+                    <div class="lock-message-box">
+                        <span class="lock-icon">🔒</span>
+                        <div class="lock-title">RISERVATO RIVENDITORI</div>
+                        <div class="lock-subtitle">Funzione Quick Order non disponibile</div>
+                    </div>
+                </div>
+            `;
+            
+            // Inseriamo la maschera dentro la sezione
+            sezioneQuick.insertAdjacentHTML('beforeend', htmlMaschera);
+        }
+    }
+    // ============================================================
+
+    
     return true; 
 }
 
