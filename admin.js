@@ -525,6 +525,7 @@ function renderUserList(users) {
                 <td>
                     <select class="permessi-select" data-id="${user.id}">
                         <option value="cliente" ${user.permessi === 'cliente' ? 'selected' : ''}>Cliente</option>
+                        <option value="rivenditore" ${user.permessi === 'rivenditore' ? 'selected' : ''}>Rivenditore</option>
                         <option value="admin" ${user.permessi === 'admin' ? 'selected' : ''}>Admin</option>
                         <option value="disattivato" ${user.permessi === 'disattivato' ? 'selected' : ''}>Disattivato</option>
                     </select>
