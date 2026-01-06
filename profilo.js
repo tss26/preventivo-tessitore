@@ -1,13 +1,25 @@
 // ===========================================
-// CONFIGURAZIONE SUPABASE (Copiate da cliente.js)
+// CONFIGURAZIONE SUPABASE (PROFILO)
 // ===========================================
 const SUPABASE_URL = 'https://jukyggaoiekenvekoicv.supabase.co'; 
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1a3lnZ2FvaWVrZW52ZWtvaWN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwNjEwOTgsImV4cCI6MjA3MjYzNzA5OH0.84lO4yqqZ6pbVLX0hlxOC3qgK508y1gFxeSp3Wx3kkw'; 
-const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+// Verifica se window.supabaseClient esiste già per evitare doppi caricamenti
+if (!window.supabaseClient) {
+    if (typeof window.supabase !== 'undefined') {
+        window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+}
+
+// Usa var (non const) per evitare l'errore "already declared"
+var supabase = window.supabaseClient;
+
+if (!supabase) {
+    console.error("ATTENZIONE: Client Supabase non inizializzato in profilo.js");
+}
 
 let currentUserId = null;
-const LOGIN_REDIRECT_URL = 'login.html'; // Utilizza la variabile per il reindirizzamento
-
+const LOGIN_REDIRECT_URL = 'login.html';
 // ===========================================
 // FUNZIONI DI UTILITY
 // ===========================================
