@@ -879,25 +879,52 @@ function preparaEApriModale(idOrdine) {
  * MODIFICATA PER ACCETTARE, VISUALIZZARE numeroOrdineProg E CALCOLARE IVA
  */
 
-
 function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg, totaleImponibile) {
     const dettagli = JSON.parse(dettagliProdottiString); 
     const modal = document.getElementById('orderDetailsModal');
     const modalBody = document.getElementById('modalOrderDetails');
     const modalTitle = document.getElementById('modalOrderId');
 
-    // Modifica 1: Inclusione del Numero Ordine accanto all'ID
-    const numeroOrdineVisualizzato = numeroOrdineProg && numeroOrdineProg !== 'null' ? `N. ${numeroOrdineProg} / ` : '';
-    let dettagliHtml = `Ordine ID: ${numeroOrdineVisualizzato}${ordineId.substring(0, 8)}...\n\nDETTAGLI PRODOTTI:\n`; 
+    // --- MODIFICA 1: Titolo corretto "Numero Preventivo" ---
+    if (numeroOrdineProg && numeroOrdineProg !== 'null') {
+        // Usa innerHTML sul genitore (h2) per pulire tutto e mettere la scritta corretta
+        document.querySelector('#orderDetailsModal h2').innerHTML = `Numero Preventivo : <span style="color: #007bff;">${numeroOrdineProg}</span>`;
+    } else {
+        document.querySelector('#orderDetailsModal h2').innerHTML = `Dettaglio Preventivo ID: <span style="color: #6c757d; font-size: 0.9em;">${ordineId.substring(0, 8)}</span>`;
+    }
     
+    let dettagliHtml = "";
+
+    // --- MODIFICA 2: Mostra i dati cliente in alto ---
+    // Cerchiamo se c'è l'oggetto 'INFO_CLIENTE' che abbiamo salvato prima
+    const infoCliente = dettagli.find(d => d.tipo === 'INFO_CLIENTE');
+    if (infoCliente) {
+        dettagliHtml += `<div style="background: #f1f8ff; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #cce5ff;">`;
+        dettagliHtml += `<strong>Cliente / Rag. Soc.:</strong> ${infoCliente.cliente || '---'}<br>`;
+        dettagliHtml += `<strong>Contatti:</strong> ${infoCliente.contatti || '---'}`;
+        dettagliHtml += `</div>`;
+        dettagliHtml += `----------------------------------------------------------\n\n`;
+    }
+
+    dettagliHtml += `DETTAGLI ARTICOLI:\n`;
+
     dettagli.forEach(item => {
+        // Se è l'oggetto "INFO_CLIENTE", non ristamparlo come prodotto
+        if (item.tipo === 'INFO_CLIENTE') return;
+
         dettagliHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
-        dettagliHtml += `Componenti: ${item.componenti.join(', ')}\n`;
-        dettagliHtml += `Prezzo netto cad.: € ${item.prezzo_unitario}\n`;
         
-        // 1. Logica Taglie
+        if (item.componenti && item.componenti.length > 0) {
+             dettagliHtml += `Componenti: ${item.componenti.join(', ')}\n`;
+        }
+        
+        // Fix per sicurezza sui prezzi
+        let pUnit = parseFloat(item.prezzo_unitario);
+        if (isNaN(pUnit)) pUnit = 0;
+        dettagliHtml += `Prezzo netto cad.: € ${pUnit.toFixed(2)}\n`;
+        
         if (item.dettagli_taglie && Object.keys(item.dettagli_taglie).length > 0) {
-            dettagliHtml += `\nDettagli Taglie:\n`;
+            dettagliHtml += `Dettagli Taglie:\n`;
             for (const genere in item.dettagli_taglie) {
                 const taglie = Object.entries(item.dettagli_taglie[genere])
                     .map(([taglia, qty]) => `${taglia}: ${qty}`)
@@ -906,25 +933,21 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
             }
         }
         
-        // 2. Logica Note
         if (item.note && item.note.trim() !== '') {
-            dettagliHtml += `Note Cliente: ${item.note}\n`;
+            dettagliHtml += `Note: ${item.note}\n`;
         }
 
-        // 3. Logica File
         if (item.personalizzazione_url && item.personalizzazione_url !== 'Nessun file collegato direttamente.') {
-            dettagliHtml += `File: COPIA E APRI L'URL:\n${item.personalizzazione_url}\n`;
-        } else {
-            dettagliHtml += `File: Nessun file collegato direttamente.\n`;
+            dettagliHtml += `File: ${item.personalizzazione_url}\n`;
         }
     });
 
-    // TESTO BONIFICO E CALCOLO TOTALI
+    // TOTALI E FOOTER (Invariato)
     dettagliHtml += '\n-----------------------------------------------------------------------------------------\n'; 
     dettagliHtml += '\n Per procedere con l\'ordine effettuare Bonifico intestato a : Tessitore s.r.l.  \n';
-    dettagliHtml += '\n BANCA : SELLA  IBAN : IT56 O032 6804 6070 5227 9191 820 \n';
+    dettagliHtml += ' BANCA : SELLA  IBAN : IT56 O032 6804 6070 5227 9191 820 \n';
     
-    const ivaRate = 0.22; // 22%
+    const ivaRate = 0.22; 
     let totaleImponibileNumerico = parseFloat(totaleImponibile) || 0; 
     
     if (totaleImponibileNumerico > 0) {
@@ -932,51 +955,34 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
         const totaleFinale = totaleImponibileNumerico + ivaDovuta;
         
         dettagliHtml += `\n-------------------------------------------------------------------------\n`;
-        dettagliHtml += `\nTOTALE IMPONIBILE (Netto): € ${totaleImponibileNumerico.toFixed(2)}`;
+        dettagliHtml += `TOTALE IMPONIBILE (Netto): € ${totaleImponibileNumerico.toFixed(2)}`;
         dettagliHtml += `\nIVA (22%): € ${ivaDovuta.toFixed(2)}`;
         dettagliHtml += `\nTOTALE DOVUTO (IVA Incl.): € ${totaleFinale.toFixed(2)}\n`;
-        dettagliHtml += `\n-------------------------------------------------------------------------\n`;
-    } else {
-        dettagliHtml += `\n-------------------------------------------------------------------------\n`;
-        dettagliHtml += `\nTotale non disponibile (importo lordo: ${totaleImponibileNumerico.toFixed(2)}).\n`;
-        dettagliHtml += `\n-------------------------------------------------------------------------\n`;
+        dettagliHtml += `-------------------------------------------------------------------------\n`;
     }
     
-    // Aggiorna titolo e corpo
-    modalTitle.textContent = numeroOrdineProg && numeroOrdineProg !== 'null' ? `Dettagli Ordine Completo: N. ${numeroOrdineProg}` : ` (ID: ${ordineId.substring(0, 8)}...)`;
-    modalBody.textContent = dettagliHtml; 
+    // Assegnazione HTML (usiamo innerHTML per supportare il div blu dei contatti)
+    modalBody.innerHTML = dettagliHtml.replace(/\n/g, '<br>');
 
-    // === NUOVA LOGICA: AGGIUNTA TASTO STAMPA ===
-    // Controlliamo se il bottone esiste già per non duplicarlo se l'utente apre/chiude più volte
+    // TASTO STAMPA (Mantenuto come nel tuo codice o aggiunto se manca)
     let btnStampa = document.getElementById('btnStampaOrdine');
-    
     if (!btnStampa) {
-        // Creiamo il bottone se non esiste
         btnStampa = document.createElement('button');
         btnStampa.id = 'btnStampaOrdine';
         btnStampa.textContent = '🖨️ Stampa Ordine / Salva PDF';
-        
-        // Stile inline per renderlo subito carino
         btnStampa.style.marginTop = '15px';
         btnStampa.style.padding = '10px 20px';
-        btnStampa.style.backgroundColor = '#6c757d'; // Grigio
+        btnStampa.style.backgroundColor = '#6c757d'; 
         btnStampa.style.color = 'white';
         btnStampa.style.border = 'none';
         btnStampa.style.borderRadius = '5px';
         btnStampa.style.cursor = 'pointer';
         btnStampa.style.fontSize = '1rem';
         btnStampa.style.float = 'right'; 
-        
-        // Evento Click: Lancia la stampa del browser
-        btnStampa.onclick = function() {
-            window.print();
-        };
-
-        // Inseriamo il bottone DOPO il div del testo (modalBody)
+        btnStampa.onclick = function() { window.print(); };
         modalBody.parentNode.insertBefore(btnStampa, modalBody.nextSibling);
     }
 
-    // Mostra il modale
     modal.style.display = 'block';
 }
 
