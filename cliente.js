@@ -564,57 +564,76 @@ async function gestisciAggiuntaAlCarrello() {
  * Gestisce il processo di checkout.
  */
 async function gestisciCheckout() {
-    if (!supabase) { alert("ERRORE: Supabase non è inizializzato."); return; }
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) { alert("Devi effettuare il login per richiedere un preventivo ufficiale."); return; }
-    
-    const carrelloDaSalvare = JSON.parse(localStorage.getItem('carrello')) || [];
-    
-    if (carrelloDaSalvare.length === 0) { alert("Il preventivo è vuoto."); return; }
-    
-    const totaleCalcolato = calcolaTotaleParziale();
-    
-    // *** CHIAMATA ALLA FUNZIONE AGGIORNATA ***
-    let numeroOrdineGenerato;
-    try {
-        numeroOrdineGenerato = await generaNumeroOrdineTemporaneo();
-    } catch (e) {
-        alert(e.message);
-        return; // Blocca il checkout in caso di errore RPC
-    }
-    
-    // FINE CHIAMATA ALLA FUNZIONE AGGIORNATA
-    
+    if (!supabase) { alert("ERRORE: Supabase non è inizializzato."); return; }
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { alert("Devi effettuare il login per richiedere un preventivo ufficiale."); return; }
+    
+    const carrelloDaSalvare = JSON.parse(localStorage.getItem('carrello')) || [];
+    if (carrelloDaSalvare.length === 0) { alert("Il preventivo è vuoto."); return; }
+    
+    // --- PARTE NUOVA: Recupero dati dai campi blu ---
+    const nomeCliente = document.getElementById('prevClienteNome').value.trim();
+    const contattiCliente = document.getElementById('prevClienteContatti').value.trim();
 
-    if (!confirm(`Confermi l'invio del preventivo N. ${numeroOrdineGenerato} per € ${totaleCalcolato.toFixed(2)}?`)) { return; }
-    
-    try {
-        const { error } = await supabase
-            .from('ordini')
-            .insert([
-                {
-                    num_ordine_prog: numeroOrdineGenerato,
-                    stato: 'Richiesta Inviata',
-                    totale: totaleCalcolato,
-                    dettagli_prodotti: carrelloDaSalvare,
-                    user_id: utenteCorrenteId,
-                }
-            ]);
+    // Creiamo un oggetto "intestazione" da salvare insieme ai prodotti
+    const intestazioneCliente = {
+        tipo: 'INFO_CLIENTE', // Questo ci serve per riconoscerlo dopo
+        cliente: nomeCliente,
+        contatti: contattiCliente,
+        prodotto: "RIFERIMENTI CLIENTE", // Fallback per sicurezza
+        quantita: 0,
+        prezzo_unitario: 0,
+        componenti: [],
+        note: `Cliente: ${nomeCliente} - Contatti: ${contattiCliente}`
+    };
 
-        if (error) { throw new Error(error.message); }
+    // Mettiamo l'intestazione PRIMA dei prodotti veri
+    const dettagliCompleti = [intestazioneCliente, ...carrelloDaSalvare];
+    // ------------------------------------------------
+    
+    const totaleCalcolato = calcolaTotaleParziale();
+    
+    let numeroOrdineGenerato;
+    try {
+        numeroOrdineGenerato = await generaNumeroOrdineTemporaneo();
+    } catch (e) {
+        alert(e.message);
+        return; 
+    }
+    
+    if (!confirm(`Confermi l'invio del preventivo N. ${numeroOrdineGenerato} per € ${totaleCalcolato.toFixed(2)}?`)) { return; }
+    
+    try {
+        const { error } = await supabase
+            .from('ordini')
+            .insert([
+                {
+                    num_ordine_prog: numeroOrdineGenerato,
+                    stato: 'Richiesta Inviata',
+                    totale: totaleCalcolato,
+                    dettagli_prodotti: dettagliCompleti, // Usiamo la lista con i dati cliente
+                    user_id: utenteCorrenteId,
+                }
+            ]);
 
-        carrello = []; 
-        localStorage.removeItem('carrello');
-        aggiornaUIPreventivo();
-        
-        alert(`Ordine/Preventivo ${numeroOrdineGenerato} inviato con successo!`);
+        if (error) { throw new Error(error.message); }
 
-    } catch (e) {
-        console.error('Errore durante l\'invio dell\'ordine:', e);
-        alert(`Errore nell'invio dell'ordine: ${e.message}.`);
-    }
+        carrello = []; 
+        localStorage.removeItem('carrello');
+        
+        // Puliamo anche i campi input
+        document.getElementById('prevClienteNome').value = "";
+        document.getElementById('prevClienteContatti').value = "";
+        
+        aggiornaUIPreventivo();
+        
+        alert(`Ordine/Preventivo ${numeroOrdineGenerato} inviato con successo!`);
+
+    } catch (e) {
+        console.error('Errore durante l\'invio dell\'ordine:', e);
+        alert(`Errore nell'invio dell'ordine: ${e.message}.`);
+    }
 }
 
 
