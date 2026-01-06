@@ -1012,7 +1012,7 @@ document.addEventListener('DOMContentLoaded', () => {
 //chiusura nuova funzione modale
 
 
-function mostraVistaPreventivo() {
+/*function mostraVistaPreventivo() {
     document.querySelector('.container').style.gridTemplateColumns = '1fr'; 
     document.getElementById('galleriaView').style.display = 'block'; 
     document.getElementById('sezioneCarrello').style.display = 'block'; 
@@ -1025,6 +1025,45 @@ function mostraVistaOrdini() {
     document.getElementById('sezioneCarrello').style.display = 'none';
     document.getElementById('ordiniCliente').style.display = 'block'; 
     caricaMieiOrdini();
+}*/
+
+function mostraVistaPreventivo() {
+    document.querySelector('.container').style.gridTemplateColumns = '1fr'; 
+    
+    // Mostra la galleria prodotti e il carrello
+    document.getElementById('galleriaView').style.display = 'block'; 
+    document.getElementById('sezioneCarrello').style.display = 'block'; 
+    
+    // Nascondi la sezione ordini
+    document.getElementById('ordiniCliente').style.display = 'none';
+
+    // --- FIX GRAFICO: Mostra i Banner e il Quick Order ---
+    const bannerNav = document.querySelector('.banner-iniziale-nav');
+    if (bannerNav) bannerNav.style.display = 'block';
+
+    const quickOrder = document.getElementById('quick-order-section');
+    if (quickOrder) quickOrder.style.display = 'block';
+}
+
+function mostraVistaOrdini() {
+    document.querySelector('.container').style.gridTemplateColumns = '1fr'; 
+    
+    // Nascondi galleria e carrello
+    document.getElementById('galleriaView').style.display = 'none'; 
+    document.getElementById('sezioneCarrello').style.display = 'none';
+    
+    // Mostra la sezione ordini
+    document.getElementById('ordiniCliente').style.display = 'block'; 
+    
+    // --- FIX GRAFICO: Nascondi esplicitamente Banner e Quick Order ---
+    const bannerNav = document.querySelector('.banner-iniziale-nav');
+    if (bannerNav) bannerNav.style.display = 'none';
+
+    const quickOrder = document.getElementById('quick-order-section');
+    if (quickOrder) quickOrder.style.display = 'none';
+
+    // Carica i dati
+    caricaMieiOrdini();
 }
 
 
@@ -1256,7 +1295,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('aggiungiBandiera').addEventListener('click', gestisciAggiuntaAlCarrello);
         document.getElementById('richiediPreventivo').addEventListener('click', gestisciCheckout);
         
-        document.getElementById('mieiOrdiniBtn').addEventListener('click', (e) => {
+        /*document.getElementById('mieiOrdiniBtn').addEventListener('click', (e) => {
             e.preventDefault();
             mostraVistaOrdini();
         });
@@ -1266,7 +1305,36 @@ document.addEventListener('DOMContentLoaded', async () => {
                  e.preventDefault();
                  mostraVistaPreventivo();
              }
-        });
+        });*/
+// === FIX NAVIGAZIONE: Controllo URL iniziale ===
+        // Se l'URL finisce con #ordini, apre subito la vista ordini
+        if (window.location.hash === '#ordini') {
+            mostraVistaOrdini();
+        } else {
+            mostraVistaPreventivo();
+        }
+        
+        // Listener MENU "I Miei Ordini"
+        document.getElementById('mieiOrdiniBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            // Aggiunge #ordini all'URL
+            history.pushState(null, null, '#ordini');
+            mostraVistaOrdini();
+        });
+
+        // Listener MENU "Nuovo Preventivo"
+        document.querySelector('.nav a[href="cliente.html"]').addEventListener('click', (e) => {
+             // Rimuove #ordini dall'URL tornando a cliente.html pulito
+             history.pushState(null, null, 'cliente.html');
+             
+             // Se non siamo già nel preventivo, mostriamolo
+             if (document.getElementById('galleriaView').style.display === 'none') {
+                 e.preventDefault();
+                 mostraVistaPreventivo();
+             }
+        });
+
+        
 
 
 // *** LOGICA DI FORZATURA STATI (PER TIMING JS) ***
@@ -1385,7 +1453,7 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
         });
 
         aggiornaUIPreventivo();
-        mostraVistaPreventivo();
+        //NOTA: mostraVistaPreventivo() QUI E' STATA RIMOSSA PERCHE' GESTITA ALL'INIZIO
         calcolaPrezzoDinamico(); // Inizializza il prezzo dinamico all'avvio (Bandiere)
         calcolaPrezzoDinamicoKit(); // Inizializza il prezzo dinamico Kit all'avvio
         calcolaPrezzoDinamicoDTF(); // Inizializza il prezzo dinamico DTF all'avvio
@@ -1400,64 +1468,7 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
         
     }
 });
-/*----ERRATAAAAA----------------------------------------------------------------------------------------
-//Questa funzione è il "cuore" del sistema perché mette in comunicazione il configuratore con il carrello (preventivo).
-function aggiungiAlCarrello(nome, qta, prezzo) {
-    const item = {
-        prodotto: nome,
-        quantita: qta,
-        prezzo_unitario: prezzo
-    };
 
-    // 1. Aggiungi all'array in memoria
-    carrello.push(item);
-
-    // 2. SALVA NEL LOCALSTORAGE (Fondamentale per gestisciCheckout)
-    localStorage.setItem('carrello', JSON.stringify(carrello));
-
-    // 3. Aggiorna l'interfaccia
-    aggiornaUIPreventivo();
-}*/
-/*----------------------------------------------function aggiungiAlCarrello(param1, param2, param3) {
-    let item;
-
-    // Se param1 è un OGGETTO (caso Kit Calcio)
-    if (typeof param1 === 'object' && param1 !== null) {
-        console.log("Rilevato Kit/Oggetto complesso:", param1);
-        
-        item = {
-            prodotto: param1.prodotto || param1.nome || "Kit Personalizzato",
-            // Cerchiamo la quantità (può essere .quantita o .qta)
-            quantita: parseInt(param1.quantita || param1.qta) || 1,
-            // Cerchiamo il prezzo (può essere .prezzo_unitario o .prezzo) e lo puliamo
-            prezzo_unitario: parsePrezzo(param1.prezzo_unitario || param1.prezzo || 0),
-            note: param1.note || "",
-            // Manteniamo gli array del Kit
-            componenti: param1.componenti || [],
-            dettagli_taglie: param1.dettagli_taglie || {},
-            personalizzazione_url: param1.personalizzazione_url || ""
-        };
-    } 
-    // Se riceve 3 PARAMETRI (caso Configuratore Rapido)
-    else {
-        item = {
-            prodotto: param1,
-            quantita: parseInt(param2) || 1,
-            prezzo_unitario: parsePrezzo(param3),
-            note: "Ordine Rapido",
-            componenti: [],
-            dettagli_taglie: {},
-            personalizzazione_url: ""
-        };
-    }
-
-    // SICUREZZA: Se dopo il parsing qualcosa è ancora NaN, lo forziamo a 0
-    if (isNaN(item.prezzo_unitario)) item.prezzo_unitario = 0;
-    
-    carrello.push(item);
-    localStorage.setItem('carrello', JSON.stringify(carrello));
-    aggiornaUIPreventivo();
-}----------------------------------------------*/
 
 // ============================================================
 // LOGICA CONFIGURATORE RAPIDO (Inizio)***********
