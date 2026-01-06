@@ -151,7 +151,7 @@ function renderOrderList(ordiniDaVisualizzare) {
                     </select>
                 </td>
                 <td>
-                    <button onclick="mostraDettagli('${ordine.id}', '${dettagliProdotti}', '${numeroOrdine}')" class="btn-primary" style="padding: 5px 10px;">Vedi Dettagli</button>
+                    <button onclick="mostraDettagli('${ordine.id}', '${dettagliProdotti}', '${numeroOrdine}', ${ordine.totale || 0})" class="btn-primary" style="padding: 5px 10px;">Vedi Dettagli</button>
                 </td>
             </tr>
         `;
@@ -252,32 +252,67 @@ async function aggiornaStatoOrdine(ordineId, nuovoStato) {
 /**
  * 4. Mostra i dettagli dell'ordine in un modale.
  * MODIFICATA: Ora accetta numeroOrdineVisibile
+ *//**
+ * 4. Mostra i dettagli dell'ordine in un modale.
+ * MODIFICATA: Ora identica al lato Cliente (Box Blu, Preventivo, IVA)
  */
-function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile) {
+function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, totaleImponibile) {
     const dettagli = JSON.parse(dettagliProdottiString); 
     const modal = document.getElementById('orderDetailsModal');
     const modalBody = document.getElementById('modalOrderDetails');
     const modalTitle = document.getElementById('modalOrderId');
 
-    if (!modal || !modalBody || !modalTitle) {
-        console.error("Elementi modale non trovati in admin.html!");
-        alert("Errore nel caricamento del modale. Controllare l'HTML.");
+    if (!modal || !modalBody) {
+        console.error("Elementi modale non trovati!");
         return; 
     }
-    
-    // Se per qualche motivo il numero visibile non arriva, usiamo l'ID tronco come fallback
-    const labelOrdine = numeroOrdineVisibile || ordineId.substring(0, 8).toUpperCase();
 
-    // Aggiorniamo il corpo del testo per includere il numero leggibile
-    let dettagliHtml = `Riferimento Ordine: ${labelOrdine}\n(ID Univoco DB: ${ordineId})\n\nDETTAGLI PRODOTTI:\n`; 
- 
+    // --- 1. GESTIONE TITOLO (Preventivo vs ID) ---
+    // Sostituiamo l'intero contenuto dell'H2 per uniformarlo al cliente
+    const h2Element = document.querySelector('#orderDetailsModal h2');
+    if (numeroOrdineVisibile && numeroOrdineVisibile.includes('/')) {
+        h2Element.innerHTML = `Numero Preventivo : <span style="color: #007bff;">${numeroOrdineVisibile}</span>`;
+    } else {
+        // Fallback se non è un numero preventivo formattato
+        const label = numeroOrdineVisibile || ordineId.substring(0, 8).toUpperCase();
+        h2Element.innerHTML = `Dettaglio Preventivo ID: <span style="color: #6c757d; font-size: 0.9em;">${label}</span>`;
+    }
+
+    let dettagliHtml = "";
+
+    // --- 2. BOX BLU DATI CLIENTE (Se presenti) ---
+    const infoCliente = dettagli.find(d => d.tipo === 'INFO_CLIENTE');
+    
+    // Aggiungiamo anche il riferimento ID Database per l'admin, sopra il box blu
+    dettagliHtml += `<div style="font-size: 0.85em; color: #999; margin-bottom: 5px;">Rif. Database: ${ordineId}</div>`;
+
+    if (infoCliente) {
+        dettagliHtml += `<div style="background: #f1f8ff; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #cce5ff;">`;
+        dettagliHtml += `<strong>Cliente / Rag. Soc.:</strong> ${infoCliente.cliente || '---'}<br>`;
+        dettagliHtml += `<strong>Contatti:</strong> ${infoCliente.contatti || '---'}`;
+        dettagliHtml += `</div>`;
+        dettagliHtml += `----------------------------------------------------------\n\n`;
+    }
+
+    dettagliHtml += `DETTAGLI ARTICOLI:\n`;
+
+    // --- 3. LISTA PRODOTTI ---
     dettagli.forEach(item => {
+        // Saltiamo l'oggetto info cliente nel loop
+        if (item.tipo === 'INFO_CLIENTE') return;
+
         dettagliHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
-        dettagliHtml += `Componenti: ${item.componenti.join(', ')}\n`;
-        dettagliHtml += `Prezzo netto cad.: € ${item.prezzo_unitario}\n`;
+        
+        if (item.componenti && Array.isArray(item.componenti) && item.componenti.length > 0) {
+            dettagliHtml += `Componenti: ${item.componenti.join(', ')}\n`;
+        }
+        
+        let pUnit = parseFloat(item.prezzo_unitario);
+        if (isNaN(pUnit)) pUnit = 0;
+        dettagliHtml += `Prezzo netto cad.: € ${pUnit.toFixed(2)}\n`;
   
         if (item.dettagli_taglie && Object.keys(item.dettagli_taglie).length > 0) {
-            dettagliHtml += `\nDettagli Taglie:\n`;
+            dettagliHtml += `Dettagli Taglie:\n`;
             for (const genere in item.dettagli_taglie) {
                 const taglie = Object.entries(item.dettagli_taglie[genere])
                     .map(([taglia, qty]) => `${taglia}: ${qty}`)
@@ -287,21 +322,37 @@ function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile) 
         }
         
         if (item.note && item.note.trim() !== '') {
-            dettagliHtml += `Note Cliente: ${item.note}\n`;
+            dettagliHtml += `Note: ${item.note}\n`;
         }
 
         if (item.personalizzazione_url && item.personalizzazione_url !== 'Nessun file collegato direttamente.') {
            dettagliHtml += `File: COPIA E APRI L'URL:\n${item.personalizzazione_url}\n`;
-        } else {
-            dettagliHtml += `File: Nessun file caricato.\n`;
         }
     });
 
-    // Aggiorna titolo del modale con il numero leggibile (es. 26/0012)
-    modalTitle.textContent = labelOrdine;
-    modalBody.textContent = dettagliHtml;
+    // --- 4. FOOTER E TOTALI (Coordinate Bancarie e IVA) ---
+    dettagliHtml += '\n-----------------------------------------------------------------------------------------\n'; 
+    dettagliHtml += '\n Per procedere con l\'ordine effettuare Bonifico intestato a : Tessitore s.r.l.  \n';
+    dettagliHtml += ' BANCA : SELLA  IBAN : IT56 O032 6804 6070 5227 9191 820 \n';
 
-    // --- LOGICA TASTO STAMPA ---
+    const ivaRate = 0.22; 
+    let totaleImponibileNumerico = parseFloat(totaleImponibile) || 0; 
+    
+    if (totaleImponibileNumerico > 0) {
+        const ivaDovuta = totaleImponibileNumerico * ivaRate;
+        const totaleFinale = totaleImponibileNumerico + ivaDovuta;
+        
+        dettagliHtml += `\n-------------------------------------------------------------------------\n`;
+        dettagliHtml += `TOTALE IMPONIBILE (Netto): € ${totaleImponibileNumerico.toFixed(2)}`;
+        dettagliHtml += `\nIVA (22%): € ${ivaDovuta.toFixed(2)}`;
+        dettagliHtml += `\nTOTALE DOVUTO (IVA Incl.): € ${totaleFinale.toFixed(2)}\n`;
+        dettagliHtml += `-------------------------------------------------------------------------\n`;
+    }
+
+    // Rendering nel corpo (innerHTML per supportare il div blu)
+    modalBody.innerHTML = dettagliHtml.replace(/\n/g, '<br>');
+
+    // --- 5. TASTO STAMPA ---
     let btnStampa = document.getElementById('btnStampaOrdine');
     if (!btnStampa) {
         btnStampa = document.createElement('button');
@@ -323,7 +374,6 @@ function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile) 
         };
         modalBody.parentNode.insertBefore(btnStampa, modalBody.nextSibling);
     }
-    // ----------------------------
 
     modal.style.display = 'block';
 }
