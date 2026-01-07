@@ -180,7 +180,24 @@
             <h3>Note Aggiuntive per la Personalizzazione:</h3>
             <textarea id="kitNote" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;"></textarea>
         </div>
-        
+      
+<div class="upload" style="margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px;">
+        <div style="font-weight: 600; margin-bottom: 10px; color: #333;">Carica Logo / Grafica Kit (.PNG / .PDF):</div>
+    
+    <div class="upload-box">
+        <p>Trascina o carica file</p>
+        <input type="file" id="kitFileUpload" />
+    </div>
+
+    <div id="kitUploadStatusBox" style="margin-top: 15px; background: #e9ecef; padding: 10px; border-radius: 8px; display: none;">
+        <div style="font-weight: 600;" id="kitUploadMessage">In attesa...</div>
+        <div style="height: 8px; background: #ccc; border-radius: 4px; margin-top: 5px;">
+            <div id="kitUploadProgressBar" style="height: 100%; width: 0%; background: #007bff; border-radius: 4px; transition: width 0.3s;"></div>
+        </div>
+    </div>
+</div>
+
+      
         <div style="margin-top: 20px; font-size: 1.2rem; font-weight: 600;">
             Quantità Totale Pezzi: <span id="kitQtaTotale" style="color: #dc3545;">0</span>
         </div>
