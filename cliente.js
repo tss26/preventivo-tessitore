@@ -967,9 +967,8 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
     const modalBody = document.getElementById('modalOrderDetails');
     const modalTitle = document.getElementById('modalOrderId');
 
-    // --- MODIFICA 1: Titolo corretto "Numero Preventivo" ---
+    // --- Titolo Modale ---
     if (numeroOrdineProg && numeroOrdineProg !== 'null') {
-        // Usa innerHTML sul genitore (h2) per pulire tutto e mettere la scritta corretta
         document.querySelector('#orderDetailsModal h2').innerHTML = `Numero Preventivo : <span style="color: #007bff;">${numeroOrdineProg}</span>`;
     } else {
         document.querySelector('#orderDetailsModal h2').innerHTML = `Dettaglio Preventivo ID: <span style="color: #6c757d; font-size: 0.9em;">${ordineId.substring(0, 8)}</span>`;
@@ -977,8 +976,7 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
     
     let dettagliHtml = "";
 
-    // --- MODIFICA 2: Mostra i dati cliente in alto ---
-    // Cerchiamo se c'è l'oggetto 'INFO_CLIENTE' che abbiamo salvato prima
+    // --- Dati Cliente ---
     const infoCliente = dettagli.find(d => d.tipo === 'INFO_CLIENTE');
     if (infoCliente) {
         dettagliHtml += `<div style="background: #f1f8ff; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #cce5ff;">`;
@@ -991,7 +989,7 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
     dettagliHtml += `DETTAGLI ARTICOLI:\n`;
 
     dettagli.forEach(item => {
-        // Se è l'oggetto "INFO_CLIENTE", non ristamparlo come prodotto
+        // Ignora l'oggetto INFO_CLIENTE nel loop prodotti
         if (item.tipo === 'INFO_CLIENTE') return;
 
         dettagliHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
@@ -1000,7 +998,6 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
              dettagliHtml += `Componenti: ${item.componenti.join(', ')}\n`;
         }
         
-        // Fix per sicurezza sui prezzi
         let pUnit = parseFloat(item.prezzo_unitario);
         if (isNaN(pUnit)) pUnit = 0;
         dettagliHtml += `Prezzo netto cad.: € ${pUnit.toFixed(2)}\n`;
@@ -1019,12 +1016,19 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
             dettagliHtml += `Note: ${item.note}\n`;
         }
 
+        // --- MODIFICA QUI: GESTIONE LINK FILE ---
         if (item.personalizzazione_url && item.personalizzazione_url !== 'Nessun file collegato direttamente.') {
-            dettagliHtml += `File: ${item.personalizzazione_url}\n`;
+            // Se contiene "http", è un link valido -> Creiamo il pulsante
+            if (item.personalizzazione_url.includes('http')) {
+                dettagliHtml += `File: <a href="${item.personalizzazione_url}" target="_blank" style="color: #007bff; text-decoration: underline; font-weight: bold; cursor: pointer;">Visualizza Allegato 📎</a>\n`;
+            } else {
+                // Altrimenti stampiamo il testo (es. "Nessun file caricato")
+                dettagliHtml += `File: ${item.personalizzazione_url}\n`;
+            }
         }
     });
 
-    // TOTALI E FOOTER (Invariato)
+    // --- Totali e Footer ---
     dettagliHtml += '\n-----------------------------------------------------------------------------------------\n'; 
     dettagliHtml += '\n Per procedere con l\'ordine effettuare Bonifico intestato a : Tessitore s.r.l.  \n';
     dettagliHtml += ' BANCA : SELLA  IBAN : IT56 O032 6804 6070 5227 9191 820 \n';
@@ -1043,10 +1047,10 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
         dettagliHtml += `-------------------------------------------------------------------------\n`;
     }
     
-    // Assegnazione HTML (usiamo innerHTML per supportare il div blu dei contatti)
+    // Assegnazione HTML
     modalBody.innerHTML = dettagliHtml.replace(/\n/g, '<br>');
 
-    // TASTO STAMPA (Mantenuto come nel tuo codice o aggiunto se manca)
+    // Tasto Stampa
     let btnStampa = document.getElementById('btnStampaOrdine');
     if (!btnStampa) {
         btnStampa = document.createElement('button');
