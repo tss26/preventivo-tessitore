@@ -87,8 +87,103 @@ async function caricaTuttiGliOrdini() {
     table.style.display = 'table';
 }
 
-// 3. NUOVA FUNZIONE: APRI DETTAGLI (SENZA PREZZI)
+// 3. NUOVA FUNZIONE: APRI DETTAGLI (SENZA PREZZI) + TASTO STAMPA
 window.apriDettagliPreventivo = function(id) {
+    const ordine = ordiniGlobali.find(o => o.id === id);
+    if (!ordine) return;
+
+    const dettagli = ordine.dettagli_prodotti;
+    const container = document.getElementById('contenutoDettagli');
+    let html = "";
+
+    // Info Cliente
+    const infoCliente = dettagli.find(d => d.tipo === 'INFO_CLIENTE');
+    if (infoCliente) {
+        html += `<div style="background: #f1f8ff; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #cce5ff;">`;
+        html += `<strong>Cliente:</strong> ${infoCliente.cliente || '---'}<br>`;
+        html += `<strong>Riferimenti:</strong> ${infoCliente.contatti || '---'}`;
+        html += `</div>`;
+    }
+
+    html += `<strong>ARTICOLI DA PRODURRE:</strong><br>`;
+
+    dettagli.forEach(item => {
+        if (item.tipo === 'INFO_CLIENTE') return;
+
+        html += `<div style="border-bottom: 1px solid #eee; padding: 10px 0; margin-bottom: 5px;">`;
+        html += `<strong style="font-size: 1.1em;">${item.prodotto}</strong> (${item.quantita} pz)`;
+        
+        // Componenti
+        if (item.componenti && item.componenti.length > 0) {
+             html += `<div style="color: #555; font-size: 0.9em;">Componenti: ${item.componenti.join(', ')}</div>`;
+        }
+        
+        // Taglie
+        if (item.dettagli_taglie && Object.keys(item.dettagli_taglie).length > 0) {
+            html += `<div style="margin-top: 5px; background: #fafafa; padding: 5px; border-radius: 4px;">`;
+            for (const genere in item.dettagli_taglie) {
+                const taglie = Object.entries(item.dettagli_taglie[genere])
+                    .map(([taglia, qty]) => `<b>${taglia}</b>: ${qty}`)
+                    .join(' | ');
+                html += `<div>${genere}: ${taglie}</div>`;
+            }
+            html += `</div>`;
+        }
+        
+        // Note Articolo
+        if (item.note && item.note.trim() !== '') {
+            html += `<div style="margin-top: 5px; color: #d63384;"><em>Note: ${item.note}</em></div>`;
+        }
+
+        // File Allegato
+        if (item.personalizzazione_url && item.personalizzazione_url !== 'Nessun file collegato direttamente.') {
+            if (item.personalizzazione_url.includes('http')) {
+                html += `<div style="margin-top: 5px;">File: <a href="${item.personalizzazione_url}" target="_blank" style="color: #007bff; text-decoration: underline; font-weight: bold; cursor: pointer;">Visualizza Allegato 📎</a></div>`;
+            } else {
+                html += `<div style="margin-top: 5px;">File: ${item.personalizzazione_url}</div>`;
+            }
+        }
+        
+        html += `</div>`;
+    });
+
+    container.innerHTML = html;
+
+    // --- AGGIUNTA TASTO STAMPA (Nuova parte) ---
+    
+    // 1. Rimuoviamo eventuali vecchi bottoni per evitare duplicati se riapri il modale
+    const vecchioBtn = document.getElementById('btnStampaOperatore');
+    if (vecchioBtn) vecchioBtn.remove();
+
+    // 2. Creiamo il bottone
+    const btnStampa = document.createElement('button');
+    btnStampa.id = 'btnStampaOperatore';
+    btnStampa.textContent = '🖨️ Stampa Dettagli';
+    
+    // Stili uguali a quelli del cliente
+    btnStampa.style.marginTop = '15px';
+    btnStampa.style.padding = '10px 20px';
+    btnStampa.style.backgroundColor = '#6c757d'; 
+    btnStampa.style.color = 'white';
+    btnStampa.style.border = 'none';
+    btnStampa.style.borderRadius = '5px';
+    btnStampa.style.cursor = 'pointer';
+    btnStampa.style.fontSize = '1rem';
+    btnStampa.style.float = 'right'; 
+    
+    // Azione di stampa
+    btnStampa.onclick = function() { window.print(); };
+
+    // 3. Inseriamo il bottone DOPO il contenitore del testo, dentro il modale
+    container.parentNode.insertBefore(btnStampa, container.nextSibling);
+
+    document.getElementById('modalDettagli').style.display = 'flex';
+}
+
+
+
+// 3. NUOVA FUNZIONE: APRI DETTAGLI (SENZA PREZZI)
+/*window.apriDettagliPreventivo = function(id) {
     const ordine = ordiniGlobali.find(o => o.id === id);
     if (!ordine) return;
 
@@ -151,7 +246,7 @@ window.apriDettagliPreventivo = function(id) {
 
     container.innerHTML = html;
     document.getElementById('modalDettagli').style.display = 'flex';
-}
+}*/
 
 // 4. GESTIONE MODALE STATO (Esistente)
 window.apriModaleModifica = function(id, numProg, statoAttuale) {
