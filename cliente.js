@@ -912,13 +912,27 @@ async function caricaMieiOrdini() {
     
     ordiniCaricatiLocali = ordini; // Salviamo i dati qui
 
-    let html = `<div class="lista-ordini-table-wrapper"><table><thead><tr><th>N. Ordine</th><th>Data</th><th>Totale</th><th>Stato</th><th>Dettagli</th></tr></thead><tbody>`;
+    // MODIFICA 1: Aggiunta intestazione <th>Riferimento</th>
+    let html = `<div class="lista-ordini-table-wrapper"><table><thead><tr><th>N. Ordine</th><th>Riferimento</th><th>Data</th><th>Totale</th><th>Stato</th><th>Dettagli</th></tr></thead><tbody>`;
     
     ordini.forEach(ordine => {
         const numeroOrdine = ordine.num_ordine_prog || ordine.id.substring(0, 8).toUpperCase();
+
+        // --- MODIFICA 2: Estrazione del Riferimento ---
+        let riferimentoCliente = "---";
+        if (ordine.dettagli_prodotti && Array.isArray(ordine.dettagli_prodotti)) {
+            const info = ordine.dettagli_prodotti.find(d => d.tipo === 'INFO_CLIENTE');
+            if (info && info.cliente) {
+                riferimentoCliente = info.cliente;
+            }
+        }
+        // ----------------------------------------------
+
+        // MODIFICA 3: Aggiunta cella <td> con il riferimento
         html += `
             <tr>
                 <td>${numeroOrdine}</td>
+                <td style="font-weight:600; color:#4a90e2;">${riferimentoCliente}</td>
                 <td>${new Date(ordine.data_ordine).toLocaleString()}</td>
                 <td>€ ${ordine.totale ? ordine.totale.toFixed(2) : '0.00'}</td>
                 <td><span class="stato-ordine stato-${ordine.stato.replace(/\s/g, '-')}">${ordine.stato}</span></td>
