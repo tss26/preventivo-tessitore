@@ -1,4 +1,6 @@
+// ===========================================
 // CONFIGURAZIONE SUPABASE
+// ===========================================
 const SUPABASE_URL = 'https://jukyggaoiekenvekoicv.supabase.co'; 
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1a3lnZ2FvaWVrZW52ZWtvaWN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwNjEwOTgsImV4cCI6MjA3MjYzNzA5OH0.84lO4yqqZ6pbVLX0hlxOC3qgK508y1gFxeSp3Wx3kkw'; 
 
@@ -9,10 +11,13 @@ if (!window.supabaseClient) {
 }
 var supabase = window.supabaseClient;
 
+// --- VARIABILI GLOBALI ---
 let ordineSelezionatoId = null; 
-let ordiniGlobali = []; // Variabile per salvare i dati scaricati
+let ordiniGlobali = []; // Contiene TUTTI i dati scaricati dal DB
 
+// ===========================================
 // 1. VERIFICA PERMESSI OPERATORE
+// ===========================================
 async function verificaOperatore() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { window.location.href = 'login.html'; return; }
@@ -32,11 +37,15 @@ async function verificaOperatore() {
     caricaTuttiGliOrdini();
 }
 
-// 2. CARICAMENTO ORDINI
+// ===========================================
+// 2. CARICAMENTO ORDINI DAL DB
+// ===========================================
 async function caricaTuttiGliOrdini() {
-    const tbody = document.getElementById('listaOrdiniBody');
-    const table = document.getElementById('tabellaOrdini');
     const loading = document.getElementById('loadingMessage');
+    const table = document.getElementById('tabellaOrdini');
+    
+    if(loading) loading.style.display = 'block';
+    if(table) table.style.display = 'none';
 
     const { data: ordini, error } = await supabase
         .from('ordini')
@@ -44,24 +53,95 @@ async function caricaTuttiGliOrdini() {
         .order('data_ordine', { ascending: false });
 
     if (error) {
-        loading.textContent = "Errore caricamento ordini: " + error.message;
+        if(loading) loading.textContent = "Errore caricamento ordini: " + error.message;
         return;
     }
 
-    // Salviamo gli ordini nella variabile globale per usarli nel dettaglio
+    // Salviamo i dati nella variabile globale
     ordiniGlobali = ordini;
 
-    tbody.innerHTML = '';
+    // Disegniamo la tabella applicando i filtri (inizialmente vuoti = mostra tutto)
+    applicaFiltri(); 
     
-    ordini.forEach(ordine => {
+    if(loading) loading.style.display = 'none';
+    if(table) table.style.display = 'table';
+}
+
+// ===========================================
+// 2a. FUNZIONE DI FILTRAGGIO
+// ===========================================
+function applicaFiltri() {
+    const testo = document.getElementById('filtroTesto').value.toLowerCase().trim();
+    const stato = document.getElementById('filtroStato').value;
+    const dataInizio = document.getElementById('filtroDataInizio').value;
+    const dataFine = document.getElementById('filtroDataFine').value;
+
+    const ordiniFiltrati = ordiniGlobali.filter(ordine => {
+        // 1. Filtro Testo (ID, Riferimento, Nome Cliente nel DB)
+        let matchTesto = true;
+        if (testo) {
+            const numOrdine = (ordine.num_ordine_prog || ordine.id).toLowerCase();
+            
+            // Estrazione Riferimento JSON
+            let riferimento = "";
+            if (ordine.dettagli_prodotti && Array.isArray(ordine.dettagli_prodotti)) {
+                const info = ordine.dettagli_prodotti.find(i => i.tipo === 'INFO_CLIENTE');
+                if (info && info.cliente) riferimento = info.cliente.toLowerCase();
+            }
+
+            matchTesto = numOrdine.includes(testo) || riferimento.includes(testo);
+        }
+
+        // 2. Filtro Stato
+        let matchStato = true;
+        if (stato) {
+            matchStato = ordine.stato === stato;
+        }
+
+        // 3. Filtro Data
+        let matchData = true;
+        const dataOrdine = new Date(ordine.data_ordine); // Data ordine dal DB
+        
+        if (dataInizio) {
+            const dInizio = new Date(dataInizio);
+            dInizio.setHours(0,0,0,0); // Azzera orario
+            if (dataOrdine < dInizio) matchData = false;
+        }
+        
+        if (dataFine) {
+            const dFine = new Date(dataFine);
+            dFine.setHours(23,59,59,999); // Fine giornata
+            if (dataOrdine > dFine) matchData = false;
+        }
+
+        return matchTesto && matchStato && matchData;
+    });
+
+    renderOrdini(ordiniFiltrati);
+}
+
+// ===========================================
+// 2b. FUNZIONE DI RENDERING (DISEGNO TABELLA)
+// ===========================================
+function renderOrdini(lista) {
+    const tbody = document.getElementById('listaOrdiniBody');
+    tbody.innerHTML = '';
+
+    if (lista.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nessun ordine trovato con questi criteri.</td></tr>';
+        return;
+    }
+    
+    lista.forEach(ordine => {
         const numOrdine = ordine.num_ordine_prog || ordine.id.substring(0, 8).toUpperCase();
         const dataFmt = new Date(ordine.data_ordine).toLocaleString();
         
+        // Estrazione nome cliente / riferimento
         let nomeCliente = '<span style="color: #999;">N/D</span>';
         if (ordine.dettagli_prodotti && Array.isArray(ordine.dettagli_prodotti)) {
             const info = ordine.dettagli_prodotti.find(item => item.tipo === 'INFO_CLIENTE');
             if (info && info.cliente) {
-                nomeCliente = `<strong>${info.cliente}</strong>`;
+                nomeCliente = `<strong style="color:#0056b3;">${info.cliente}</strong>`;
             }
         }
 
@@ -82,12 +162,11 @@ async function caricaTuttiGliOrdini() {
         `;
         tbody.appendChild(tr);
     });
-
-    loading.style.display = 'none';
-    table.style.display = 'table';
 }
 
-// 3. NUOVA FUNZIONE: APRI DETTAGLI (SENZA PREZZI) + TASTO STAMPA
+// ===========================================
+// 3. FUNZIONE: APRI DETTAGLI + TASTO STAMPA
+// ===========================================
 window.apriDettagliPreventivo = function(id) {
     const ordine = ordiniGlobali.find(o => o.id === id);
     if (!ordine) return;
@@ -149,9 +228,8 @@ window.apriDettagliPreventivo = function(id) {
 
     container.innerHTML = html;
 
-    // --- AGGIUNTA TASTO STAMPA (Nuova parte) ---
-    
-    // 1. Rimuoviamo eventuali vecchi bottoni per evitare duplicati se riapri il modale
+    // --- TASTO STAMPA ---
+    // 1. Rimuoviamo eventuali vecchi bottoni
     const vecchioBtn = document.getElementById('btnStampaOperatore');
     if (vecchioBtn) vecchioBtn.remove();
 
@@ -160,7 +238,6 @@ window.apriDettagliPreventivo = function(id) {
     btnStampa.id = 'btnStampaOperatore';
     btnStampa.textContent = '🖨️ Stampa Dettagli';
     
-    // Stili uguali a quelli del cliente
     btnStampa.style.marginTop = '15px';
     btnStampa.style.padding = '10px 20px';
     btnStampa.style.backgroundColor = '#6c757d'; 
@@ -171,84 +248,17 @@ window.apriDettagliPreventivo = function(id) {
     btnStampa.style.fontSize = '1rem';
     btnStampa.style.float = 'right'; 
     
-    // Azione di stampa
     btnStampa.onclick = function() { window.print(); };
 
-    // 3. Inseriamo il bottone DOPO il contenitore del testo, dentro il modale
+    // 3. Inseriamo il bottone
     container.parentNode.insertBefore(btnStampa, container.nextSibling);
 
     document.getElementById('modalDettagli').style.display = 'flex';
 }
 
-
-
-// 3. NUOVA FUNZIONE: APRI DETTAGLI (SENZA PREZZI)
-/*window.apriDettagliPreventivo = function(id) {
-    const ordine = ordiniGlobali.find(o => o.id === id);
-    if (!ordine) return;
-
-    const dettagli = ordine.dettagli_prodotti;
-    const container = document.getElementById('contenutoDettagli');
-    let html = "";
-
-    // Info Cliente
-    const infoCliente = dettagli.find(d => d.tipo === 'INFO_CLIENTE');
-    if (infoCliente) {
-        html += `<div style="background: #f1f8ff; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #cce5ff;">`;
-        html += `<strong>Cliente:</strong> ${infoCliente.cliente || '---'}<br>`;
-        html += `<strong>Riferimenti:</strong> ${infoCliente.contatti || '---'}`;
-        html += `</div>`;
-    }
-
-    html += `<strong>ARTICOLI DA PRODURRE:</strong><br>`;
-
-    dettagli.forEach(item => {
-        if (item.tipo === 'INFO_CLIENTE') return;
-
-        html += `<div style="border-bottom: 1px solid #eee; padding: 10px 0; margin-bottom: 5px;">`;
-        html += `<strong style="font-size: 1.1em;">${item.prodotto}</strong> (${item.quantita} pz)`;
-        
-        // Componenti
-        if (item.componenti && item.componenti.length > 0) {
-             html += `<div style="color: #555; font-size: 0.9em;">Componenti: ${item.componenti.join(', ')}</div>`;
-        }
-        
-        // Taglie
-        if (item.dettagli_taglie && Object.keys(item.dettagli_taglie).length > 0) {
-            html += `<div style="margin-top: 5px; background: #fafafa; padding: 5px; border-radius: 4px;">`;
-            for (const genere in item.dettagli_taglie) {
-                const taglie = Object.entries(item.dettagli_taglie[genere])
-                    .map(([taglia, qty]) => `<b>${taglia}</b>: ${qty}`)
-                    .join(' | ');
-                html += `<div>${genere}: ${taglie}</div>`;
-            }
-            html += `</div>`;
-        }
-        
-        // Note Articolo
-        if (item.note && item.note.trim() !== '') {
-            html += `<div style="margin-top: 5px; color: #d63384;"><em>Note: ${item.note}</em></div>`;
-        }
-
-        // File Allegato (Con logica link cliccabile)
-        if (item.personalizzazione_url && item.personalizzazione_url !== 'Nessun file collegato direttamente.') {
-            if (item.personalizzazione_url.includes('http')) {
-                html += `<div style="margin-top: 5px;">File: <a href="${item.personalizzazione_url}" target="_blank" style="color: #007bff; text-decoration: underline; font-weight: bold; cursor: pointer;">Visualizza Allegato 📎</a></div>`;
-            } else {
-                html += `<div style="margin-top: 5px;">File: ${item.personalizzazione_url}</div>`;
-            }
-        }
-        
-        html += `</div>`;
-    });
-
-    // NOTE: NON AGGIUNGIAMO TOTALI NÉ IBAN QUI.
-
-    container.innerHTML = html;
-    document.getElementById('modalDettagli').style.display = 'flex';
-}*/
-
-// 4. GESTIONE MODALE STATO (Esistente)
+// ===========================================
+// 4. GESTIONE MODALE STATO
+// ===========================================
 window.apriModaleModifica = function(id, numProg, statoAttuale) {
     ordineSelezionatoId = id;
     document.getElementById('modalOrderIdLabel').textContent = numProg;
@@ -270,33 +280,58 @@ document.getElementById('btnSalvaStato').addEventListener('click', async () => {
         alert("Errore: " + error.message);
     } else {
         document.getElementById('modalStato').style.display = 'none';
-        caricaTuttiGliOrdini(); // Ricarica tabella
+        caricaTuttiGliOrdini(); // Ricarica tabella e riapplica i filtri (via render)
     }
 });
 
-// GESTIONE CHIUSURA MODALI
-document.getElementById('logoutBtn').addEventListener('click', async () => {
-    await supabase.auth.signOut();
-    window.location.href = 'login.html';
-});
+// ===========================================
+// EVENT LISTENERS GENERALI (DOM Ready)
+// ===========================================
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Avvio verifica operatore
+    verificaOperatore();
+    
+    // 2. Listener Logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await supabase.auth.signOut();
+        window.location.href = 'login.html';
+    });
 
-// Chiudi modale Stato
-document.getElementById('closeModalStato').addEventListener('click', () => {
-    document.getElementById('modalStato').style.display = 'none';
-});
+    // 3. Listener Chiusura Modali
+    document.getElementById('closeModalStato').addEventListener('click', () => {
+        document.getElementById('modalStato').style.display = 'none';
+    });
+    document.getElementById('closeModalDettagli').addEventListener('click', () => {
+        document.getElementById('modalDettagli').style.display = 'none';
+    });
+    
+    // Chiudi cliccando fuori
+    window.addEventListener('click', (e) => {
+        const mStato = document.getElementById('modalStato');
+        const mDett = document.getElementById('modalDettagli');
+        if (e.target === mStato) mStato.style.display = 'none';
+        if (e.target === mDett) mDett.style.display = 'none';
+    });
 
-// Chiudi modale Dettagli (Nuovo)
-document.getElementById('closeModalDettagli').addEventListener('click', () => {
-    document.getElementById('modalDettagli').style.display = 'none';
-});
+    // 4. Listener Filtri
+    const btnApplica = document.getElementById('btnApplicaFiltri');
+    if(btnApplica) btnApplica.addEventListener('click', applicaFiltri);
 
-// Chiudi cliccando fuori
-window.addEventListener('click', (e) => {
-    const mStato = document.getElementById('modalStato');
-    const mDett = document.getElementById('modalDettagli');
-    if (e.target === mStato) mStato.style.display = 'none';
-    if (e.target === mDett) mDett.style.display = 'none';
+    const inputTesto = document.getElementById('filtroTesto');
+    if(inputTesto) {
+        inputTesto.addEventListener('keyup', (e) => {
+            if(e.key === 'Enter') applicaFiltri();
+        });
+    }
+    
+    const btnReset = document.getElementById('btnResetFiltri');
+    if(btnReset) {
+        btnReset.addEventListener('click', () => {
+            document.getElementById('filtroTesto').value = '';
+            document.getElementById('filtroStato').value = '';
+            document.getElementById('filtroDataInizio').value = '';
+            document.getElementById('filtroDataFine').value = '';
+            applicaFiltri();
+        });
+    }
 });
-
-// Avvio
-document.addEventListener('DOMContentLoaded', verificaOperatore);
