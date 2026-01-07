@@ -9,7 +9,8 @@ if (!window.supabaseClient) {
 }
 var supabase = window.supabaseClient;
 
-let ordineSelezionatoId = null; // Per tenere traccia di quale ordine stiamo modificando
+let ordineSelezionatoId = null; 
+let ordiniGlobali = []; // Variabile per salvare i dati scaricati
 
 // 1. VERIFICA PERMESSI OPERATORE
 async function verificaOperatore() {
@@ -28,8 +29,6 @@ async function verificaOperatore() {
         window.location.href = 'login.html';
         return;
     }
-    
-    // Se è operatore, carica i dati
     caricaTuttiGliOrdini();
 }
 
@@ -39,7 +38,6 @@ async function caricaTuttiGliOrdini() {
     const table = document.getElementById('tabellaOrdini');
     const loading = document.getElementById('loadingMessage');
 
-    // Prendi TUTTI gli ordini (senza filtro user_id)
     const { data: ordini, error } = await supabase
         .from('ordini')
         .select('*')
@@ -50,17 +48,17 @@ async function caricaTuttiGliOrdini() {
         return;
     }
 
+    // Salviamo gli ordini nella variabile globale per usarli nel dettaglio
+    ordiniGlobali = ordini;
+
     tbody.innerHTML = '';
     
     ordini.forEach(ordine => {
         const numOrdine = ordine.num_ordine_prog || ordine.id.substring(0, 8).toUpperCase();
         const dataFmt = new Date(ordine.data_ordine).toLocaleString();
         
-        // ESTRAZIONE NOME CLIENTE (Il famoso "Commento")
         let nomeCliente = '<span style="color: #999;">N/D</span>';
-        
         if (ordine.dettagli_prodotti && Array.isArray(ordine.dettagli_prodotti)) {
-            // Cerchiamo l'oggetto INFO_CLIENTE che abbiamo salvato nel carrello
             const info = ordine.dettagli_prodotti.find(item => item.tipo === 'INFO_CLIENTE');
             if (info && info.cliente) {
                 nomeCliente = `<strong>${info.cliente}</strong>`;
@@ -74,8 +72,11 @@ async function caricaTuttiGliOrdini() {
             <td>${nomeCliente}</td>
             <td><span class="stato-${ordine.stato.replace(/\s/g, '-')}">${ordine.stato}</span></td>
             <td>
-                <button class="btn-edit" onclick="apriModaleModifica('${ordine.id}', '${ordine.num_ordine_prog || ''}', '${ordine.stato}')">
-                    ✏️ Modifica
+                <button class="btn-info" onclick="apriDettagliPreventivo('${ordine.id}')">
+                    📄 Visualizza
+                </button>
+                <button class="btn-edit" onclick="apriModaleModifica('${ordine.id}', '${numOrdine}', '${ordine.stato}')">
+                    ✏️ Stato
                 </button>
             </td>
         `;
@@ -86,49 +87,120 @@ async function caricaTuttiGliOrdini() {
     table.style.display = 'table';
 }
 
-// 3. GESTIONE MODALE
-window.apriModaleModifica = function(id, numProg, statoAttuale) {
-    ordineSelezionatoId = id;
-    document.getElementById('modalOrderIdLabel').textContent = numProg || id.substring(0,8);
-    document.getElementById('nuovoStatoSelect').value = statoAttuale;
-    document.getElementById('modalStato').style.display = 'flex'; // Flex per centrare
+// 3. NUOVA FUNZIONE: APRI DETTAGLI (SENZA PREZZI)
+window.apriDettagliPreventivo = function(id) {
+    const ordine = ordiniGlobali.find(o => o.id === id);
+    if (!ordine) return;
+
+    const dettagli = ordine.dettagli_prodotti;
+    const container = document.getElementById('contenutoDettagli');
+    let html = "";
+
+    // Info Cliente
+    const infoCliente = dettagli.find(d => d.tipo === 'INFO_CLIENTE');
+    if (infoCliente) {
+        html += `<div style="background: #f1f8ff; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #cce5ff;">`;
+        html += `<strong>Cliente:</strong> ${infoCliente.cliente || '---'}<br>`;
+        html += `<strong>Riferimenti:</strong> ${infoCliente.contatti || '---'}`;
+        html += `</div>`;
+    }
+
+    html += `<strong>ARTICOLI DA PRODURRE:</strong><br>`;
+
+    dettagli.forEach(item => {
+        if (item.tipo === 'INFO_CLIENTE') return;
+
+        html += `<div style="border-bottom: 1px solid #eee; padding: 10px 0; margin-bottom: 5px;">`;
+        html += `<strong style="font-size: 1.1em;">${item.prodotto}</strong> (${item.quantita} pz)`;
+        
+        // Componenti
+        if (item.componenti && item.componenti.length > 0) {
+             html += `<div style="color: #555; font-size: 0.9em;">Componenti: ${item.componenti.join(', ')}</div>`;
+        }
+        
+        // Taglie
+        if (item.dettagli_taglie && Object.keys(item.dettagli_taglie).length > 0) {
+            html += `<div style="margin-top: 5px; background: #fafafa; padding: 5px; border-radius: 4px;">`;
+            for (const genere in item.dettagli_taglie) {
+                const taglie = Object.entries(item.dettagli_taglie[genere])
+                    .map(([taglia, qty]) => `<b>${taglia}</b>: ${qty}`)
+                    .join(' | ');
+                html += `<div>${genere}: ${taglie}</div>`;
+            }
+            html += `</div>`;
+        }
+        
+        // Note Articolo
+        if (item.note && item.note.trim() !== '') {
+            html += `<div style="margin-top: 5px; color: #d63384;"><em>Note: ${item.note}</em></div>`;
+        }
+
+        // File Allegato (Con logica link cliccabile)
+        if (item.personalizzazione_url && item.personalizzazione_url !== 'Nessun file collegato direttamente.') {
+            if (item.personalizzazione_url.includes('http')) {
+                html += `<div style="margin-top: 5px;">File: <a href="${item.personalizzazione_url}" target="_blank" style="color: #007bff; text-decoration: underline; font-weight: bold; cursor: pointer;">Visualizza Allegato 📎</a></div>`;
+            } else {
+                html += `<div style="margin-top: 5px;">File: ${item.personalizzazione_url}</div>`;
+            }
+        }
+        
+        html += `</div>`;
+    });
+
+    // NOTE: NON AGGIUNGIAMO TOTALI NÉ IBAN QUI.
+
+    container.innerHTML = html;
+    document.getElementById('modalDettagli').style.display = 'flex';
 }
 
-// 4. SALVATAGGIO STATO
+// 4. GESTIONE MODALE STATO (Esistente)
+window.apriModaleModifica = function(id, numProg, statoAttuale) {
+    ordineSelezionatoId = id;
+    document.getElementById('modalOrderIdLabel').textContent = numProg;
+    document.getElementById('nuovoStatoSelect').value = statoAttuale;
+    document.getElementById('modalStato').style.display = 'flex';
+}
+
 document.getElementById('btnSalvaStato').addEventListener('click', async () => {
     if (!ordineSelezionatoId) return;
-
     const nuovoStato = document.getElementById('nuovoStatoSelect').value;
-    const btn = document.getElementById('btnSalvaStato');
-    btn.textContent = "Salvataggio...";
-    btn.disabled = true;
-
+    
+    // Aggiorna stato su Supabase
     const { error } = await supabase
         .from('ordini')
         .update({ stato: nuovoStato })
         .eq('id', ordineSelezionatoId);
 
     if (error) {
-        alert("Errore aggiornamento: " + error.message);
+        alert("Errore: " + error.message);
     } else {
-        // Chiudi modale e ricarica tabella
         document.getElementById('modalStato').style.display = 'none';
-        caricaTuttiGliOrdini();
+        caricaTuttiGliOrdini(); // Ricarica tabella
     }
-
-    btn.textContent = "Salva Modifica";
-    btn.disabled = false;
 });
 
-// Logout
+// GESTIONE CHIUSURA MODALI
 document.getElementById('logoutBtn').addEventListener('click', async () => {
     await supabase.auth.signOut();
     window.location.href = 'login.html';
 });
 
-// Chiusura Modale
+// Chiudi modale Stato
 document.getElementById('closeModalStato').addEventListener('click', () => {
     document.getElementById('modalStato').style.display = 'none';
+});
+
+// Chiudi modale Dettagli (Nuovo)
+document.getElementById('closeModalDettagli').addEventListener('click', () => {
+    document.getElementById('modalDettagli').style.display = 'none';
+});
+
+// Chiudi cliccando fuori
+window.addEventListener('click', (e) => {
+    const mStato = document.getElementById('modalStato');
+    const mDett = document.getElementById('modalDettagli');
+    if (e.target === mStato) mStato.style.display = 'none';
+    if (e.target === mDett) mDett.style.display = 'none';
 });
 
 // Avvio
