@@ -187,23 +187,35 @@ function renderOrderList(ordiniDaVisualizzare) {
 /**
  * Applica i filtri (testo e stato) all'array allOrders e ridisegna la lista.
  */
-function applyFilters() { // <-- AGGIUNTA: Logica di filtraggio
+function applyFilters() { 
     const ricercaTesto = document.getElementById('ricercaTesto')?.value.toLowerCase().trim() || '';
     const filtroStato = document.getElementById('filtroStato')?.value || '';
+    // Nuovi valori
+    const dataInizio = document.getElementById('filtroDataInizio')?.value;
+    const dataFine = document.getElementById('filtroDataFine')?.value;
 
-    let ordiniFiltrati = allOrders.filter(ordine => {
+    let ordiniFiltrati = allOrders.filter(ordine => { // Assicurati che admin.js usi 'allOrders' come variabile globale
         let matchTesto = true;
         let matchStato = true;
+        let matchData = true;
 
-        // 1. Filtro Testuale (N. Ordine Progressivo, ID, Ragione Sociale)
+        // 1. Filtro Testuale (N. Ordine, ID, Ragione Sociale, RIFERIMENTO)
         if (ricercaTesto) {
             const numeroOrdine = String(ordine.num_ordine_prog || '').toLowerCase(); 
             const idOrdineTroncato = ordine.id ? ordine.id.substring(0, 8).toLowerCase() : '';
-            const nomeCliente = ordine.utente?.ragione_sociale ? ordine.utente.ragione_sociale.toLowerCase() : '';
+            const nomeClienteDB = ordine.utente?.ragione_sociale ? ordine.utente.ragione_sociale.toLowerCase() : '';
+            
+            // Logica Riferimento (dal JSON)
+            let riferimento = "";
+            if (ordine.dettagli_prodotti && Array.isArray(ordine.dettagli_prodotti)) {
+                const info = ordine.dettagli_prodotti.find(i => i.tipo === 'INFO_CLIENTE');
+                if (info && info.cliente) riferimento = info.cliente.toLowerCase();
+            }
             
             matchTesto = numeroOrdine.includes(ricercaTesto) || 
                          idOrdineTroncato.includes(ricercaTesto) ||
-                         nomeCliente.includes(ricercaTesto);
+                         nomeClienteDB.includes(ricercaTesto) ||
+                         riferimento.includes(ricercaTesto);
         }
 
         // 2. Filtro per Stato
@@ -211,11 +223,36 @@ function applyFilters() { // <-- AGGIUNTA: Logica di filtraggio
             matchStato = ordine.stato === filtroStato;
         }
 
-        return matchTesto && matchStato;
+        // 3. Filtro Data
+        const dataOrdine = new Date(ordine.data_ordine);
+        if (dataInizio) {
+            const dInizio = new Date(dataInizio);
+            dInizio.setHours(0,0,0,0);
+            if (dataOrdine < dInizio) matchData = false;
+        }
+        if (dataFine) {
+            const dFine = new Date(dataFine);
+            dFine.setHours(23,59,59,999);
+            if (dataOrdine > dFine) matchData = false;
+        }
+
+        return matchTesto && matchStato && matchData;
     });
 
     renderOrderList(ordiniFiltrati);
 }
+
+// Ricordati di aggiornare il listener del pulsante Reset per pulire anche le date
+function resetFilters() {
+    if(document.getElementById('ricercaTesto')) document.getElementById('ricercaTesto').value = '';
+    if(document.getElementById('filtroStato')) document.getElementById('filtroStato').value = '';
+    if(document.getElementById('filtroDataInizio')) document.getElementById('filtroDataInizio').value = '';
+    if(document.getElementById('filtroDataFine')) document.getElementById('filtroDataFine').value = '';
+    applyFilters(); 
+}
+
+
+
 
 /**
  * Resetta i campi di filtro e riesegue applyFilters.
