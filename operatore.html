@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   
   <style>
-    /* --- STILI BASE (Copiati/Adattati da cliente.css per coerenza) --- */
+    /* --- STILI BASE --- */
     body {
         font-family: 'Poppins', sans-serif;
         background-color: #f4f7f6;
@@ -34,6 +34,7 @@
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
+    /* Contenitore bianco per la tabella */
     .table-wrapper {
         background: white;
         padding: 20px;
@@ -45,7 +46,7 @@
     table {
         width: 100%;
         border-collapse: collapse;
-        min-width: 800px; /* Per evitare che si schiacci troppo su mobile */
+        min-width: 800px;
     }
 
     th, td {
@@ -102,50 +103,14 @@
     }
     .btn-primary:hover { background-color: #0056b3; }
 
-    /* --- COLORI STATI (Aggiornati per i tuoi stati specifici) --- */
-    /* Nota: Le classi sono generate sostituendo gli spazi con trattini '-' */
-
-    /* 1. Richiesta Inviata (Azzurro) */
-    .stato-Richiesta-Inviata { 
-        background: #e3f2fd; color: #0d47a1; 
-        padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600;
-    }
-
-    /* 2. In attesa di lavorazione (Giallo/Arancio) */
-    .stato-In-attesa-di-lavorazione { 
-        background: #fff3cd; color: #856404; 
-        padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600;
-    }
-
-    /* 3. In lavorazione (Blu Elettrico) */
-    .stato-In-lavorazione { 
-        background: #cce5ff; color: #004085; 
-        padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600;
-    }
-
-    /* 4. Stampato (Viola) */
-    .stato-Stampato { 
-        background: #e0cffc; color: #4a148c; 
-        padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600;
-    }
-
-    /* 5. Completato (Verde Chiaro) */
-    .stato-Completato { 
-        background: #d4edda; color: #155724; 
-        padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600;
-    }
-
-    /* 6. Spedito (Verde Scuro) */
-    .stato-Spedito { 
-        background: #c3e6cb; color: #0f5132; 
-        padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600;
-    }
-
-    /* 7. Annullato (Rosso) */
-    .stato-Annullato { 
-        background: #f8d7da; color: #721c24; 
-        padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600;
-    }
+    /* --- COLORI STATI --- */
+    .stato-Richiesta-Inviata { background: #e3f2fd; color: #0d47a1; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600; }
+    .stato-In-attesa-di-lavorazione { background: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600; }
+    .stato-In-lavorazione { background: #cce5ff; color: #004085; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600; }
+    .stato-Stampato { background: #e0cffc; color: #4a148c; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600; }
+    .stato-Completato { background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600; }
+    .stato-Spedito { background: #c3e6cb; color: #0f5132; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600; }
+    .stato-Annullato { background: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600; }
 
     /* --- MODALE --- */
     .modal-backdrop {
@@ -176,44 +141,26 @@
     }
     .close-button:hover { color: #333; }
 
-    /* Nuovo stile per il bottone Visualizza */
     .btn-info {
-        background-color: #17a2b8; /* Azzurro petrolio */
+        background-color: #17a2b8;
         color: white;
         border: none;
         padding: 6px 12px;
         border-radius: 4px;
         cursor: pointer;
         font-weight: 500;
-        margin-right: 5px; /* Spazio dal bottone modifica */
+        margin-right: 5px;
         font-size: 0.9rem;
     }
     .btn-info:hover { background-color: #138496; }
 
-    /* per stampa modale */
-@media print {
-    body * {
-        visibility: hidden; /* Nasconde tutto il sito */
+    /* STAMPA */
+    @media print {
+        body * { visibility: hidden; }
+        #modalDettagli, #modalDettagli * { visibility: visible; }
+        #modalDettagli { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; background: white; box-shadow: none; }
+        .close-button, #btnStampaOperatore { display: none !important; }
     }
-    #modalDettagli, #modalDettagli * {
-        visibility: visible; /* Rende visibile solo il modale */
-    }
-    #modalDettagli {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        margin: 0;
-        padding: 0;
-        background: white;
-        box-shadow: none;
-    }
-    /* Nasconde la X di chiusura e il bottone Stampa stesso sul foglio di carta */
-    .close-button, #btnStampaOperatore {
-        display: none !important;
-    }
-}
-
   </style>
 </head>
 <body>
@@ -227,14 +174,52 @@
         <button id="logoutBtn" class="btn-logout">Esci</button>
     </div>
 
-    <div class="table-wrapper">
+    <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
             <h2 style="margin: 0; color: #333;">Gestione Ordini</h2>
-            <button onclick="caricaTuttiGliOrdini()" style="background:none; border:1px solid #ccc; padding:5px 10px; border-radius:4px; cursor:pointer;">🔄 Aggiorna</button>
+            <button onclick="caricaTuttiGliOrdini()" style="background:none; border:1px solid #ccc; padding:5px 10px; border-radius:4px; cursor:pointer;">🔄 Ricarica Dati</button>
         </div>
-        
-        <div id="loadingMessage" style="text-align: center; padding: 20px; color: #666;">Caricamento ordini...</div>
-        
+
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;">
+            <div style="flex: 1; min-width: 200px;">
+                <label style="font-weight: 600; font-size: 0.9em; display: block; margin-bottom: 5px;">Cerca (ID, Cliente, Riferimento):</label>
+                <input type="text" id="filtroTesto" placeholder="Es: Mario, 12345..." style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+
+            <div style="flex: 1; min-width: 150px;">
+                <label style="font-weight: 600; font-size: 0.9em; display: block; margin-bottom: 5px;">Stato:</label>
+                <select id="filtroStato" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    <option value="">Tutti</option>
+                    <option value="Richiesta Inviata">Richiesta Inviata</option>
+                    <option value="In attesa di lavorazione">In attesa di lavorazione</option>
+                    <option value="In lavorazione">In lavorazione</option>
+                    <option value="Stampato">Stampato</option>
+                    <option value="Completato">Completato</option>
+                    <option value="Spedito">Spedito</option>
+                    <option value="Annullato">Annullato</option>
+                </select>
+            </div>
+
+            <div style="flex: 1; min-width: 130px;">
+                <label style="font-weight: 600; font-size: 0.9em; display: block; margin-bottom: 5px;">Da Data:</label>
+                <input type="date" id="filtroDataInizio" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+
+            <div style="flex: 1; min-width: 130px;">
+                <label style="font-weight: 600; font-size: 0.9em; display: block; margin-bottom: 5px;">A Data:</label>
+                <input type="date" id="filtroDataFine" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+
+            <div style="display: flex; gap: 5px;">
+                <button id="btnApplicaFiltri" class="btn-primary">Cerca</button>
+                <button id="btnResetFiltri" style="background: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;">Reset</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="loadingMessage" style="text-align: center; padding: 20px; color: #666;">Caricamento ordini...</div>
+    
+    <div class="table-wrapper"> 
         <table id="tabellaOrdini" style="display: none;">
             <thead>
                 <tr>
@@ -246,7 +231,7 @@
                 </tr>
             </thead>
             <tbody id="listaOrdiniBody">
-                </tbody>
+            </tbody>
         </table>
     </div>
   </div>
@@ -281,7 +266,7 @@
         <span class="close-button" id="closeModalDettagli">&times;</span>
         <h3 style="margin-top: 0; color: #17a2b8;">Dettagli Produzione</h3>
         <div id="contenutoDettagli" style="max-height: 70vh; overflow-y: auto; text-align: left; line-height: 1.6;">
-            </div>
+        </div>
     </div>
   </div>
 
