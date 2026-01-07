@@ -102,6 +102,9 @@ async function caricaOrdini() { // <-- MODIFICATA: Ora salva in allOrders e chia
 /**
  * Funzione di utilità per disegnare la tabella degli ordini
  */
+/**
+ * Funzione di utilità per disegnare la tabella degli ordini
+ */
 function renderOrderList(ordiniDaVisualizzare) { 
     const container = document.getElementById('ordiniLista');
     
@@ -110,30 +113,45 @@ function renderOrderList(ordiniDaVisualizzare) {
         return;
     }
 
+    // MODIFICA 1: Aggiunto <th>Riferimento</th> nell'header
     let html = `<div class="admin-table">
         <table><thead><tr>
-        <th>N. Ordine</th><th>Cliente</th><th>P. IVA</th><th>Data</th><th>Totale</th><th>Stato</th><th>Azioni</th>
+        <th>N. Ordine</th><th>Account</th><th>Riferimento</th><th>P. IVA</th><th>Data</th><th>Totale</th><th>Stato</th><th>Azioni</th>
         </tr></thead><tbody>`;
     
     ordiniDaVisualizzare.forEach(ordine => {
         const dettagliProdotti = JSON.stringify(ordine.dettagli_prodotti).replace(/"/g, '&quot;');
         
-        // Calcolo del numero ordine leggibile (es. 26/0012)
+        // Calcolo del numero ordine leggibile
         const numeroOrdine = ordine.num_ordine_prog 
             ? ordine.num_ordine_prog 
             : ordine.id.substring(0, 8).toUpperCase(); 
 
+        // Nome dell'account registrato (chi ha fatto il login)
         const nomeUtenteDB = ordine.utente?.ragione_sociale; 
-        const clienteNome = (nomeUtenteDB && nomeUtenteDB.trim() !== '') 
+        const accountNome = (nomeUtenteDB && nomeUtenteDB.trim() !== '') 
             ? nomeUtenteDB 
             : 'ID: ' + (ordine.user_id ? ordine.user_id.substring(0, 8) : 'N/D'); 
         
         const clientePiva = (ordine.utente && ordine.utente.partita_iva) || 'N/D';
+
+        // --- MODIFICA 2: Estrazione del Riferimento (Nome inserito nel carrello) ---
+        let riferimentoCliente = "---";
+        // Controlliamo se esiste l'array dettagli e cerchiamo l'oggetto INFO_CLIENTE
+        if (ordine.dettagli_prodotti && Array.isArray(ordine.dettagli_prodotti)) {
+            const info = ordine.dettagli_prodotti.find(d => d.tipo === 'INFO_CLIENTE');
+            if (info && info.cliente) {
+                riferimentoCliente = info.cliente;
+            }
+        }
+        // --------------------------------------------------------------------------
         
+        // MODIFICA 3: Aggiunto <td>${riferimentoCliente}</td> nella riga
         html += `
             <tr data-id="${ordine.id}">
                 <td>${numeroOrdine}</td> 
-                <td>${clienteNome}</td>
+                <td>${accountNome}</td>
+                <td style="font-weight:bold; color:#007bff;">${riferimentoCliente}</td>
                 <td>${clientePiva}</td>
                 <td>${new Date(ordine.data_ordine).toLocaleString()}</td>
                 <td>€ ${ordine.totale ? ordine.totale.toFixed(2) : '0.00'}</td>
