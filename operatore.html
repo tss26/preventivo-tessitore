@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Operatore - Tessitore</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* --- STILI BASE (Copiati/Adattati da cliente.css per coerenza) --- */
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f4f7f6;
+        margin: 0;
+        padding: 0;
+        color: #333;
+    }
+
+    /* --- LAYOUT OPERATORE --- */
+    .container-operatore {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .header-operatore {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .table-wrapper {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 800px; /* Per evitare che si schiacci troppo su mobile */
+    }
+
+    th, td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        color: #555;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+    }
+
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    /* BOTTONI */
+    .btn-edit {
+        background-color: #ffc107;
+        color: #333;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: background 0.2s;
+    }
+    .btn-edit:hover { background-color: #e0a800; }
+
+    .btn-logout {
+        background: #dc3545; 
+        color: white; 
+        border: none; 
+        padding: 8px 15px; 
+        border-radius: 5px; 
+        cursor: pointer;
+        font-weight: 500;
+    }
+    .btn-logout:hover { background: #c82333; }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    .btn-primary:hover { background-color: #0056b3; }
+
+    /* --- COLORI STATI (Aggiornati per i tuoi stati specifici) --- */
+    /* Nota: Le classi sono generate sostituendo gli spazi con trattini '-' */
+
+    /* 1. Richiesta Inviata (Azzurro) */
+    .stato-Richiesta-Inviata { 
+        background: #e3f2fd; color: #0d47a1; 
+        padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600;
+    }
+
+    /* 2. In attesa di lavorazione (Giallo/Arancio) */
+    .stato-In-attesa-di-lavorazione { 
+        background: #fff3cd; color: #856404; 
+        padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600;
+    }
+
+    /* 3. In lavorazione (Blu Elettrico) */
+    .stato-In-lavorazione { 
+        background: #cce5ff; color: #004085; 
+        padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600;
+    }
+
+    /* 4. Stampato (Viola) */
+    .stato-Stampato { 
+        background: #e0cffc; color: #4a148c; 
+        padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600;
+    }
+
+    /* 5. Completato (Verde Chiaro) */
+    .stato-Completato { 
+        background: #d4edda; color: #155724; 
+        padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600;
+    }
+
+    /* 6. Spedito (Verde Scuro) */
+    .stato-Spedito { 
+        background: #c3e6cb; color: #0f5132; 
+        padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600;
+    }
+
+    /* 7. Annullato (Rosso) */
+    .stato-Annullato { 
+        background: #f8d7da; color: #721c24; 
+        padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600;
+    }
+
+    /* --- MODALE --- */
+    .modal-backdrop {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+    .modal-content {
+        background-color: white;
+        padding: 25px;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 400px;
+        position: relative;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .close-button {
+        position: absolute;
+        top: 10px; right: 15px;
+        font-size: 24px;
+        cursor: pointer;
+        color: #aaa;
+    }
+    .close-button:hover { color: #333; }
+
+  </style>
+</head>
+<body>
+
+  <div class="container-operatore">
+    <div class="header-operatore">
+        <div class="logo">
+            <img src="icon-192.png" alt="Logo" style="height: 40px; vertical-align: middle;">
+            <span style="font-weight: 600; font-size: 1.2em; margin-left: 10px; color: #0056b3;">Area Operatore</span>
+        </div>
+        <button id="logoutBtn" class="btn-logout">Esci</button>
+    </div>
+
+    <div class="table-wrapper">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+            <h2 style="margin: 0; color: #333;">Gestione Ordini</h2>
+            <button onclick="caricaTuttiGliOrdini()" style="background:none; border:1px solid #ccc; padding:5px 10px; border-radius:4px; cursor:pointer;">🔄 Aggiorna</button>
+        </div>
+        
+        <div id="loadingMessage" style="text-align: center; padding: 20px; color: #666;">Caricamento ordini...</div>
+        
+        <table id="tabellaOrdini" style="display: none;">
+            <thead>
+                <tr>
+                    <th>N. Ordine</th>
+                    <th>Data</th>
+                    <th>Cliente / Riferimento</th>
+                    <th>Stato Attuale</th>
+                    <th style="text-align: center;">Azioni</th>
+                </tr>
+            </thead>
+            <tbody id="listaOrdiniBody">
+                </tbody>
+        </table>
+    </div>
+  </div>
+
+  <div id="modalStato" class="modal-backdrop" style="display: none;">
+    <div class="modal-content">
+        <span class="close-button" id="closeModalStato">&times;</span>
+        <h3 style="margin-top: 0; color: #007bff;">Modifica Stato Ordine</h3>
+        
+        <p style="margin-bottom: 20px;">
+            Ordine N.: <span id="modalOrderIdLabel" style="font-weight: bold; font-size: 1.1em;"></span>
+        </p>
+        
+        <label for="nuovoStatoSelect" style="font-weight: 500; display: block; margin-bottom: 8px;">Seleziona Nuovo Stato:</label>
+        
+        <select id="nuovoStatoSelect" style="width: 100%; padding: 10px; margin-bottom: 25px; border-radius: 5px; border: 1px solid #ccc; font-size: 1rem;">
+            <option value="Richiesta Inviata">Richiesta Inviata</option>
+            <option value="In attesa di lavorazione">In attesa di lavorazione</option>
+            <option value="In lavorazione">In lavorazione</option>
+            <option value="Stampato">Stampato</option>
+            <option value="Completato">Completato</option>
+            <option value="Spedito">Spedito</option>
+            <option value="Annullato">Annullato</option>
+        </select>
+
+        <button id="btnSalvaStato" class="btn-primary" style="width: 100%;">💾 Salva Modifica</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="operatore.js"></script>
+
+</body>
+</html>
