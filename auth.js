@@ -77,7 +77,7 @@ async function handleLogin(email, password) {
         return;
     }
     
-    // 1. Esegue il login e ottiene i dati di base (incluso l'UUID dell'utente)
+    // 1. Esegue il login e ottiene i dati di base
     const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
@@ -93,24 +93,35 @@ async function handleLogin(email, password) {
     // 2. RECUPERA I PERMESSI DALLA TABELLA 'utenti'
     const { data: profilo, error: profiloError } = await supabase
         .from('utenti')
-        .select('permessi') // Seleziona il campo 'permessi'
+        .select('permessi')
         .eq('id', userId)
         .single();
 
     if (profiloError) {
         console.error("Errore nel recupero dei permessi utente:", profiloError);
         alert("Accesso OK, ma impossibile determinare i permessi. Reindirizzamento standard.");
-        window.location.href = 'cliente.html'; // Fallback sicuro
+        window.location.href = 'cliente.html'; 
         return;
     }
 
-    // 3. LOGICA DI REINDIRIZZAMENTO CONDIZIONALE
-    if (profilo && profilo.permessi === 'admin') {
-        alert("Accesso Admin effettuato!");
-        window.location.href = 'admin.html'; // Reindirizza l'admin
-    } else {
-        alert("Accesso Cliente effettuato!");
-        window.location.href = 'cliente.html'; // Reindirizza il cliente
+    // 3. LOGICA DI REINDIRIZZAMENTO AGGIORNATA
+    const ruolo = profilo.permessi;
+
+    if (ruolo === 'admin') {
+        // alert("Bentornato Admin!"); // Opzionale
+        window.location.href = 'admin.html';
+    } 
+    else if (ruolo === 'operatore') {
+        // alert("Accesso Operatore"); // Opzionale
+        window.location.href = 'operatore.html';
+    } 
+    else if (ruolo === 'rappresentante') {
+        // alert("Accesso Rappresentante"); // Opzionale
+        window.location.href = 'rappresentante.html';
+    } 
+    else {
+        // Se è 'cliente' o qualsiasi altra cosa
+        window.location.href = 'cliente.html';
     }
 }
 
@@ -146,16 +157,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Logica di gestione della sessione (opzionale, ma utile per reindirizzare)
-    // Se l'utente è già loggato e arriva su login.html, lo reindirizziamo
-    supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session && window.location.pathname.endsWith('login.html')) {
-            // Se la sessione esiste e siamo sulla pagina di login, andiamo all'area cliente
-            window.location.href = 'cliente.html';
-        }
-    });
+  // Nuovo codice intelligente:
+supabase.auth.getSession().then(async ({ data: { session } }) => {
+    // Se c'è una sessione attiva E l'utente è sulla pagina di login
+    if (session && window.location.pathname.endsWith('login.html')) {
+        
+        // Controlliamo al volo che ruolo ha per mandarlo alla pagina giusta
+        const { data: profilo } = await supabase
+            .from('utenti')
+            .select('permessi')
+            .eq('id', session.user.id)
+            .single();
 
-
+        if (profilo && profilo.permessi === 'admin') window.location.href = 'admin.html';
+        else if (profilo && profilo.permessi === 'operatore') window.location.href = 'operatore.html';
+        else if (profilo && profilo.permessi === 'rappresentante') window.location.href = 'rappresentante.html';
+        else window.location.href = 'cliente.html';
+    }
+});
 
 
 
