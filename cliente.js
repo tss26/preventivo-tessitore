@@ -1859,3 +1859,6 @@ function aggiungiNuovaRigaConfiguratore() {
     container.appendChild(nuova);
     setupRigaEvents(nuova);
 }
+// ============================================================
+// LOGICA CONFIGURATORE RAPIDO (Fine gli * segnano le parti collegate)**********
+// ============================================================
