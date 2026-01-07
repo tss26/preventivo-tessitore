@@ -446,12 +446,48 @@
         <button class="btn-secondary" id="richiediPreventivo">Richiedi preventivo ufficiale</button>
       </aside>
     
-    <section id="ordiniCliente" class="galleria-blocco" style="display: none; ">
-        <h2>I Miei Ordini Recenti</h2>
-        <div id="ordiniListaCliente" class="lista-ordini">
-            <p>Caricamento ordini in corso...</p>
+    <section id="ordiniCliente" class="galleria-blocco" style="display: none;">
+    <h2>I Miei Ordini Recenti</h2>
+
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px;">
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;">
+            
+            <div style="flex: 1; min-width: 200px;">
+                <label style="font-size: 0.9em; font-weight: 600;">Cerca (Riferimento o N. Ordine):</label>
+                <input type="text" id="cliRicerca" placeholder="Es. Squadra Rossi..." style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+
+            <div style="flex: 1; min-width: 130px;">
+                <label style="font-size: 0.9em; font-weight: 600;">Dal:</label>
+                <input type="date" id="cliDataInizio" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+
+            <div style="flex: 1; min-width: 130px;">
+                <label style="font-size: 0.9em; font-weight: 600;">Al:</label>
+                <input type="date" id="cliDataFine" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+
+             <div style="flex: 1; min-width: 130px;">
+                 <label style="font-size: 0.9em; font-weight: 600;">Stato:</label>
+                 <select id="cliStato" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    <option value="">Tutti</option>
+                    <option value="Richiesta Inviata">Richiesta Inviata</option>
+                    <option value="In lavorazione">In lavorazione</option>
+                    <option value="Spedito">Spedito</option>
+                 </select>
+            </div>
+
+            <div>
+                <button id="cliBtnCerca" class="btn-primary" style="padding: 9px 15px;">Cerca</button>
+                <button id="cliBtnReset" style="padding: 9px 15px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">Reset</button>
+            </div>
         </div>
-    </section>
+    </div>
+
+    <div id="ordiniListaCliente" class="lista-ordini">
+        <p>Caricamento ordini in corso...</p>
+    </div>
+</section>
 
   </main>
 
