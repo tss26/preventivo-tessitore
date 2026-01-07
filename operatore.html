@@ -176,6 +176,20 @@
     }
     .close-button:hover { color: #333; }
 
+    /* Nuovo stile per il bottone Visualizza */
+    .btn-info {
+        background-color: #17a2b8; /* Azzurro petrolio */
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        margin-right: 5px; /* Spazio dal bottone modifica */
+        font-size: 0.9rem;
+    }
+    .btn-info:hover { background-color: #138496; }
+
   </style>
 </head>
 <body>
@@ -235,6 +249,15 @@
         </select>
 
         <button id="btnSalvaStato" class="btn-primary" style="width: 100%;">💾 Salva Modifica</button>
+    </div>
+  </div>
+
+  <div id="modalDettagli" class="modal-backdrop" style="display: none;">
+    <div class="modal-content" style="max-width: 600px; width: 95%;">
+        <span class="close-button" id="closeModalDettagli">&times;</span>
+        <h3 style="margin-top: 0; color: #17a2b8;">Dettagli Produzione</h3>
+        <div id="contenutoDettagli" style="max-height: 70vh; overflow-y: auto; text-align: left; line-height: 1.6;">
+            </div>
     </div>
   </div>
 
