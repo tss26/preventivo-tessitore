@@ -324,3 +324,417 @@ function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, 
         
         let pUnit = parseFloat(item.prezzo_unitario);
         if (isNaN(pUnit)) pUnit = 0;
+        dettagliHtml += `Prezzo netto cad.: € ${pUnit.toFixed(2)}\n`;
+  
+        if (item.dettagli_taglie && Object.keys(item.dettagli_taglie).length > 0) {
+            dettagliHtml += `Dettagli Taglie:\n`;
+            for (const genere in item.dettagli_taglie) {
+                const taglie = Object.entries(item.dettagli_taglie[genere])
+                    .map(([taglia, qty]) => `${taglia}: ${qty}`)
+                    .join(', ');
+                dettagliHtml += `  - ${genere}: ${taglie}\n`;
+            }
+        }
+        
+        if (item.note && item.note.trim() !== '') {
+            dettagliHtml += `Note: ${item.note}\n`;
+        }
+
+        if (item.personalizzazione_url && item.personalizzazione_url !== 'Nessun file collegato direttamente.') {
+           dettagliHtml += `File: COPIA E APRI L'URL:\n${item.personalizzazione_url}\n`;
+        }
+    });
+
+    // --- 4. FOOTER E TOTALI ---
+    dettagliHtml += '\n-----------------------------------------------------------------------------------------\n'; 
+    dettagliHtml += '\n Per procedere con l\'ordine effettuare Bonifico intestato a : Tessitore s.r.l.  \n';
+    dettagliHtml += ' BANCA : SELLA  IBAN : IT56 O032 6804 6070 5227 9191 820 \n';
+
+    const ivaRate = 0.22; 
+    let totaleImponibileNumerico = parseFloat(totaleImponibile) || 0; 
+    
+    if (totaleImponibileNumerico > 0) {
+        const ivaDovuta = totaleImponibileNumerico * ivaRate;
+        const totaleFinale = totaleImponibileNumerico + ivaDovuta;
+        
+        dettagliHtml += `\n-------------------------------------------------------------------------\n`;
+        dettagliHtml += `TOTALE IMPONIBILE (Netto): € ${totaleImponibileNumerico.toFixed(2)}`;
+        dettagliHtml += `\nIVA (22%): € ${ivaDovuta.toFixed(2)}`;
+        dettagliHtml += `\nTOTALE DOVUTO (IVA Incl.): € ${totaleFinale.toFixed(2)}\n`;
+        dettagliHtml += `-------------------------------------------------------------------------\n`;
+    }
+
+    modalBody.innerHTML = dettagliHtml.replace(/\n/g, '<br>');
+
+    // --- 5. TASTO STAMPA ---
+    let btnStampa = document.getElementById('btnStampaOrdine');
+    if (!btnStampa) {
+        btnStampa = document.createElement('button');
+        btnStampa.id = 'btnStampaOrdine'; 
+        btnStampa.textContent = '🖨️ Stampa Ordine';
+        
+        btnStampa.style.marginTop = '15px';
+        btnStampa.style.padding = '10px 20px';
+        btnStampa.style.backgroundColor = '#6c757d'; 
+        btnStampa.style.color = 'white';
+        btnStampa.style.border = 'none';
+        btnStampa.style.borderRadius = '5px';
+        btnStampa.style.cursor = 'pointer';
+        btnStampa.style.fontSize = '1rem';
+        btnStampa.style.float = 'right'; 
+        
+        btnStampa.onclick = function() {
+            window.print();
+        };
+        modalBody.parentNode.insertBefore(btnStampa, modalBody.nextSibling);
+    }
+
+    modal.style.display = 'block';
+}
+
+
+/**
+ * Gestisce il logout.
+ */
+async function handleLogout() {
+    const { error } = await supabase.auth.signOut();
+    if (error) console.error('Errore logout:', error);
+    window.location.href = 'index.html'; 
+}
+
+
+// ===========================================
+// INIZIALIZZAZIONE E PROTEZIONE
+// ===========================================
+
+document.addEventListener('DOMContentLoaded', async () => {
+    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+    const isAdmin = await verificaAdmin();
+
+    if (isAdmin) {
+        
+        // --- EVENT LISTENERS FILTRI ---
+        const applicaBtn = document.getElementById('applicaFiltriBtn');
+        const resetBtn = document.getElementById('resetFiltriBtn');
+        const ricercaInput = document.getElementById('ricercaTesto');
+        const statoSelect = document.getElementById('filtroStato');
+
+        if (applicaBtn) applicaBtn.addEventListener('click', applyFilters);
+        if (resetBtn) resetBtn.addEventListener('click', resetFilters);
+        if (statoSelect) statoSelect.addEventListener('change', applyFilters);
+        
+        if (ricercaInput) {
+            ricercaInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') applyFilters();
+            });
+        }
+
+        // --- GESTIONE MODALE ORDINI ---
+        const modal = document.getElementById('orderDetailsModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        
+        if (closeModalBtn && modal) {
+            closeModalBtn.addEventListener('click', () => { modal.style.display = 'none'; });
+            window.addEventListener('click', (event) => {
+                if (event.target === modal) modal.style.display = 'none';
+            });
+        }
+
+        caricaOrdini();
+        
+        // ===========================================
+        // GESTIONE MODALE UTENTI
+        // ===========================================
+        const saveBtn = document.getElementById('saveUserChangesBtn');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', saveUserChanges);
+        }
+
+        const userEditModal = document.getElementById('userEditModal');
+        window.addEventListener('click', (event) => {
+            if (event.target === userEditModal) {
+                userEditModal.style.display = 'none';
+            }
+        });
+        
+        const sameMerceCheckbox = document.getElementById('editUserStessoMerce');
+        if (sameMerceCheckbox) {
+             sameMerceCheckbox.addEventListener('change', (e) => toggleMerceAddressFields(e.target.checked));
+        }
+
+        // Avvia la sezione Ordini
+        showSection('orders');
+    }
+});
+
+// ===========================================
+// FUNZIONALITÀ UTENTI E PERMESSI
+// ===========================================
+
+let allUsers = []; 
+
+function showSection(sectionId) {
+    document.querySelectorAll('.content-section').forEach(section => {
+        section.style.display = 'none';
+    });
+
+    const targetSection = document.getElementById(sectionId + '-section');
+    if (targetSection) targetSection.style.display = 'block';
+
+    document.querySelectorAll('.tab-nav a').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    const activeTab = document.getElementById(sectionId + '-tab');
+    if (activeTab) activeTab.classList.add('active');
+
+    if (sectionId === 'orders') {
+        caricaOrdini();
+    } else if (sectionId === 'users') {
+        caricaUtenti();
+    }
+}
+
+
+/**
+ * 1. Recupera tutti gli utenti.
+ */
+async function caricaUtenti() {
+    const container = document.getElementById('utentiLista');
+    if (!container) return;
+    
+    container.innerHTML = '<h2>Caricamento utenti in corso...</h2>';
+    
+    const { data: utenti, error } = await supabase
+        .from('utenti')
+        .select(`
+            id, email, ragione_sociale, partita_iva, telefono, permessi,
+            indirizzo_legale_via, indirizzo_legale_cap, indirizzo_legale_citta, indirizzo_legale_provincia,
+            stesso_indirizzo_merce,
+            indirizzo_merce_via, indirizzo_merce_cap, indirizzo_merce_citta, indirizzo_merce_provincia,
+            percentuale_sconto, sdi
+        `)
+        .order('ragione_sociale', { ascending: true }); 
+
+    if (error) {
+        container.innerHTML = `<p style="color: red;">Errore nel recupero utenti: ${error.message}.</p>`;
+        return;
+    }
+
+    allUsers = utenti || []; 
+    renderUserList(allUsers); 
+}
+
+/**
+ * 2. Visualizza la tabella degli utenti.
+ */
+function renderUserList(users) {
+    const container = document.getElementById('utentiLista');
+    if (!container) return;
+
+    if (users.length === 0) {
+        container.innerHTML = '<h2>Nessun utente trovato.</h2>';
+        return;
+    }
+
+    let html = `
+    <div class="admin-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome / Ragione Sociale</th>
+                    <th>Email</th> <th>P. IVA</th>
+                    <th>Permessi</th>
+                    <th>Azioni</th>
+                </tr>
+            </thead>
+            <tbody>`;
+    
+    users.forEach(user => {
+        html += `
+            <tr data-id="${user.id}">
+                <td>${user.ragione_sociale || 'N/D'}</td> 
+                <td>${user.email || 'N/D'}</td> <td>${user.partita_iva || 'N/D'}</td>
+                <td>
+                    <select class="permessi-select" data-id="${user.id}">
+                        <option value="cliente" ${user.permessi === 'cliente' ? 'selected' : ''}>Cliente</option>
+                        <option value="rivenditore" ${user.permessi === 'rivenditore' ? 'selected' : ''}>Rivenditore</option>
+                        <option value="operatore" ${user.permessi === 'operatore' ? 'selected' : ''}>Operatore</option>
+                        <option value="rappresentante" ${user.permessi === 'rappresentante' ? 'selected' : ''}>Rappresentante</option>
+                        <option value="admin" ${user.permessi === 'admin' ? 'selected' : ''}>Admin</option>
+                        <option value="disattivato" ${user.permessi === 'disattivato' ? 'selected' : ''}>Disattivato</option>
+                    </select>
+                </td>
+                <td>
+                    <button onclick="openEditUserModal('${user.id}')" class="btn-secondary" style="padding: 5px 10px;">Modifica Dati</button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+    
+    document.querySelectorAll('.permessi-select').forEach(select => {
+        select.addEventListener('change', (e) => aggiornaPermessiUtente(e.target.dataset.id, e.target.value));
+    });
+}
+
+/**
+ * 3. Aggiorna i permessi di un utente nel DB.
+ */
+async function aggiornaPermessiUtente(userId, nuovoPermesso) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user && user.id === userId && nuovoPermesso !== 'admin') {
+        alert("Non puoi declassare o disattivare i tuoi stessi permessi di amministratore.");
+        caricaUtenti(); 
+        return;
+    }
+    
+    if (!confirm(`Confermi il cambio permessi per l'utente ${userId.substring(0, 8)} a "${nuovoPermesso}"?`)) {
+        caricaUtenti(); 
+        return;
+    }
+    
+    const { error } = await supabase
+        .from('utenti')
+        .update({ permessi: nuovoPermesso })
+        .eq('id', userId);
+    
+    if (error) {
+        alert(`Errore nell'aggiornamento dei permessi: ${error.message}.`);
+    } else {
+        console.log(`Permessi utente ${userId} aggiornati a: ${nuovoPermesso}`);
+        caricaUtenti(); 
+    }
+}
+
+/**
+ * Nasconde/Mostra i campi dell'indirizzo di destinazione merce a seconda della checkbox.
+ */
+function toggleMerceAddressFields(isSame) {
+    const fieldsContainer = document.getElementById('merceAddressFields');
+    if (fieldsContainer) {
+        fieldsContainer.style.display = isSame ? 'none' : 'block';
+    }
+}
+
+
+/**
+ * 4. Apri e popola il modale per la modifica di tutti i dati dell'utente.
+ */
+function openEditUserModal(userId) {
+    const user = allUsers.find(u => u.id === userId);
+    if (!user) {
+        alert('Utente non trovato nell\'elenco.');
+        return;
+    }
+
+    const modal = document.getElementById('userEditModal');
+    if (!modal) {
+        alert('Modale di modifica utente non trovato.');
+        return;
+    }
+    
+    document.getElementById('editUserId').value = user.id;
+    document.getElementById('editUserEmail').value = user.email || '';
+    document.getElementById('editUserRagioneSociale').value = user.ragione_sociale || '';
+    document.getElementById('editUserPartitaIva').value = user.partita_iva || '';
+    document.getElementById('editUserTelefono').value = user.telefono || '';
+    document.getElementById('editUserPermessi').value = user.permessi || 'cliente';
+    
+    document.getElementById('editUserSdi').value = user.sdi || '';
+    document.getElementById('editUserSconto').value = user.percentuale_sconto || 0;
+
+    document.getElementById('editUserLegaleVia').value = user.indirizzo_legale_via || '';
+    document.getElementById('editUserLegaleCap').value = user.indirizzo_legale_cap || '';
+    document.getElementById('editUserLegaleCitta').value = user.indirizzo_legale_citta || '';
+    document.getElementById('editUserLegaleProvincia').value = user.indirizzo_legale_provincia || '';
+
+    const isSameAddress = user.stesso_indirizzo_merce === true;
+    document.getElementById('editUserStessoMerce').checked = isSameAddress;
+    
+    document.getElementById('editUserMerceVia').value = user.indirizzo_merce_via || '';
+    document.getElementById('editUserMerceCap').value = user.indirizzo_merce_cap || '';
+    document.getElementById('editUserMerceCitta').value = user.indirizzo_merce_citta || '';
+    document.getElementById('editUserMerceProvincia').value = user.indirizzo_merce_provincia || '';
+    
+    toggleMerceAddressFields(isSameAddress);
+
+    modal.style.display = 'block';
+}
+
+/**
+ * 5. Salva i dati modificati dall'apposito modale.
+ */
+async function saveUserChanges() {
+    const userId = document.getElementById('editUserId').value;
+    const ragione_sociale = document.getElementById('editUserRagioneSociale').value;
+    const partita_iva = document.getElementById('editUserPartitaIva').value;
+    const telefono = document.getElementById('editUserTelefono').value.trim(); 
+    const permessi = document.getElementById('editUserPermessi').value;
+    
+    if (!telefono || telefono === '') {
+        alert("ATTENZIONE INSERIRE IL TELEFONO è OBBLIGATORIO");
+        return; 
+    }
+    
+    const sdi = document.getElementById('editUserSdi').value;
+
+    const scontoInput = document.getElementById('editUserSconto').value.trim();
+    let sconto = 0; 
+    if (scontoInput !== '') {
+        const parsedSconto = parseFloat(scontoInput);
+        sconto = isNaN(parsedSconto) ? 0 : parsedSconto; 
+    }
+
+    const legale_via = document.getElementById('editUserLegaleVia').value;
+    const legale_cap = document.getElementById('editUserLegaleCap').value;
+    const legale_citta = document.getElementById('editUserLegaleCitta').value;
+    const legale_provincia = document.getElementById('editUserLegaleProvincia').value;
+
+    const stesso_merce = document.getElementById('editUserStessoMerce').checked;
+
+    const merce_via = stesso_merce ? legale_via : document.getElementById('editUserMerceVia').value;
+    const merce_cap = stesso_merce ? legale_cap : document.getElementById('editUserMerceCap').value;
+    const merce_citta = stesso_merce ? legale_citta : document.getElementById('editUserMerceCitta').value;
+    const merce_provincia = stesso_merce ? legale_provincia : document.getElementById('editUserMerceProvincia').value;
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user && user.id === userId && permessi !== 'admin') {
+        alert("Non puoi declassare i tuoi stessi permessi. Modifica fallita.");
+        return;
+    }
+
+    const updatedData = {
+        ragione_sociale: ragione_sociale,
+        partita_iva: partita_iva,
+        telefono: telefono,
+        permessi: permessi,
+        sdi: sdi,
+        percentuale_sconto: sconto, 
+
+        indirizzo_legale_via: legale_via,
+        indirizzo_legale_cap: legale_cap,
+        indirizzo_legale_citta: legale_citta,
+        indirizzo_legale_provincia: legale_provincia,
+        
+        stesso_indirizzo_merce: stesso_merce,
+        indirizzo_merce_via: merce_via,
+        indirizzo_merce_cap: merce_cap,
+        indirizzo_merce_citta: merce_citta,
+        indirizzo_merce_provincia: merce_provincia,
+    };
+    
+    const { error } = await supabase
+        .from('utenti')
+        .update(updatedData)
+        .eq('id', userId);
+    
+    if (error) {
+        alert(`Errore nel salvataggio dei dati utente: ${error.message}.`);
+    } else {
+        alert('Dati utente aggiornati con successo!');
+        document.getElementById('userEditModal').style.display = 'none'; 
+        caricaUtenti(); 
+    }
+}
