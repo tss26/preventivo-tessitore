@@ -721,73 +721,155 @@ function calcolaPrezzoDinamicoKit() {
 
 //-----------
 //Questa funzione deve usare il prezzo medio e deve includere il costo grafico nei componenti per tracciarlo nell'ordine.
-
 async function gestisciAggiuntaKitCalcio() {
-    const taglieTables = document.querySelectorAll('#taglieInputContainer .taglie-table');
-    const kitProdSelezionato = document.querySelector('.kit-item.active')?.dataset.prodotto;
-    
-    const qtaTotale = parseInt(document.getElementById('kitQtaTotale').textContent) || 0;
-    //kitPrezzoBase sostituito a kitPrezzoDinamico
-    const prezzoDinamico = parseFloat(document.getElementById('kitPrezzoBase').textContent.replace('€', '').trim()) || 0;
-    const kitNote = document.getElementById('kitNote').value;
+    const taglieTables = document.querySelectorAll('#taglieInputContainer .taglie-table');
+    const kitProdSelezionato = document.querySelector('.kit-item.active')?.dataset.prodotto;
+    
+    // Recupero dati numerici e testo
+    const qtaTotale = parseInt(document.getElementById('kitQtaTotale').textContent) || 0;
+    const prezzoDinamico = parseFloat(document.getElementById('kitPrezzoDinamico').textContent.replace('€', '').trim()) || 0;
+    const kitNote = document.getElementById('kitNote').value;
 
-    if (!kitProdSelezionato) {
-        alert("Devi selezionare un prodotto Kit (T-Shirt, Pantaloncino o Completino).");
-        return;
-    }
-    if (qtaTotale === 0 || isNaN(prezzoDinamico)) {
-        alert("La quantità totale deve essere superiore a zero.");
-        return;
-    }
-    if (!utenteCorrenteId) { // Controllo cruciale
-        alert("Errore: ID Utente non disponibile. Effettua nuovamente il login.");
-        return;
-    }
-    
-    // Raccoglie i dettagli delle taglie
-    let dettagliTaglie = {};
-    taglieTables.forEach(table => {
-        const genere = table.dataset.genere;
-        dettagliTaglie[genere] = {};
-        
-        const inputs = table.querySelectorAll('input[type="number"]');
-        inputs.forEach(input => {
-            const taglia = input.dataset.taglia;
-            const qta = parseInt(input.value) || 0;
-            if (qta > 0) {
-                dettagliTaglie[genere][taglia] = qta;
-            }
-        });
-        if (Object.keys(dettagliTaglie[genere]).length === 0) {
-            delete dettagliTaglie[genere];
-        }
-    });
-    
-    // Traccia il costo impianto grafico come componente fisso
-    const componenti = [`Sublimazione`, `Costo Impianto Grafico (€${LISTINO_COMPLETO.KIT_CALCIO.COSTO_GRAFICO.toFixed(2)})`];
+    // --- 1. RILEVAZIONE FILE UPLOAD ---
+    const fileInput = document.getElementById('kitFileUpload'); // Assicurati che questo ID esista nell'HTML
+    const fileToUpload = fileInput ? fileInput.files[0] : null; 
+    
+    // Elementi UI per l'upload (Barra di progresso)
+    const uploadStatusBox = document.getElementById('kitUploadStatusBox');
+    const uploadMessage = document.getElementById('kitUploadMessage');
+    const uploadProgressBar = document.getElementById('kitUploadProgressBar');
 
-    const nuovoArticolo = { 
-        id_unico: Date.now(), 
-        prodotto: `KIT CALCIO - ${kitProdSelezionato}`, 
-        quantita: qtaTotale, 
-        // Il prezzo unitario è il prezzo medio calcolato
-        prezzo_unitario: parseFloat(prezzoDinamico.toFixed(2)), 
-        componenti: componenti,
-        dettagli_taglie: dettagliTaglie,
-        note: kitNote,
-        // NON c'è upload qui, ma l'ordine verrà inviato con questo campo
-        personalizzazione_url: 'Nessun file collegato direttamente.'
-    };
+    // --- CONTROLLI PRELIMINARI ---
+    if (!kitProdSelezionato) {
+        alert("Devi selezionare un prodotto Kit (T-Shirt, Pantaloncino o Completino).");
+        return;
+    }
+    if (qtaTotale === 0) {
+        alert("La quantità totale deve essere superiore a zero.");
+        return;
+    }
+    if (!utenteCorrenteId) { 
+        alert("Errore: ID Utente non disponibile. Effettua nuovamente il login.");
+        return;
+    }
+    
+    // Controllo Dimensione File (Max 5MB) - Se il file c'è
+    const MAX_FILE_SIZE_MB = 5;
+    if (fileToUpload && fileToUpload.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+        alert(`Il file è troppo grande. Max ${MAX_FILE_SIZE_MB} MB.`);
+        fileInput.value = ''; 
+        return;
+    }
 
-    aggiungiAlCarrello(nuovoArticolo);
-    alert(`Aggiunto ${qtaTotale}x ${nuovoArticolo.prodotto} al preventivo per € ${nuovoArticolo.prezzo_unitario.toFixed(2)} cad. (Prezzo Netto)!`);
-    
-    // Reset dell'interfaccia dopo l'aggiunta 
-    document.getElementById('kitNote').value = '';
-    taglieTables.forEach(table => table.querySelectorAll('input[type="number"]').forEach(input => input.value = '0'));
-    calcolaPrezzoDinamicoKit(); // Ritorna a €0.00
+    // --- LOGICA DI UPLOAD (OPZIONALE) ---
+    let fileUrl = 'Nessun file caricato';
+    
+    // Eseguiamo l'upload SOLO se l'utente ha selezionato un file
+    if (fileToUpload) {
+        const BUCKET_NAME = 'personalizzazioni'; 
+        
+        // Mostra interfaccia caricamento
+        if (uploadStatusBox) {
+            uploadStatusBox.style.display = 'block';
+            uploadMessage.textContent = 'Caricamento grafica in corso...';
+            uploadProgressBar.style.width = '0%';
+            uploadProgressBar.style.backgroundColor = '#007bff';
+        }
+
+        try {
+            const extension = fileToUpload.name.split('.').pop();
+            // Path univoco: user_id/KIT-timestamp.ext
+            const filePath = `${utenteCorrenteId}/KIT-${Date.now()}-${Math.random().toString(36).substring(2)}.${extension}`;
+
+            // Upload su Supabase Storage
+            const { error: uploadError } = await supabase.storage
+                .from(BUCKET_NAME)
+                .upload(filePath, fileToUpload, {
+                    cacheControl: '3600',
+                    upsert: false,
+                });
+
+            if (uploadError) throw uploadError;
+
+            // Aggiorna progress bar al 100%
+            if (uploadProgressBar) uploadProgressBar.style.width = '100%';
+            if (uploadMessage) uploadMessage.textContent = '✅ File caricato. Creazione ordine...';
+
+            // Ottieni URL pubblico
+            fileUrl = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath).data.publicUrl;
+
+            // Registra scadenza file nel DB (72h)
+            const expirationTime = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
+            const { error: dbError } = await supabase
+                .from('temp_files')
+                .insert([{
+                    storage_path: `${BUCKET_NAME}/${filePath}`,
+                    expires_at: expirationTime,
+                }]);
+
+            if (dbError) console.error("Errore tracciamento scadenza file (non bloccante)", dbError);
+
+        } catch (e) {
+            console.error('Errore Upload Kit:', e.message);
+            alert(`Errore durante il caricamento del file: ${e.message}`);
+            if (uploadStatusBox) uploadStatusBox.style.display = 'none';
+            return; // Interrompe l'aggiunta al carrello in caso di errore upload
+        }
+    }
+
+    // --- 2. RACCOLTA DATI TAGLIE ---
+    let dettagliTaglie = {};
+    taglieTables.forEach(table => {
+        const genere = table.dataset.genere;
+        dettagliTaglie[genere] = {};
+        
+        const inputs = table.querySelectorAll('input[type="number"]');
+        inputs.forEach(input => {
+            const taglia = input.dataset.taglia;
+            const qta = parseInt(input.value) || 0;
+            if (qta > 0) {
+                dettagliTaglie[genere][taglia] = qta;
+            }
+        });
+        if (Object.keys(dettagliTaglie[genere]).length === 0) {
+            delete dettagliTaglie[genere];
+        }
+    });
+    
+    // --- 3. CREAZIONE OGGETTO CARRELLO ---
+    // Traccia il costo impianto grafico come componente fisso
+    const componenti = [`Sublimazione`, `Costo Impianto Grafico (€${LISTINO_COMPLETO.KIT_CALCIO.COSTO_GRAFICO.toFixed(2)})`];
+
+    const nuovoArticolo = { 
+        id_unico: Date.now(), 
+        prodotto: `KIT CALCIO - ${kitProdSelezionato}`, 
+        quantita: qtaTotale, 
+        prezzo_unitario: parseFloat(prezzoDinamico.toFixed(2)), 
+        componenti: componenti,
+        dettagli_taglie: dettagliTaglie,
+        note: kitNote,
+        personalizzazione_url: fileUrl // Qui salva l'URL o "Nessun file caricato"
+    };
+
+    // --- 4. AGGIUNTA E RESET ---
+    aggiungiAlCarrello(nuovoArticolo);
+    
+    let msg = `Aggiunto ${qtaTotale}x ${nuovoArticolo.prodotto} al preventivo!`;
+    if (fileToUpload) msg += " (File caricato correttamente)";
+    alert(msg);
+    
+    // Reset dell'interfaccia dopo l'aggiunta 
+    document.getElementById('kitNote').value = '';
+    taglieTables.forEach(table => table.querySelectorAll('input[type="number"]').forEach(input => input.value = '0'));
+    
+    // Reset File e Progress Bar
+    if (fileInput) fileInput.value = '';
+    if (uploadStatusBox) {
+        setTimeout(() => { uploadStatusBox.style.display = 'none'; }, 2000);
+    }
+
+    calcolaPrezzoDinamicoKit(); // Ritorna a €0.00
 }
-
 
 
 
