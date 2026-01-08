@@ -1952,3 +1952,68 @@ function aggiungiNuovaRigaConfiguratore() {
 // ============================================================
 // LOGICA CONFIGURATORE RAPIDO (Fine gli * segnano le parti collegate)**********
 // ============================================================
+
+
+// ===========================================
+// FUNZIONE FILTRO MENU PRINCIPALE
+// ===========================================
+
+function filterMainMenu() {
+    var input = document.getElementById('menuSearchInput');
+    var filter = input.value.toLowerCase().trim();
+    var container = document.getElementById('mainMenuGrid');
+    var items = container.getElementsByClassName('banner-item');
+    var noResultsMsg = document.getElementById('menuNoResults');
+    
+    var visibleCount = 0;
+
+    // Se l'input è vuoto, mostra tutto
+    if (filter === "") {
+        for (var i = 0; i < items.length; i++) {
+            items[i].style.display = "";
+        }
+        noResultsMsg.style.display = "none";
+        return;
+    }
+
+    // Divide le parole cercate (es: "calcio bandiera" diventa ["calcio", "bandiera"])
+    var searchTerms = filter.split(" ");
+
+    for (var i = 0; i < items.length; i++) {
+        var keywords = items[i].getAttribute('data-keywords');
+        var match = false;
+
+        if (keywords) {
+            keywords = keywords.toLowerCase();
+            
+            // Controlla se ALMENO UNA delle parole cercate è presente
+            for (var j = 0; j < searchTerms.length; j++) {
+                var term = searchTerms[j];
+                if (term !== "" && keywords.indexOf(term) > -1) {
+                    match = true;
+                    break; // Trovato! Non serve controllare le altre parole per questo item
+                }
+            }
+        }
+
+        if (match) {
+            items[i].style.display = ""; // Mostra
+            visibleCount++;
+        } else {
+            items[i].style.display = "none"; // Nascondi
+        }
+    }
+
+    // Gestione messaggio "Nessun risultato"
+    if (visibleCount === 0) {
+        noResultsMsg.style.display = "block";
+    } else {
+        noResultsMsg.style.display = "none";
+    }
+}
+//------fine js per la ricerca sul menu cliente.html--------------------------
+
+
+
+
+
