@@ -1955,19 +1955,27 @@ function aggiungiNuovaRigaConfiguratore() {
 
 
 // ===========================================
-// FUNZIONE FILTRO MENU PRINCIPALE
+// FUNZIONI FILTRO MENU & RESET
 // ===========================================
 
 function filterMainMenu() {
     var input = document.getElementById('menuSearchInput');
+    var clearBtn = document.getElementById('menuClearBtn'); // <--- RECUPERIAMO LA X
     var filter = input.value.toLowerCase().trim();
     var container = document.getElementById('mainMenuGrid');
     var items = container.getElementsByClassName('banner-item');
     var noResultsMsg = document.getElementById('menuNoResults');
     
+    // GESTIONE VISIBILITÀ DELLA "X"
+    if (filter.length > 0) {
+        clearBtn.style.display = "block"; // Mostra se c'è testo
+    } else {
+        clearBtn.style.display = "none";  // Nascondi se vuoto
+    }
+
     var visibleCount = 0;
 
-    // Se l'input è vuoto, mostra tutto
+    // Se l'input è vuoto, mostra tutto e esci
     if (filter === "") {
         for (var i = 0; i < items.length; i++) {
             items[i].style.display = "";
@@ -1976,7 +1984,6 @@ function filterMainMenu() {
         return;
     }
 
-    // Divide le parole cercate (es: "calcio bandiera" diventa ["calcio", "bandiera"])
     var searchTerms = filter.split(" ");
 
     for (var i = 0; i < items.length; i++) {
@@ -1985,22 +1992,20 @@ function filterMainMenu() {
 
         if (keywords) {
             keywords = keywords.toLowerCase();
-            
-            // Controlla se ALMENO UNA delle parole cercate è presente
             for (var j = 0; j < searchTerms.length; j++) {
                 var term = searchTerms[j];
                 if (term !== "" && keywords.indexOf(term) > -1) {
                     match = true;
-                    break; // Trovato! Non serve controllare le altre parole per questo item
+                    break; 
                 }
             }
         }
 
         if (match) {
-            items[i].style.display = ""; // Mostra
+            items[i].style.display = ""; 
             visibleCount++;
         } else {
-            items[i].style.display = "none"; // Nascondi
+            items[i].style.display = "none"; 
         }
     }
 
@@ -2010,6 +2015,14 @@ function filterMainMenu() {
     } else {
         noResultsMsg.style.display = "none";
     }
+}
+
+// NUOVA FUNZIONE PER CANCELLARE TUTTO
+function clearSearch() {
+    var input = document.getElementById('menuSearchInput');
+    input.value = ""; // Pulisce il testo
+    filterMainMenu(); // Richiama il filtro (che ora vedrà testo vuoto e resetterà tutto)
+    input.focus();    // Rimette il cursore nella barra pronto per scrivere di nuovo
 }
 //------fine js per la ricerca sul menu cliente.html--------------------------
 
