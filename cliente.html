@@ -64,28 +64,46 @@
   <main class="container">
 
 
+    
 <div class="banner-iniziale-nav">
   
-        <div class="banner-grid">
-             
-            <a href="#kitCalcioSection" class="banner-item">
-                <img src="MAGLIA_CALCIO.jpeg" alt="Sezione Kit Calcio Personalizzabile" />
-            </a>
-            
-            <a href="#bandiereSection" class="banner-item">
-                <img src="BANDIERE_DROP.jpeg" alt="Bandiere e Espositori" />
-            </a>
-            
-            <a href="#dtfSection" class="banner-item">
-                <img src="DTF.jpeg" alt="Stampa DTF" />
-            </a>
-          
-            <a href="#quick-order-section" class="banner-item">
-                <img src="quickorder.jpeg" alt="Ordine Veloce Generico" />
-            </a>
-
-        </div>
+    <div class="search-wrapper" style="text-align: center; margin-bottom: 25px; padding: 0 15px;">
+        <input type="text" 
+               id="menuSearchInput" 
+               placeholder="🔍 Cerca nel menu (es. calcio, bandiere, dtf...)" 
+               onkeyup="filterMainMenu()"
+               style="width: 100%; max-width: 500px; padding: 12px 20px; border-radius: 50px; border: 2px solid #e1ecf4; background: #f8fbfe; font-size: 16px; outline: none; transition: 0.3s;">
     </div>
+
+    <div class="banner-grid" id="mainMenuGrid">
+            
+        <a href="#kitCalcioSection" class="banner-item" 
+           data-keywords="calcio soccer maglia pantaloncino completino sport divisa sublimazione t-shirt">
+            <img src="MAGLIA_CALCIO.jpeg" alt="Sezione Kit Calcio Personalizzabile" />
+        </a>
+        
+        <a href="#bandiereSection" class="banner-item" 
+           data-keywords="bandiere bandiera flag goccia vela crest rettangolare espositori stand fiera pubblicità esterno">
+            <img src="BANDIERE_DROP.jpeg" alt="Bandiere e Espositori" />
+        </a>
+        
+        <a href="#dtfSection" class="banner-item" 
+           data-keywords="dtf plotter stampa termoadesivo transfer bobina metro personalizzazione film">
+            <img src="DTF.jpeg" alt="Stampa DTF" />
+        </a>
+        
+        <a href="#quick-order-section" class="banner-item" 
+           data-keywords="quick order veloce rapido configuratore preventivo generico altro riga libera manuale">
+            <img src="quickorder.jpeg" alt="Ordine Veloce Generico" />
+        </a>
+
+    </div>
+
+    <div id="menuNoResults" style="display: none; text-align: center; padding: 20px; color: #888;">
+        <p style="font-size: 1.1em;">⚠️ Nessuna sezione corrisponde alla tua ricerca.</p>
+    </div>
+
+</div>
 
 
 
