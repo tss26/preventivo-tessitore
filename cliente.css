@@ -661,3 +661,14 @@ body {
     color: #ccc;
     font-weight: 400;
 }
+
+/* Effetto focus per la barra di ricerca menu ciente.html */
+#menuSearchInput:focus {
+    border-color: #007bff !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+}
+
+
+
+
