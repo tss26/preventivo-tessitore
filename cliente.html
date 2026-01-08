@@ -67,13 +67,30 @@
     
 <div class="banner-iniziale-nav">
   
-    <div class="search-wrapper" style="text-align: center; margin-bottom: 25px; padding: 0 15px;">
+<div class="search-wrapper" style="text-align: center; margin-bottom: 25px; padding: 0 15px;">
+    
+    <div style="position: relative; display: inline-block; width: 100%; max-width: 500px;">
+        
         <input type="text" 
                id="menuSearchInput" 
                placeholder="🔍 Cerca nel menu (es. calcio, bandiere, dtf...)" 
                onkeyup="filterMainMenu()"
-               style="width: 100%; max-width: 500px; padding: 12px 20px; border-radius: 50px; border: 2px solid #e1ecf4; background: #f8fbfe; font-size: 16px; outline: none; transition: 0.3s;">
+               style="width: 100%; padding: 12px 40px 12px 20px; border-radius: 50px; border: 2px solid #e1ecf4; background: #f8fbfe; font-size: 16px; outline: none; transition: 0.3s;">
+        
+        <span id="menuClearBtn" onclick="clearSearch()" 
+              style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #999; font-weight: bold; font-size: 18px; display: none;">
+            &times;
+        </span>
+
     </div>
+
+</div>
+
+
+
+
+
+  
 
     <div class="banner-grid" id="mainMenuGrid">
             
