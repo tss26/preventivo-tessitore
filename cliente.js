@@ -896,29 +896,114 @@ async function gestisciAggiuntaKitCalcio() {
     container.innerHTML = html;
 }*/
 
-let ordiniCaricatiLocali = []; // Variabile di appoggio
+// ===========================================
+// BLOCCO GESTIONE ORDINI E FILTRI (NUOVO)
+// ===========================================
 
+let ordiniCaricatiLocali = []; // Variabile globale per salvare i dati
+
+// 1. CARICAMENTO DATI (Sostituisce la tua vecchia funzione)
 async function caricaMieiOrdini() {
     const container = document.getElementById('ordiniListaCliente');
     if (!utenteCorrenteId) return;
 
+    // Recupera i dati da Supabase
     const { data: ordini, error } = await supabase
         .from('ordini')
         .select('*')
         .eq('user_id', utenteCorrenteId)
         .order('data_ordine', { ascending: false });
 
-    if (error) { console.error(error); return; }
+    if (error) { 
+        console.error(error); 
+        container.innerHTML = `<p style="color:red">Errore caricamento: ${error.message}</p>`;
+        return; 
+    }
     
-    ordiniCaricatiLocali = ordini; // Salviamo i dati qui
+    ordiniCaricatiLocali = ordini; // Salviamo i dati nella variabile globale
+    
+    // Invece di disegnare subito, chiamiamo la funzione che applica i filtri
+    applicaFiltriCliente(); 
+}
 
-    // MODIFICA 1: Aggiunta intestazione <th>Riferimento</th>
-    let html = `<div class="lista-ordini-table-wrapper"><table><thead><tr><th>N. Ordine</th><th>Riferimento</th><th>Data</th><th>Totale</th><th>Stato</th><th>Dettagli</th></tr></thead><tbody>`;
+// 2. FUNZIONE DI FILTRAGGIO (Nuova)
+function applicaFiltriCliente() {
+    // Recupera i valori dai campi input HTML (con controllo di esistenza)
+    const testo = document.getElementById('cliRicerca') ? document.getElementById('cliRicerca').value.toLowerCase().trim() : '';
+    const dataInizio = document.getElementById('cliDataInizio') ? document.getElementById('cliDataInizio').value : '';
+    const dataFine = document.getElementById('cliDataFine') ? document.getElementById('cliDataFine').value : '';
+    const stato = document.getElementById('cliStato') ? document.getElementById('cliStato').value : '';
+
+    // Filtra l'array locale
+    const ordiniFiltrati = ordiniCaricatiLocali.filter(ordine => {
+        let matchTesto = true;
+        let matchData = true;
+        let matchStato = true;
+
+        // A. Filtro Testo (Cerca in N. Ordine o Riferimento Cliente)
+        if (testo) {
+            const numOrdine = (ordine.num_ordine_prog || ordine.id).toLowerCase();
+            let riferimento = "";
+            
+            // Cerca dentro il JSON dettagli_prodotti
+            if (ordine.dettagli_prodotti && Array.isArray(ordine.dettagli_prodotti)) {
+                const info = ordine.dettagli_prodotti.find(i => i.tipo === 'INFO_CLIENTE');
+                if (info && info.cliente) riferimento = info.cliente.toLowerCase();
+            }
+            
+            matchTesto = numOrdine.includes(testo) || riferimento.includes(testo);
+        }
+
+        // B. Filtro Data
+        const dataOrdine = new Date(ordine.data_ordine);
+        if (dataInizio) {
+            const dStart = new Date(dataInizio); dStart.setHours(0,0,0,0);
+            if (dataOrdine < dStart) matchData = false;
+        }
+        if (dataFine) {
+            const dEnd = new Date(dataFine); dEnd.setHours(23,59,59,999);
+            if (dataOrdine > dEnd) matchData = false;
+        }
+
+        // C. Filtro Stato
+        if (stato && stato !== "") {
+            matchStato = ordine.stato === stato;
+        }
+
+        return matchTesto && matchData && matchStato;
+    });
+
+    // Passa i dati filtrati alla funzione che disegna la tabella
+    renderOrdiniCliente(ordiniFiltrati);
+}
+
+// 3. FUNZIONE DI DISEGNO TABELLA (Nuova)
+function renderOrdiniCliente(ordiniDaMostrare) {
+    const container = document.getElementById('ordiniListaCliente');
     
-    ordini.forEach(ordine => {
+    if (ordiniDaMostrare.length === 0) {
+        container.innerHTML = '<p style="text-align:center; padding:20px;">Nessun ordine trovato con i filtri selezionati.</p>';
+        return;
+    }
+
+    let html = `<div class="lista-ordini-table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>N. Ordine</th>
+                    <th>Riferimento</th>
+                    <th>Data</th>
+                    <th>Totale</th>
+                    <th>Stato</th>
+                    <th>Dettagli</th>
+                </tr>
+            </thead>
+            <tbody>`;
+    
+    ordiniDaMostrare.forEach(ordine => {
         const numeroOrdine = ordine.num_ordine_prog || ordine.id.substring(0, 8).toUpperCase();
 
-        // --- MODIFICA 2: Estrazione del Riferimento ---
+        // Estrazione del Riferimento
         let riferimentoCliente = "---";
         if (ordine.dettagli_prodotti && Array.isArray(ordine.dettagli_prodotti)) {
             const info = ordine.dettagli_prodotti.find(d => d.tipo === 'INFO_CLIENTE');
@@ -926,9 +1011,7 @@ async function caricaMieiOrdini() {
                 riferimentoCliente = info.cliente;
             }
         }
-        // ----------------------------------------------
 
-        // MODIFICA 3: Aggiunta cella <td> con il riferimento
         html += `
             <tr>
                 <td>${numeroOrdine}</td>
@@ -943,9 +1026,11 @@ async function caricaMieiOrdini() {
                 </td>
             </tr>`;
     });
+    
     html += '</tbody></table></div>';
     container.innerHTML = html;
 }
+
 
 // Nuova funzione per gestire l'apertura pulita
 window.apriDettagliOrdine = function(id) {
@@ -1394,18 +1479,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('logoutBtn').addEventListener('click', handleLogout);
         document.getElementById('aggiungiBandiera').addEventListener('click', gestisciAggiuntaAlCarrello);
         document.getElementById('richiediPreventivo').addEventListener('click', gestisciCheckout);
-        
-        /*document.getElementById('mieiOrdiniBtn').addEventListener('click', (e) => {
-            e.preventDefault();
-            mostraVistaOrdini();
-        });
-        
-        document.querySelector('.nav a[href="cliente.html"]').addEventListener('click', (e) => {
-             if (document.getElementById('ordiniCliente').style.display !== 'none') {
-                 e.preventDefault();
-                 mostraVistaPreventivo();
-             }
-        });*/
+
+// --- LISTENER FILTRI CLIENTE ---
+        const btnCerca = document.getElementById('cliBtnCerca');
+        if(btnCerca) btnCerca.addEventListener('click', applicaFiltriCliente);
+        
+        const btnReset = document.getElementById('cliBtnReset');
+        if(btnReset) btnReset.addEventListener('click', () => {
+            // Resetta i campi
+            if(document.getElementById('cliRicerca')) document.getElementById('cliRicerca').value = '';
+            if(document.getElementById('cliDataInizio')) document.getElementById('cliDataInizio').value = '';
+            if(document.getElementById('cliDataFine')) document.getElementById('cliDataFine').value = '';
+            if(document.getElementById('cliStato')) document.getElementById('cliStato').value = '';
+            // Ricarica la lista completa
+            applicaFiltriCliente();
+        });
+        
+       
 // === FIX NAVIGAZIONE: Controllo URL iniziale ===
         // Se l'URL finisce con #ordini, apre subito la vista ordini
         if (window.location.hash === '#ordini') {
