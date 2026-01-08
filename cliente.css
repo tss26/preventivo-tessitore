@@ -668,7 +668,10 @@ body {
     background-color: #ffffff !important;
     box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
 }
-
+#menuClearBtn:hover {
+    color: #dc3545 !important; /* Diventa rosso al passaggio del mouse */
+    transform: translateY(-50%) scale(1.2) !important; /* Si ingrandisce leggermente */
+}
 
 
 
