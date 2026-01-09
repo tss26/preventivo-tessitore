@@ -1267,8 +1267,10 @@ function calcolaPrezzoDinamico() {
         return; // Non ci sono elementi da aggiornare
     }
 
-    const forma = formaElement.textContent.trim();
-    const misura = misuraElement.value;
+    //const forma = formaElement.textContent.trim();
+    //const misura = misuraElement.value;
+    const forma = formaElement.querySelector('span').textContent.trim();
+    const misura = misuraElement.value;
 
     const listinoForma = LISTINO_COMPLETO[forma];
     const listinoMisura = listinoForma ? listinoForma[misura] : null;
