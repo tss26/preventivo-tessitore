@@ -1582,7 +1582,25 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
         
 
         // LISTENER PER IL PREZZO DINAMICO E AGGIORNAMENTO (Bandiere)
-        
+        // Funzione globale per gestire il click sui bottoni delle forme
+window.selezionaForma = function(formaNome) {
+    // 1. Rimuovi la classe active da tutti i bottoni forma
+    document.querySelectorAll('.forme .forma').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    // 2. Trova il bottone cliccato. Cerchiamo il bottone che contiene il testo della forma
+    // (o puoi basarti sulla posizione se preferisci)
+    const bottoni = document.querySelectorAll('.forme .forma');
+    bottoni.forEach(btn => {
+        if (btn.textContent.trim().toLowerCase() === formaNome.toLowerCase()) {
+            btn.classList.add('active');
+        }
+    });
+
+    // 3. Ricalcola subito il prezzo
+    calcolaPrezzoDinamico();
+};
        /* commentato perche andava in errore la selezione
        // 1. Logica per la selezione delle forme
         document.querySelectorAll('.forme .forma').forEach(button => {
