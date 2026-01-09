@@ -1583,7 +1583,8 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
 
         // LISTENER PER IL PREZZO DINAMICO E AGGIORNAMENTO (Bandiere)
         
-        // 1. Logica per la selezione delle forme
+       /* commentato perche andava in errore la selezione
+       // 1. Logica per la selezione delle forme
         document.querySelectorAll('.forme .forma').forEach(button => {
             button.addEventListener('click', (e) => {
                 document.querySelectorAll('.forme .forma').forEach(btn => {
@@ -1592,7 +1593,7 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
                 e.target.classList.add('active');
                 calcolaPrezzoDinamico(); 
             });
-        });
+        });*/
         
         // 2. Listener per le Misure (Radio Button)
         document.querySelectorAll('.misure input[name="misura"]').forEach(input => {
