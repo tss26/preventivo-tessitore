@@ -990,7 +990,7 @@ function renderOrdiniCliente(ordiniDaMostrare) {
         <table>
             <thead>
                 <tr>
-                    <th>N. Ordine</th>
+                    <th>N. Prev.</th>
                     <th>Riferimento</th>
                     <th>Data</th>
                     <th>Totale</th>
