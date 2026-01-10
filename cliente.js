@@ -142,11 +142,11 @@ async function verificaCliente() {
         return false;
     }
 
-    // AZIONE CRITICA 2: Reindirizza l'admin alla dashboard Admin
-    if (profilo.permessi === 'admin') {
+    // AZIONE CRITICA 2: Reindirizza l'admin alla dashboard Admin -- pero un admin deve avere la possibilità di veere anche la dashboard cliente quindi riscrivo la funzione
+    /*if (profilo.permessi === 'admin') {
            window.location.href = 'admin.html';
            return false;
-    }
+    }*/
 
     const logoElement = document.querySelector('.logo');
     if (logoElement) { logoElement.innerHTML = `<img src="icon-192.png" alt="Logo Tessitore" style="height: 40px; vertical-align: middle;"> Cliente: ${profilo?.ragione_sociale || user.email}`; }
