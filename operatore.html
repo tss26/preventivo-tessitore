@@ -271,8 +271,19 @@
         <div id="contenutoDettagli" style="max-height: 70vh; overflow-y: auto; text-align: left; line-height: 1.6;">
         </div>
     </div>
+  
   </div>
+  
+<div id="modalNotaEstesa" class="modal-backdrop" style="display: none;">
+    <div class="modal-content">
+        <span class="close-button" onclick="document.getElementById('modalNotaEstesa').style.display='none'">&times;</span>
+        <h3 style="margin-top: 0; color: #007bff;">Note Condivise</h3>
+        <textarea id="textareaNota" rows="8" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-family: inherit;"></textarea>
+        <button id="btnSalvaNotaEstesa" class="btn-primary" style="width: 100%; margin-top: 15px;">💾 Salva Nota</button>
+    </div>
+</div>
 
+  
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="operatore.js"></script>
 
