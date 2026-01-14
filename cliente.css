@@ -674,4 +674,95 @@ body {
 }
 
 
+/*----------------------------------sistemo il css per mobile--------------------*/
+/* --- OTTIMIZZAZIONE HEADER MOBILE --- */
+@media (max-width: 600px) {
+  .header {
+    flex-direction: column; /* Logo sopra, menu sotto */
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .nav {
+    display: flex;
+    flex-wrap: wrap; /* Permette ai link di andare su più righe */
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .nav a {
+    margin-left: 0; /* Rimuove il margine fisso */
+    font-size: 0.85rem; /* Testo leggermente più piccolo */
+    padding: 5px 8px;
+    background: #f0f4fa; /* Crea un effetto "bottone" per facilitare il tocco */
+    border-radius: 5px;
+  }
+
+  .logo img {
+    height: 30px; /* Logo più piccolo su mobile */
+  }
+}
+
+/* --- OTTIMIZZAZIONE BANNER GRID --- */
+.banner-grid {
+    display: grid;
+    /* Su desktop usa 4 colonne, ma con un limite di larghezza */
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 1rem;
+    max-width: 1000px; /* Aumentato per PC */
+    margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+    .banner-grid {
+        /* Su Tablet/Telefono: 2 icone per riga */
+        grid-template-columns: repeat(2, 1fr); 
+        max-width: 100%;
+        padding: 0 10px;
+    }
+}
+
+@media (max-width: 400px) {
+    /* Su telefoni molto piccoli: icone grandi singole o restano 2 più piccole */
+    .banner-grid {
+        gap: 8px;
+    }
+}
+
+/* --- OTTIMIZZAZIONE KIT E PRODOTTI --- */
+@media (max-width: 600px) {
+    .kit-grid {
+        grid-template-columns: 1fr; /* Un prodotto sotto l'altro */
+        gap: 10px;
+    }
+
+    .kit-item {
+        display: flex;
+        align-items: center;
+        text-align: left;
+        padding: 10px;
+    }
+
+    .kit-item img {
+        width: 60px !important; /* Immagine più piccola a lato */
+        margin-right: 15px;
+    }
+    
+    /* Per le Bandiere */
+    .forme {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* 2 forme per riga invece di 4 strette */
+    }
+}
+
+/* --- SCROLL ORIZZONTALE PER TABELLE --- */
+.taglie-table {
+    display: block;
+    overflow-x: auto; /* Permette di scorrere la tabella col dito */
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+}
+
+/*------------------------------------------fine modifiche mobile----------------------------------------------*/
 
