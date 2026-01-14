@@ -153,6 +153,16 @@ function renderOrderList(ordiniDaVisualizzare) {
                         <option value="Annullato" ${ordine.stato === 'Annullato' ? 'selected' : ''}>Annullato</option>
                     </select>
                 </td>
+
+                <td>
+                    <input type="text" 
+                   class="input-nota-admin" 
+                   style="width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85em;"
+                   value="${ordine.note_condivise || ''}" 
+                   placeholder="Nota interna/condivisa..."
+                   onchange="salvaNotaAdmin('${ordine.id}', this.value)">
+                </td>
+                
                 <td>
                     <button onclick="mostraDettagli('${ordine.id}', '${dettagliProdotti}', '${numeroOrdine}', ${ordine.totale || 0})" class="btn-primary" style="padding: 5px 10px;">Vedi Dettagli</button>
                 </td>
@@ -738,3 +748,21 @@ async function saveUserChanges() {
         caricaUtenti(); 
     }
 }
+
+// funzione di aggiunta nota rapida -----------------------------
+window.salvaNotaAdmin = async function(ordineId, nuovoTesto) {
+    const { error } = await supabase
+        .from('ordini')
+        .update({ note_condivise: nuovoTesto })
+        .eq('id', ordineId);
+
+    if (error) {
+        alert("Errore nel salvataggio della nota: " + error.message);
+    } else {
+        // Aggiorna l'array locale allOrders per mantenere i filtri coerenti senza ricaricare
+        allOrders = allOrders.map(order => 
+            order.id === ordineId ? { ...order, note_condivise: nuovoTesto } : order
+        );
+        console.log("Nota Admin salvata.");
+    }
+};
