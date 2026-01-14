@@ -710,7 +710,7 @@ body {
     /* Su desktop usa 4 colonne, ma con un limite di larghezza */
     grid-template-columns: repeat(4, 1fr); 
     gap: 1rem;
-    max-width: 1000px; /* Aumentato per PC */
+    max-width: 470px; /* Aumentato per PC */
     margin: 0 auto;
 }
 
@@ -718,7 +718,7 @@ body {
     .banner-grid {
         /* Su Tablet/Telefono: 2 icone per riga */
         grid-template-columns: repeat(2, 1fr); 
-        max-width: 100%;
+        max-width: 90%;
         padding: 0 10px;
     }
 }
