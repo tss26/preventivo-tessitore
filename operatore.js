@@ -152,6 +152,14 @@ function renderOrdini(lista) {
             <td>${nomeCliente}</td>
             <td><span class="stato-${ordine.stato.replace(/\s/g, '-')}">${ordine.stato}</span></td>
             <td>
+                <input type="text" 
+               class="input-nota-rapida" 
+               style="width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 4px;"
+               value="${ordine.note_condivise || ''}" 
+               placeholder="Scrivi una nota..."
+               onchange="salvaNotaRapida('${ordine.id}', this.value)">
+            </td>
+            <td>
                 <button class="btn-info" onclick="apriDettagliPreventivo('${ordine.id}')">
                     📄 
                 </button>
@@ -335,3 +343,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+
+// funzione per aggiungere nota rapida da operatore
+window.salvaNotaRapida = async function(ordineId, nuovoTesto) {
+    console.log("Salvataggio nota per ordine:", ordineId);
+    
+    const { error } = await supabase
+        .from('ordini')
+        .update({ note_condivise: nuovoTesto })
+        .eq('id', ordineId);
+
+    if (error) {
+        alert("Errore nel salvataggio della nota: " + error.message);
+    } else {
+        // Feedback visivo rapido: facciamo diventare il bordo verde per un secondo
+        const input = document.activeElement;
+        if (input) {
+            input.style.borderColor = "#28a745";
+            setTimeout(() => { input.style.borderColor = "#ddd"; }, 2000);
+        }
+    }
+};
