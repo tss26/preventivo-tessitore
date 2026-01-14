@@ -152,12 +152,11 @@ function renderOrdini(lista) {
             <td>${nomeCliente}</td>
             <td><span class="stato-${ordine.stato.replace(/\s/g, '-')}">${ordine.stato}</span></td>
             <td>
-                <input type="text" 
-               class="input-nota-rapida" 
-               style="width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 4px;"
-               value="${ordine.note_condivise || ''}" 
-               placeholder="Scrivi una nota..."
-               onchange="salvaNotaRapida('${ordine.id}', this.value)">
+                <div id="nota-preview-${ordine.id}" 
+         style="cursor:pointer; max-width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#007bff; text-decoration:underline;"
+         onclick="apriModaleNota('${ordine.id}', \`${(ordine.note_condivise || '').replace(/`/g, '\\`').replace(/\n/g, '\\n')}\`)">
+        ${ordine.note_condivise ? ordine.note_condivise : '➕'}
+                </div>
             </td>
             <td>
                 <button class="btn-info" onclick="apriDettagliPreventivo('${ordine.id}')">
