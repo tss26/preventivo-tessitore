@@ -153,10 +153,10 @@ function renderOrdini(lista) {
             <td><span class="stato-${ordine.stato.replace(/\s/g, '-')}">${ordine.stato}</span></td>
             <td>
                 <button class="btn-info" onclick="apriDettagliPreventivo('${ordine.id}')">
-                    📄 Visualizza
+                    📄 
                 </button>
                 <button class="btn-edit" onclick="apriModaleModifica('${ordine.id}', '${numOrdine}', '${ordine.stato}')">
-                    ✏️ Stato
+                    ✏️ 
                 </button>
             </td>
         `;
