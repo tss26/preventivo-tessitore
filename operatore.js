@@ -364,3 +364,35 @@ window.salvaNotaRapida = async function(ordineId, nuovoTesto) {
         }
     }
 };
+
+// Funzione per aprire il modale e caricare la nota
+window.apriModaleNota = function(id, testo) {
+    ordineSelezionatoId = id; // Usa la variabile globale già esistente
+    document.getElementById('textareaNota').value = testo;
+    document.getElementById('modalNotaEstesa').style.display = 'flex';
+};
+
+// Funzione per salvare la nota dal modale
+document.getElementById('btnSalvaNotaEstesa').addEventListener('click', async () => {
+    const nuovaNota = document.getElementById('textareaNota').value;
+    
+    const { error } = await supabase
+        .from('ordini')
+        .update({ note_condivise: nuovaNota })
+        .eq('id', ordineSelezionatoId);
+
+    if (error) {
+        alert("Errore nel salvataggio: " + error.message);
+    } else {
+        document.getElementById('modalNotaEstesa').style.display = 'none';
+        // Aggiorniamo l'anteprima nella tabella senza ricaricare tutto
+        const preview = document.getElementById(`nota-preview-${ordineSelezionatoId}`);
+        if (preview) {
+            preview.innerText = nuovaNota ? nuovaNota : '➕ Aggiungi nota';
+        }
+        // Aggiorniamo anche l'array globale per coerenza
+        const ordine = ordiniGlobali.find(o => o.id === ordineSelezionatoId);
+        if (ordine) ordine.note_condivise = nuovaNota;
+    }
+});
+//-------------fine modale aggiunzione nota
