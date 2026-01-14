@@ -749,19 +749,41 @@ async function saveUserChanges() {
 }
 
 // funzione di aggiunta nota rapida -----------------------------
-window.salvaNotaAdmin = async function(ordineId, nuovoTesto) {
+// Variabile temporanea per l'ID ordine nel modale
+let ordineNotaInModifica = null;
+
+// Funzione per aprire il modale Admin
+window.apriModaleNotaAdmin = function(id, testo) {
+    ordineNotaInModifica = id;
+    document.getElementById('textareaNotaAdmin').value = testo;
+    document.getElementById('modalNotaAdmin').style.display = 'flex';
+};
+
+// Funzione per salvare la nota dal modale Admin
+document.getElementById('btnSalvaNotaAdmin')?.addEventListener('click', async () => {
+    const nuovaNota = document.getElementById('textareaNotaAdmin').value;
+    
     const { error } = await supabase
         .from('ordini')
-        .update({ note_condivise: nuovoTesto })
-        .eq('id', ordineId);
+        .update({ note_condivise: nuovaNota })
+        .eq('id', ordineNotaInModifica);
 
     if (error) {
         alert("Errore nel salvataggio della nota: " + error.message);
     } else {
-        // Aggiorna l'array locale allOrders per mantenere i filtri coerenti senza ricaricare
+        document.getElementById('modalNotaAdmin').style.display = 'none';
+        
+        // Aggiorna l'anteprima nella tabella
+        const preview = document.getElementById(`nota-preview-${ordineNotaInModifica}`);
+        if (preview) {
+            preview.innerText = nuovaNota ? nuovaNota : '➕ Aggiungi nota';
+        }
+        
+        // Aggiorna l'array globale allOrders per mantenere la coerenza
         allOrders = allOrders.map(order => 
-            order.id === ordineId ? { ...order, note_condivise: nuovoTesto } : order
+            order.id === ordineNotaInModifica ? { ...order, note_condivise: nuovaNota } : order
         );
-        console.log("Nota Admin salvata.");
+        console.log("Nota Admin salvata con successo.");
     }
-};
+});
+//--------------fine funzione aggiunta nota admin
