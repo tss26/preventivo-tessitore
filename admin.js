@@ -103,7 +103,7 @@ function renderOrderList(ordiniDaVisualizzare) {
     // Header Tabella
     let html = `<div class="admin-table">
         <table><thead><tr>
-        <th>N. Ordine</th><th>Account</th><th>Riferimento</th><th>P. IVA</th><th>Data</th><th>Totale</th><th>Stato</th><th>Azioni</th>
+        <th>N. Ordine</th><th>Account</th><th>Riferimento</th><th>P. IVA</th><th>Data</th><th>Totale</th><th>Stato</th><th>Note</th><th>Azioni</th>
         </tr></thead><tbody>`;
     
     ordiniDaVisualizzare.forEach(ordine => {
