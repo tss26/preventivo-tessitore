@@ -748,42 +748,67 @@ async function saveUserChanges() {
     }
 }
 
-// funzione di aggiunta nota rapida -----------------------------
-// Variabile temporanea per l'ID ordine nel modale
+// 1. Variabile globale
 let ordineNotaInModifica = null;
 
-// Funzione per aprire il modale Admin
+// 2. Funzione per aprire il modale
 window.apriModaleNotaAdmin = function(id, testo) {
     ordineNotaInModifica = id;
-    document.getElementById('textareaNotaAdmin').value = testo;
-    document.getElementById('modalNotaAdmin').style.display = 'flex';
+    const textarea = document.getElementById('textareaNotaAdmin');
+    const modal = document.getElementById('modalNotaAdmin');
+    const btnSalva = document.getElementById('btnSalvaNotaAdmin');
+
+    if (textarea && modal) {
+        // Pulisce eventuali rimasugli HTML o caratteri speciali
+        textarea.value = testo && testo !== 'undefined' ? testo : '';
+        modal.style.display = 'flex';
+
+        // Rimuoviamo vecchi listener clonando il bottone per evitare salvataggi doppi o errori
+        const nuovoBtnSalva = btnSalva.cloneNode(true);
+        btnSalva.parentNode.replaceChild(nuovoBtnSalva, btnSalva);
+
+        // Colleghiamo la funzione di salvataggio al nuovo bottone pulito
+        nuovoBtnSalva.addEventListener('click', eseguiSalvataggioNotaAdmin);
+    }
 };
 
-// Funzione per salvare la nota dal modale Admin
-document.getElementById('btnSalvaNotaAdmin')?.addEventListener('click', async () => {
+// 3. Funzione effettiva di salvataggio su database---- nota 
+async function eseguiSalvataggioNotaAdmin() {
+    if (!ordineNotaInModifica) return;
+
     const nuovaNota = document.getElementById('textareaNotaAdmin').value;
-    
+    const btn = document.getElementById('btnSalvaNotaAdmin');
+
+    // Feedback visivo disabilitando il tasto
+    btn.disabled = true;
+    btn.innerText = "Salvataggio...";
+
     const { error } = await supabase
         .from('ordini')
         .update({ note_condivise: nuovaNota })
         .eq('id', ordineNotaInModifica);
 
     if (error) {
-        alert("Errore nel salvataggio della nota: " + error.message);
+        alert("Errore nel salvataggio: " + error.message);
+        btn.disabled = false;
+        btn.innerText = "💾 Salva Nota Condivisa";
     } else {
+        // Successo: chiudi e aggiorna la UI
         document.getElementById('modalNotaAdmin').style.display = 'none';
         
-        // Aggiorna l'anteprima nella tabella
+        // Aggiorna l'anteprima nella tabella (testo blu)
         const preview = document.getElementById(`nota-preview-${ordineNotaInModifica}`);
         if (preview) {
-            preview.innerText = nuovaNota ? nuovaNota : '➕ Aggiungi nota';
+            preview.innerText = nuovaNota.trim() !== "" ? nuovaNota : '➕ Aggiungi nota';
         }
         
-        // Aggiorna l'array globale allOrders per mantenere la coerenza
+        // Sincronizza l'array locale allOrders
         allOrders = allOrders.map(order => 
             order.id === ordineNotaInModifica ? { ...order, note_condivise: nuovaNota } : order
         );
-        console.log("Nota Admin salvata con successo.");
+
+        btn.disabled = false;
+        btn.innerText = "💾 Salva Nota Condivisa";
+        console.log("Salvataggio admin completato.");
     }
-});
-//--------------fine funzione aggiunta nota admin
+}
