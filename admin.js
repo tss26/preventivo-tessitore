@@ -292,7 +292,7 @@ async function aggiornaStatoOrdine(ordineId, nuovoStato) {
 
 /**
  * 4. Mostra i dettagli dell'ordine in un modale.
- */
+ 
 function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, totaleImponibile) {
     const dettagli = JSON.parse(dettagliProdottiString); 
     const modal = document.getElementById('orderDetailsModal');
@@ -409,6 +409,79 @@ function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, 
 
     modal.style.display = 'block';
 }
+*/
+function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, totaleImponibile) {
+    const dettagli = JSON.parse(dettagliProdottiString); 
+    const modal = document.getElementById('orderDetailsModal');
+    const modalBody = document.getElementById('modalOrderDetails');
+
+    if (!modal || !modalBody) return; 
+
+    // --- LOGICA TITOLO ---
+    const h2Element = document.querySelector('#orderDetailsModal h2');
+    h2Element.innerHTML = `Dettaglio Preventivo: <span style="color: #007bff;">${numeroOrdineVisibile || ordineId.substring(0,8)}</span>`;
+
+    let dettagliHtml = "";
+
+    // --- AREA COPIA E INCOLLA PER EXCEL ---
+    dettagliHtml += `<div style="background: #e9ecef; padding: 10px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ced4da;">`;
+    dettagliHtml += `<p style="margin:0 0 10px 0; font-weight:bold; color:#495057;">📊 Tabella per Copia/Incolla Excel:</p>`;
+    dettagliHtml += `<div style="overflow-x:auto;"><table id="tableToCopy" style="width:100%; border-collapse:collapse; background:white; font-size:0.85em;">`;
+    dettagliHtml += `<tr style="background:#f8f9fa;"><th>Descrizione</th><th>Q.tà</th><th>Prezzo</th></tr>`;
+
+    dettagli.forEach(item => {
+        if (item.tipo === 'INFO_CLIENTE') return;
+        const qta = parseFloat(item.quantita) || 0;
+        const prezzo = parseFloat(item.prezzo_unitario) || 0;
+        dettagliHtml += `<tr>
+            <td style="border:1px solid #dee2e6; padding:5px;">${item.prodotto}</td>
+            <td style="border:1px solid #dee2e6; padding:5px;">${qta}</td>
+            <td style="border:1px solid #dee2e6; padding:5px;">${prezzo.toFixed(2).replace('.', ',')}</td>
+        </tr>`;
+    });
+    dettagliHtml += `</table></div>`;
+    dettagliHtml += `<button onclick="copyTableToClipboard()" style="margin-top:10px; padding:8px; background:#28a745; color:white; border:none; border-radius:4px; cursor:pointer;">📋 Copia Dati per Excel</button>`;
+    dettagliHtml += `</div><hr>`;
+
+    // --- RESTO DEI DETTAGLI TESTUALI (Originale) ---
+    // ... (qui prosegue la tua logica originale per visualizzare note, file, totali, etc.)
+    modalBody.innerHTML = dettagliHtml;
+    modal.style.display = 'block';
+}
+
+// Funzione di utilità per copiare solo le celle
+window.copyTableToClipboard = function() {
+    const table = document.getElementById('tableToCopy');
+    const range = document.createRange();
+    range.selectNode(table);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    try {
+        document.execCommand('copy');
+        alert('Dati copiati! Ora vai su Excel e incolla nella colonna Descrizione.');
+    } catch (err) {
+        alert('Errore nella copia automatica.');
+    }
+    window.getSelection().removeAllRanges();
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /**
