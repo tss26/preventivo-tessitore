@@ -1172,11 +1172,10 @@ function esportaOrdineXLSX(ordineId) {
     const ordine = allOrders.find(o => o.id === ordineId);
     if (!ordine || !ordine.dettagli_prodotti) return;
 
-    // Header identici al modello "Righe documento.xlsx" caricato
+    // Header personalizzati secondo le tue impostazioni
     const headers = [
-        "Cod. articolo", "Descrizione", "Lotto", "Scadenza", 
-        "Taglia", "Colore", "U.m.", "Quantità", 
-        "Prezzo", "Sconto %", "Iva", "Cod. commessa", "Note"
+        "Cod. articolo", "Descrizione", "U.m.", "Q.tà", 
+        "Prezzo netto"
     ];
 
     const rows = [];
@@ -1191,20 +1190,14 @@ function esportaOrdineXLSX(ordineId) {
         const qta = parseFloat(String(item.quantita).replace(',', '.')) || 0;
         const prezzo = parseFloat(String(item.prezzo_unitario).replace(/[^0-9,.]/g, '').replace(',', '.')) || 0;
 
+        // Allineamento colonne basato sul nuovo array headers:
+        // A: Cod. articolo, B: Descrizione, C: U.m., D: Q.tà, E: Prezzo netto
         rows.push([
             item.codice || "0",          // A
             desc,                        // B
-            "",                          // C
-            "",                          // D
-            "",                          // E
-            "",                          // F
-            "pz",                        // G
-            qta,                         // H: Quantità
-            prezzo,                      // I: Prezzo
-            0,                           // J
-            22,                          // K
-            "",                          // L
-            (item.note || "").trim()     // M
+            "pz",                        // C
+            qta,                         // D
+            prezzo                       // E
         ]);
     });
 
@@ -1212,29 +1205,30 @@ function esportaOrdineXLSX(ordineId) {
     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
 
     // --- LOGICA DI FORZATURA NUMERICA AGGRESSIVA ---
+    // Aggiornata per riflettere le nuove posizioni (D ed E)
     const range = XLSX.utils.decode_range(ws['!ref']);
     for (let R = range.s.r + 1; R <= range.e.r; ++R) {
         
-        // Colonna H (Indice 7) -> Quantità
-        const cellH = ws[XLSX.utils.encode_cell({r: R, c: 7})];
-        if (cellH) {
-            cellH.t = 'n'; // Forza tipo numero
-            cellH.v = Number(cellH.v); // Forza valore numerico
-            cellH.z = '0,00'; // Formato con VIRGOLA decimale (Italiano)
+        // Colonna D (Indice 3) -> Q.tà
+        const cellD = ws[XLSX.utils.encode_cell({r: R, c: 3})];
+        if (cellD) {
+            cellD.t = 'n'; // Forza tipo numero
+            cellD.v = Number(cellD.v); // Forza valore numerico
+            cellD.z = '0,00'; // Formato con VIRGOLA decimale (Italiano)
         }
         
-        // Colonna I (Indice 8) -> Prezzo
-        const cellI = ws[XLSX.utils.encode_cell({r: R, c: 8})];
-        if (cellI) {
-            cellI.t = 'n'; // Forza tipo numero
-            cellI.v = Number(cellI.v); // Forza valore numerico
-            cellI.z = '#,##0,00'; // Formato con VIRGOLA decimale (Italiano)
+        // Colonna E (Indice 4) -> Prezzo netto
+        const cellE = ws[XLSX.utils.encode_cell({r: R, c: 4})];
+        if (cellE) {
+            cellE.t = 'n'; // Forza tipo numero
+            cellE.v = Number(cellE.v); // Forza valore numerico
+            cellE.z = '#,##0,00'; // Formato con VIRGOLA decimale (Italiano)
         }
     }
 
     XLSX.utils.book_append_sheet(wb, ws, "Foglio1");
 
-    // Generazione nome file
+    // Generazione nome file basata sul cliente
     let rifCliente = "Export";
     const info = ordine.dettagli_prodotti.find(d => d.tipo === 'INFO_CLIENTE');
     if (info && info.cliente) rifCliente = info.cliente.replace(/[^a-z0-9]/gi, '_');
