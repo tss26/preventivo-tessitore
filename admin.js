@@ -891,52 +891,70 @@ function esportaOrdineCSV(ordineId) {
                     </button>
 
 */
+
 function esportaOrdineXLSX(ordineId) {
     const ordine = allOrders.find(o => o.id === ordineId);
     if (!ordine || !ordine.dettagli_prodotti) return;
 
-    // 1. Definiamo le intestazioni (Header) basate sul tuo file "Righe documento.xlsx"
+    // 1. Definiamo le intestazioni esatte dal tuo file XLSX di riferimento
     const headers = [
         "Cod. articolo", "Descrizione", "Lotto", "Scadenza", 
         "Taglia", "Colore", "U.m.", "Quantità", 
         "Prezzo", "Sconto %", "Iva", "Cod. commessa", "Note"
     ];
 
-    // 2. Prepariamo i dati delle righe
     const rows = [];
+    
     ordine.dettagli_prodotti.forEach(item => {
         if (item.tipo === 'INFO_CLIENTE') return;
 
+        // 2. Assicuriamoci che Quantità e Prezzo siano numeri puri (non stringhe con € o ;)
+        const qta = parseFloat(item.quantita) || 0;
+        const przo = parseFloat(item.prezzo_unitario) || 0;
+
         rows.push([
-            "",                          // Cod. articolo
-            item.prodotto || "",         // Descrizione
-            "",                          // Lotto
-            "",                          // Scadenza
-            "",                          // Taglia
-            "",                          // Colore
-            "pz",                        // U.m.
-            item.quantita || 0,          // Quantità
-            item.prezzo_unitario || 0,   // Prezzo
-            "",                          // Sconto %
-            "22",                        // Iva
-            "",                          // Cod. commessa
-            item.note || ""              // Note
+            "",                          // A: Cod. articolo
+            item.prodotto || "",         // B: Descrizione
+            "",                          // C: Lotto
+            "",                          // D: Scadenza
+            "",                          // E: Taglia
+            "",                          // F: Colore
+            "pz",                        // G: U.m.
+            qta,                         // H: Quantità (Valore numerico)
+            przo,                        // I: Prezzo (Valore numerico)
+            0,                           // J: Sconto %
+            22,                          // K: Iva
+            "",                          // L: Cod. commessa
+            item.note || ""              // M: Note
         ]);
     });
 
-    // 3. Creazione della cartella di lavoro Excel (Workbook)
+    // 3. Creazione del foglio di lavoro
     const wb = XLSX.utils.book_new();
+    // Usiamo origin: 0 per assicurarci che parta dalla cella A1
     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
 
-    // 4. Aggiungiamo il foglio alla cartella
+    // 4. Forziamo il formato numerico sulle colonne H (Quantità) e I (Prezzo)
+    // Questo aiuta il gestionale a "vedere" i numeri invece del testo
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+        // Colonna H (indice 7) -> Quantità
+        const cellQta = ws[XLSX.utils.encode_cell({r: R, c: 7})];
+        if (cellQta) cellQta.t = 'n'; 
+        
+        // Colonna I (indice 8) -> Prezzo
+        const cellPrzo = ws[XLSX.utils.encode_cell({r: R, c: 8})];
+        if (cellPrzo) cellPrzo.t = 'n'; 
+    }
+
     XLSX.utils.book_append_sheet(wb, ws, "Foglio1");
 
-    // 5. Generazione del file e download
+    // 5. Nome file basato sul cliente
     let rifCliente = "Ordine";
     const info = ordine.dettagli_prodotti.find(d => d.tipo === 'INFO_CLIENTE');
     if (info && info.cliente) rifCliente = info.cliente.replace(/[^a-z0-9]/gi, '_');
 
-    XLSX.writeFile(wb, `${rifCliente}_${ordine.num_ordine_prog || 'export'}.xlsx`);
+    XLSX.writeFile(wb, `${rifCliente}_Dati_Import.xlsx`);
 }
 
 
