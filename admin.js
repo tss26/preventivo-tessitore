@@ -891,12 +891,11 @@ function esportaOrdineCSV(ordineId) {
                     </button>
 
 */
-
-
 function esportaOrdineXLSX(ordineId) {
     const ordine = allOrders.find(o => o.id === ordineId);
     if (!ordine || !ordine.dettagli_prodotti) return;
 
+    // Intestazioni identiche al file "Righe documento.xlsx"
     const headers = [
         "Cod. articolo", "Descrizione", "Lotto", "Scadenza", 
         "Taglia", "Colore", "U.m.", "Quantità", 
@@ -908,32 +907,27 @@ function esportaOrdineXLSX(ordineId) {
     ordine.dettagli_prodotti.forEach(item => {
         if (item.tipo === 'INFO_CLIENTE') return;
 
-        // --- LOGICA DI ESTRAZIONE SICURA VALORI ---
+        // --- PULIZIA PROFONDA DATI ---
+        // Rimuove spazi extra e caratteri di controllo che potrebbero bloccare l'importazione
+        const descrizionePulita = (item.prodotto || "").replace(/[\n\r\t]/g, " ").trim();
+        const notePulite = (item.note || "").replace(/[\n\r\t]/g, " ").trim();
+
+        // Conversione numerica sicura
+        let qtaGrezza = String(item.quantita || "0").replace(/[^0-9,.]/g, '').replace(',', '.');
+        let prezzoGrezzo = String(item.prezzo_unitario || "0").replace(/[^0-9,.]/g, '').replace(',', '.');
         
-        // 1. Pulizia Prezzo: rimuove € e spazi, poi converte in numero
-        let prezzoGrezzo = item.prezzo_unitario || "0";
-        if (typeof prezzoGrezzo === 'string') {
-            prezzoGrezzo = prezzoGrezzo.replace(/[€\s]/g, '').replace(',', '.');
-        }
+        const qtaNumerica = parseFloat(qtaGrezza) || 0;
         const prezzoNumerico = parseFloat(prezzoGrezzo) || 0;
 
-        // 2. Pulizia Quantità: assicura che sia un numero intero/decimale pulito
-        let qtaGrezza = item.quantita || "0";
-        if (typeof qtaGrezza === 'string') {
-            qtaGrezza = qtaGrezza.replace(/[^\d.,]/g, '').replace(',', '.');
-        }
-        const qtaNumerica = parseFloat(qtaGrezza) || 0;
-
-        // 3. Estrazione Taglia (se presente nell'oggetto o nelle note)
+        // Estrazione Taglia
         let taglia = "";
         if (item.dettagli_taglie) {
-            // Se dettagli_taglie è un oggetto, uniamo le chiavi (es: "M, L")
             taglia = Object.keys(item.dettagli_taglie).join(", ");
         }
 
         rows.push([
-            item.codice || "",           // A: Cod. articolo
-            item.prodotto || "",         // B: Descrizione
+            item.codice || "000",        // A: Cod. articolo (aggiunto default per evitare celle vuote iniziali)
+            descrizionePulita,           // B: Descrizione
             "",                          // C: Lotto
             "",                          // D: Scadenza
             taglia,                      // E: Taglia
@@ -944,28 +938,35 @@ function esportaOrdineXLSX(ordineId) {
             0,                           // J: Sconto %
             22,                          // K: Iva
             "",                          // L: Cod. commessa
-            item.note || ""              // M: Note
+            notePulite                   // M: Note
         ]);
     });
 
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
 
-    // --- FORZATURA FORMATO CELLA PER IL GESTIONALE ---
+    // --- DEFINIZIONE ESPLICITA AREA DATI ---
+    // Aiuta il gestionale a capire i limiti del foglio e a non fermarsi a metà
+    ws['!ref'] = XLSX.utils.encode_range({
+        s: { c: 0, r: 0 }, 
+        e: { c: 12, r: rows.length }
+    });
+
+    // --- FORZATURA FORMATO NUMERICO ---
     const range = XLSX.utils.decode_range(ws['!ref']);
     for (let R = range.s.r + 1; R <= range.e.r; ++R) {
         // Colonna H (Quantità)
         const cellH = ws[XLSX.utils.encode_cell({r: R, c: 7})];
         if (cellH) {
-            cellH.t = 'n'; // Formato Numero
-            cellH.z = '0.00'; // Forza decimali se necessari
+            cellH.t = 'n'; 
+            cellH.z = '0.00'; 
         }
         
         // Colonna I (Prezzo)
         const cellI = ws[XLSX.utils.encode_cell({r: R, c: 8})];
         if (cellI) {
-            cellI.t = 'n'; // Formato Numero
-            cellI.z = '#,##0.00'; // Formato contabile senza simbolo valuta
+            cellI.t = 'n'; 
+            cellI.z = '#,##0.00'; 
         }
     }
 
@@ -975,7 +976,8 @@ function esportaOrdineXLSX(ordineId) {
     const info = ordine.dettagli_prodotti.find(d => d.tipo === 'INFO_CLIENTE');
     if (info && info.cliente) rifCliente = info.cliente.replace(/[^a-z0-9]/gi, '_');
 
-    XLSX.writeFile(wb, `${rifCliente}_Dati_Import.xlsx`);
+    // Salvataggio esplicito in XLSX (evita il formato ODS che può dare problemi)
+    XLSX.writeFile(wb, `${rifCliente}_Dati_Import.xlsx`, { bookType: 'xlsx' });
 }
 
 
