@@ -892,11 +892,11 @@ function esportaOrdineCSV(ordineId) {
 
 */
 
+
 function esportaOrdineXLSX(ordineId) {
     const ordine = allOrders.find(o => o.id === ordineId);
     if (!ordine || !ordine.dettagli_prodotti) return;
 
-    // 1. Definiamo le intestazioni esatte dal tuo file XLSX di riferimento
     const headers = [
         "Cod. articolo", "Descrizione", "Lotto", "Scadenza", 
         "Taglia", "Colore", "U.m.", "Quantità", 
@@ -908,20 +908,39 @@ function esportaOrdineXLSX(ordineId) {
     ordine.dettagli_prodotti.forEach(item => {
         if (item.tipo === 'INFO_CLIENTE') return;
 
-        // 2. Assicuriamoci che Quantità e Prezzo siano numeri puri (non stringhe con € o ;)
-        const qta = parseFloat(item.quantita) || 0;
-        const przo = parseFloat(item.prezzo_unitario) || 0;
+        // --- LOGICA DI ESTRAZIONE SICURA VALORI ---
+        
+        // 1. Pulizia Prezzo: rimuove € e spazi, poi converte in numero
+        let prezzoGrezzo = item.prezzo_unitario || "0";
+        if (typeof prezzoGrezzo === 'string') {
+            prezzoGrezzo = prezzoGrezzo.replace(/[€\s]/g, '').replace(',', '.');
+        }
+        const prezzoNumerico = parseFloat(prezzoGrezzo) || 0;
+
+        // 2. Pulizia Quantità: assicura che sia un numero intero/decimale pulito
+        let qtaGrezza = item.quantita || "0";
+        if (typeof qtaGrezza === 'string') {
+            qtaGrezza = qtaGrezza.replace(/[^\d.,]/g, '').replace(',', '.');
+        }
+        const qtaNumerica = parseFloat(qtaGrezza) || 0;
+
+        // 3. Estrazione Taglia (se presente nell'oggetto o nelle note)
+        let taglia = "";
+        if (item.dettagli_taglie) {
+            // Se dettagli_taglie è un oggetto, uniamo le chiavi (es: "M, L")
+            taglia = Object.keys(item.dettagli_taglie).join(", ");
+        }
 
         rows.push([
-            "",                          // A: Cod. articolo
+            item.codice || "",           // A: Cod. articolo
             item.prodotto || "",         // B: Descrizione
             "",                          // C: Lotto
             "",                          // D: Scadenza
-            "",                          // E: Taglia
+            taglia,                      // E: Taglia
             "",                          // F: Colore
             "pz",                        // G: U.m.
-            qta,                         // H: Quantità (Valore numerico)
-            przo,                        // I: Prezzo (Valore numerico)
+            qtaNumerica,                 // H: Quantità
+            prezzoNumerico,              // I: Prezzo
             0,                           // J: Sconto %
             22,                          // K: Iva
             "",                          // L: Cod. commessa
@@ -929,27 +948,29 @@ function esportaOrdineXLSX(ordineId) {
         ]);
     });
 
-    // 3. Creazione del foglio di lavoro
     const wb = XLSX.utils.book_new();
-    // Usiamo origin: 0 per assicurarci che parta dalla cella A1
     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
 
-    // 4. Forziamo il formato numerico sulle colonne H (Quantità) e I (Prezzo)
-    // Questo aiuta il gestionale a "vedere" i numeri invece del testo
+    // --- FORZATURA FORMATO CELLA PER IL GESTIONALE ---
     const range = XLSX.utils.decode_range(ws['!ref']);
     for (let R = range.s.r + 1; R <= range.e.r; ++R) {
-        // Colonna H (indice 7) -> Quantità
-        const cellQta = ws[XLSX.utils.encode_cell({r: R, c: 7})];
-        if (cellQta) cellQta.t = 'n'; 
+        // Colonna H (Quantità)
+        const cellH = ws[XLSX.utils.encode_cell({r: R, c: 7})];
+        if (cellH) {
+            cellH.t = 'n'; // Formato Numero
+            cellH.z = '0.00'; // Forza decimali se necessari
+        }
         
-        // Colonna I (indice 8) -> Prezzo
-        const cellPrzo = ws[XLSX.utils.encode_cell({r: R, c: 8})];
-        if (cellPrzo) cellPrzo.t = 'n'; 
+        // Colonna I (Prezzo)
+        const cellI = ws[XLSX.utils.encode_cell({r: R, c: 8})];
+        if (cellI) {
+            cellI.t = 'n'; // Formato Numero
+            cellI.z = '#,##0.00'; // Formato contabile senza simbolo valuta
+        }
     }
 
     XLSX.utils.book_append_sheet(wb, ws, "Foglio1");
 
-    // 5. Nome file basato sul cliente
     let rifCliente = "Ordine";
     const info = ordine.dettagli_prodotti.find(d => d.tipo === 'INFO_CLIENTE');
     if (info && info.cliente) rifCliente = info.cliente.replace(/[^a-z0-9]/gi, '_');
