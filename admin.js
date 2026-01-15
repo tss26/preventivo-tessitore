@@ -889,8 +889,7 @@ function esportaOrdineCSV(ordineId) {
 <button onclick="esportaOrdineCSV('${ordine.id}')" class="btn-secondary" style="padding: 5px 10px; background-color: #28a745; color: white; border: none;">
                     <i class="fas fa-file-csv"></i>
                     </button>
-
-*/
+----------------------------------------------------------------------------------------------------------------------------------------------------
 function esportaOrdineXLSX(ordineId) {
     const ordine = allOrders.find(o => o.id === ordineId);
     if (!ordine || !ordine.dettagli_prodotti) return;
@@ -980,5 +979,58 @@ function esportaOrdineXLSX(ordineId) {
     XLSX.writeFile(wb, `${rifCliente}_Dati_Import.xlsx`, { bookType: 'xlsx' });
 }
 
+*/
+function esportaOrdineXLSX(ordineId) {
+    const ordine = allOrders.find(o => o.id === ordineId);
+    if (!ordine || !ordine.dettagli_prodotti) return;
 
+    const headers = [
+        "Cod. articolo", "Descrizione", "Lotto", "Scadenza", 
+        "Taglia", "Colore", "U.m.", "Quantità", 
+        "Prezzo", "Sconto %", "Iva", "Cod. commessa", "Note"
+    ];
+
+    const rows = [];
+    
+    ordine.dettagli_prodotti.forEach(item => {
+        if (item.tipo === 'INFO_CLIENTE') return;
+
+        const pulisciTesto = (t) => String(t || "").replace(/[^\x20-\x7E]/g, "").trim();
+        
+        // Estrazione numerica
+        let qtaGrezza = String(item.quantita || "1").replace(/[^0-9,.]/g, '').replace(',', '.');
+        let prezzoGrezzo = String(item.prezzo_unitario || "1").replace(/[^0-9,.]/g, '').replace(',', '.');
+        
+        const qtaNumerica = parseFloat(qtaGrezza) || 1; // Default a 1 per test
+        const prezzoNumerico = parseFloat(prezzoGrezzo) || 1; // Default a 1 per test
+
+        rows.push([
+            pulisciTesto(item.codice) || "COD000", // A: Codice (Mai vuoto)
+            pulisciTesto(item.prodotto) || "ARTICOLO TEST", // B: Descrizione
+            "0",                                 // C: Lotto (Riempito)
+            "0",                                 // D: Scadenza (Riempito)
+            "---",                               // E: Taglia (Riempito)
+            "---",                               // F: Colore (Riempito)
+            "pz",                                // G: U.m.
+            qtaNumerica,                         // H: Quantità
+            prezzoNumerico,                      // I: Prezzo
+            0,                                   // J: Sconto %
+            22,                                  // K: Iva
+            "0",                                 // L: Cod. commessa
+            "NOTE TEST"                          // M: Note
+        ]);
+    });
+
+    const wb = XLSX.utils.book_new(); //
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]); //
+
+    // Forza l'area dati per includere tutte le colonne dalla A alla M
+    ws['!ref'] = XLSX.utils.encode_range({
+        s: { c: 0, r: 0 }, 
+        e: { c: 12, r: rows.length }
+    });
+
+    XLSX.utils.book_append_sheet(wb, ws, "Foglio1"); //
+    XLSX.writeFile(wb, `TEST_IMPORTAZIONE.xlsx`, { bookType: 'xlsx' }); //
+}
 
