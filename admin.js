@@ -409,33 +409,9 @@ function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, 
 
     modal.style.display = 'block';
 }
-----------------QUESTA è LA VERSONE STABILE MA COMMENTATA PERCHE LA VOGLIO RENDERE PIU USER FRIENDLY------*/
-/**
- * Mostra i dettagli dell'ordine in un modale includendo la tabella per Excel,
- * i file allegati, i totali e la funzione di stampa.
- */
-function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, totaleImponibile) {
-    const dettagli = JSON.parse(dettagliProdottiString); 
-    const modal = document.getElementById('orderDetailsModal');
-    const modalBody = document.getElementById('modalOrderDetails');
 
-    if (!modal || !modalBody) {
-        console.error("Elementi modale non trovati!");
-        return; 
-    }
 
-    // --- 1. GESTIONE TITOLO ---
-    const h2Element = document.querySelector('#orderDetailsModal h2');
-    if (numeroOrdineVisibile && numeroOrdineVisibile.includes('/')) {
-        h2Element.innerHTML = `Numero Preventivo : <span style="color: #007bff;">${numeroOrdineVisibile}</span>`;
-    } else {
-        const label = numeroOrdineVisibile || ordineId.substring(0, 8).toUpperCase();
-        h2Element.innerHTML = `Dettaglio Preventivo ID: <span style="color: #6c757d; font-size: 0.9em;">${label}</span>`;
-    }
-
-    let dettagliHtml = "";
-
-    // --- 2. SEZIONE COPIA E INCOLLA PER EXCEL (NOVITÀ) ---
+ // --- 2. SEZIONE COPIA E INCOLLA PER EXCEL (NOVITÀ) ---
     dettagliHtml += `<div style="background: #e9ecef; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ced4da;">`;
     dettagliHtml += `<p style="margin:0 0 10px 0; font-weight:bold; color:#495057;">📊 Tabella Rapida per Excel (Colonne B, H, I):</p>`;
     dettagliHtml += `<div style="overflow-x:auto;">
@@ -467,6 +443,33 @@ function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, 
     </button>
     </div><hr style="border: 0; border-top: 2px solid #eee; margin: 20px 0;">`;
 
+----------------QUESTA è LA VERSONE STABILE MA COMMENTATA PERCHE LA VOGLIO RENDERE PIU USER FRIENDLY------*/
+/**
+ * Mostra i dettagli dell'ordine in un modale includendo la tabella per Excel,
+ * i file allegati, i totali e la funzione di stampa.
+ */
+function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, totaleImponibile) {
+    const dettagli = JSON.parse(dettagliProdottiString); 
+    const modal = document.getElementById('orderDetailsModal');
+    const modalBody = document.getElementById('modalOrderDetails');
+
+    if (!modal || !modalBody) {
+        console.error("Elementi modale non trovati!");
+        return; 
+    }
+
+    // --- 1. GESTIONE TITOLO ---
+    const h2Element = document.querySelector('#orderDetailsModal h2');
+    if (numeroOrdineVisibile && numeroOrdineVisibile.includes('/')) {
+        h2Element.innerHTML = `Numero Preventivo : <span style="color: #007bff;">${numeroOrdineVisibile}</span>`;
+    } else {
+        const label = numeroOrdineVisibile || ordineId.substring(0, 8).toUpperCase();
+        h2Element.innerHTML = `Dettaglio Preventivo ID: <span style="color: #6c757d; font-size: 0.9em;">${label}</span>`;
+    }
+
+    let dettagliHtml = "";
+
+   
     // --- 3. BOX BLU DATI CLIENTE ---
     const infoCliente = dettagli.find(d => d.tipo === 'INFO_CLIENTE');
     dettagliHtml += `<div style="font-size: 0.85em; color: #999; margin-bottom: 5px;">Rif. Database: ${ordineId}</div>`;
