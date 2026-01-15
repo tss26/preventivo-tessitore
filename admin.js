@@ -169,7 +169,7 @@ function renderOrderList(ordiniDaVisualizzare) {
                     Vedi Dettagli
                     </button>
                     <button onclick="esportaOrdineCSV('${ordine.id}')" class="btn-secondary" style="padding: 5px 10px; background-color: #28a745; color: white; border: none;">
-                    <i class="fas fa-file-csv"></i>Esporta
+                    <i class="fas fa-file-csv"></i>
                     </button>
                 </td>   
                 
