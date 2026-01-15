@@ -168,8 +168,9 @@ function renderOrderList(ordiniDaVisualizzare) {
                     <button onclick="preparaEApriDettagli('${ordine.id}')" class="btn-primary" style="padding: 5px 10px;">
                     Vedi Dettagli
                     </button>
-                    <button onclick="esportaOrdineCSV('${ordine.id}')" class="btn-secondary" style="padding: 5px 10px; background-color: #28a745; color: white; border: none;">
-                    <i class="fas fa-file-csv"></i>
+                    
+                    <button onclick="esportaOrdineXLSX('${ordine.id}')" style="padding: 5px 10px; background-color: #28a745; color: white; border: none; cursor: pointer; font-size: 0.85em; border-radius: 4px; display: flex; align-items: center; gap: 4px;">
+                    📊 Esporta XLSX
                     </button>
                 </td>   
                 
@@ -834,7 +835,7 @@ window.preparaEApriDettagli = function(id) {
 
 /**
  * Funzione per generare ed esportare il file CSV dell'ordine
- */
+ 
 function esportaOrdineCSV(ordineId) {
     const ordine = allOrders.find(o => o.id === ordineId);
     if (!ordine || !ordine.dettagli_prodotti) return;
@@ -884,7 +885,54 @@ function esportaOrdineCSV(ordineId) {
     link.click();
     document.body.removeChild(link);
 }
+*/
+function esportaOrdineXLSX(ordineId) {
+    const ordine = allOrders.find(o => o.id === ordineId);
+    if (!ordine || !ordine.dettagli_prodotti) return;
 
+    // 1. Definiamo le intestazioni (Header) basate sul tuo file "Righe documento.xlsx"
+    const headers = [
+        "Cod. articolo", "Descrizione", "Lotto", "Scadenza", 
+        "Taglia", "Colore", "U.m.", "Quantità", 
+        "Prezzo", "Sconto %", "Iva", "Cod. commessa", "Note"
+    ];
+
+    // 2. Prepariamo i dati delle righe
+    const rows = [];
+    ordine.dettagli_prodotti.forEach(item => {
+        if (item.tipo === 'INFO_CLIENTE') return;
+
+        rows.push([
+            "",                          // Cod. articolo
+            item.prodotto || "",         // Descrizione
+            "",                          // Lotto
+            "",                          // Scadenza
+            "",                          // Taglia
+            "",                          // Colore
+            "pz",                        // U.m.
+            item.quantita || 0,          // Quantità
+            item.prezzo_unitario || 0,   // Prezzo
+            "",                          // Sconto %
+            "22",                        // Iva
+            "",                          // Cod. commessa
+            item.note || ""              // Note
+        ]);
+    });
+
+    // 3. Creazione della cartella di lavoro Excel (Workbook)
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+
+    // 4. Aggiungiamo il foglio alla cartella
+    XLSX.utils.book_append_sheet(wb, ws, "Foglio1");
+
+    // 5. Generazione del file e download
+    let rifCliente = "Ordine";
+    const info = ordine.dettagli_prodotti.find(d => d.tipo === 'INFO_CLIENTE');
+    if (info && info.cliente) rifCliente = info.cliente.replace(/[^a-z0-9]/gi, '_');
+
+    XLSX.writeFile(wb, `${rifCliente}_${ordine.num_ordine_prog || 'export'}.xlsx`);
+}
 
 
 
