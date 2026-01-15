@@ -409,63 +409,178 @@ function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, 
 
     modal.style.display = 'block';
 }
-*/
+----------------QUESTA è LA VERSONE STABILE MA COMMENTATA PERCHE LA VOGLIO RENDERE PIU USER FRIENDLY------*/
+/**
+ * Mostra i dettagli dell'ordine in un modale includendo la tabella per Excel,
+ * i file allegati, i totali e la funzione di stampa.
+ */
 function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, totaleImponibile) {
     const dettagli = JSON.parse(dettagliProdottiString); 
     const modal = document.getElementById('orderDetailsModal');
     const modalBody = document.getElementById('modalOrderDetails');
 
-    if (!modal || !modalBody) return; 
+    if (!modal || !modalBody) {
+        console.error("Elementi modale non trovati!");
+        return; 
+    }
 
-    // --- LOGICA TITOLO ---
+    // --- 1. GESTIONE TITOLO ---
     const h2Element = document.querySelector('#orderDetailsModal h2');
-    h2Element.innerHTML = `Dettaglio Preventivo: <span style="color: #007bff;">${numeroOrdineVisibile || ordineId.substring(0,8)}</span>`;
+    if (numeroOrdineVisibile && numeroOrdineVisibile.includes('/')) {
+        h2Element.innerHTML = `Numero Preventivo : <span style="color: #007bff;">${numeroOrdineVisibile}</span>`;
+    } else {
+        const label = numeroOrdineVisibile || ordineId.substring(0, 8).toUpperCase();
+        h2Element.innerHTML = `Dettaglio Preventivo ID: <span style="color: #6c757d; font-size: 0.9em;">${label}</span>`;
+    }
 
     let dettagliHtml = "";
 
-    // --- AREA COPIA E INCOLLA PER EXCEL ---
-    dettagliHtml += `<div style="background: #e9ecef; padding: 10px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ced4da;">`;
-    dettagliHtml += `<p style="margin:0 0 10px 0; font-weight:bold; color:#495057;">📊 Tabella per Copia/Incolla Excel:</p>`;
-    dettagliHtml += `<div style="overflow-x:auto;"><table id="tableToCopy" style="width:100%; border-collapse:collapse; background:white; font-size:0.85em;">`;
-    dettagliHtml += `<tr style="background:#f8f9fa;"><th>Descrizione</th><th>Q.tà</th><th>Prezzo</th></tr>`;
+    // --- 2. SEZIONE COPIA E INCOLLA PER EXCEL (NOVITÀ) ---
+    dettagliHtml += `<div style="background: #e9ecef; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ced4da;">`;
+    dettagliHtml += `<p style="margin:0 0 10px 0; font-weight:bold; color:#495057;">📊 Tabella Rapida per Excel (Colonne B, H, I):</p>`;
+    dettagliHtml += `<div style="overflow-x:auto;">
+        <table id="tableToCopy" style="width:100%; border-collapse:collapse; background:white; font-size:0.9em;">
+            <thead>
+                <tr style="background:#f8f9fa;">
+                    <th style="border:1px solid #dee2e6; padding:8px; text-align:left;">Descrizione</th>
+                    <th style="border:1px solid #dee2e6; padding:8px; text-align:center;">Quantità</th>
+                    <th style="border:1px solid #dee2e6; padding:8px; text-align:right;">Prezzo Netto</th>
+                </tr>
+            </thead>
+            <tbody>`;
 
     dettagli.forEach(item => {
         if (item.tipo === 'INFO_CLIENTE') return;
         const qta = parseFloat(item.quantita) || 0;
-        const prezzo = parseFloat(item.prezzo_unitario) || 0;
-        dettagliHtml += `<tr>
-            <td style="border:1px solid #dee2e6; padding:5px;">${item.prodotto}</td>
-            <td style="border:1px solid #dee2e6; padding:5px;">${qta}</td>
-            <td style="border:1px solid #dee2e6; padding:5px;">${prezzo.toFixed(2).replace('.', ',')}</td>
-        </tr>`;
+        const pUnit = parseFloat(item.prezzo_unitario) || 0;
+        dettagliHtml += `
+            <tr>
+                <td style="border:1px solid #dee2e6; padding:8px;">${item.prodotto}</td>
+                <td style="border:1px solid #dee2e6; padding:8px; text-align:center;">${qta}</td>
+                <td style="border:1px solid #dee2e6; padding:8px; text-align:right;">${pUnit.toFixed(2).replace('.', ',')}</td>
+            </tr>`;
     });
-    dettagliHtml += `</table></div>`;
-    dettagliHtml += `<button onclick="copyTableToClipboard()" style="margin-top:10px; padding:8px; background:#28a745; color:white; border:none; border-radius:4px; cursor:pointer;">📋 Copia Dati per Excel</button>`;
-    dettagliHtml += `</div><hr>`;
 
-    // --- RESTO DEI DETTAGLI TESTUALI (Originale) ---
-    // ... (qui prosegue la tua logica originale per visualizzare note, file, totali, etc.)
+    dettagliHtml += `</tbody></table></div>`;
+    dettagliHtml += `<button onclick="copyTableToClipboard()" style="margin-top:10px; padding:10px 15px; background:#28a745; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">
+        📋 Copia Dati per Excel
+    </button>
+    </div><hr style="border: 0; border-top: 2px solid #eee; margin: 20px 0;">`;
+
+    // --- 3. BOX BLU DATI CLIENTE ---
+    const infoCliente = dettagli.find(d => d.tipo === 'INFO_CLIENTE');
+    dettagliHtml += `<div style="font-size: 0.85em; color: #999; margin-bottom: 5px;">Rif. Database: ${ordineId}</div>`;
+
+    if (infoCliente) {
+        dettagliHtml += `<div style="background: #f1f8ff; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #cce5ff;">`;
+        dettagliHtml += `<strong>Cliente / Rag. Soc.:</strong> ${infoCliente.cliente || '---'}<br>`;
+        dettagliHtml += `<strong>Contatti:</strong> ${infoCliente.contatti || '---'}`;
+        dettagliHtml += `</div>`;
+        dettagliHtml += `----------------------------------------------------------<br><br>`;
+    }
+
+    dettagliHtml += `<strong>DETTAGLI ARTICOLI COMPLETI:</strong><br>`;
+
+    // --- 4. LISTA PRODOTTI E ALLEGATI ---
+    dettagli.forEach(item => {
+        if (item.tipo === 'INFO_CLIENTE') return;
+
+        dettagliHtml += `<br><strong>--- ${item.prodotto} (${item.quantita} pz) ---</strong><br>`;
+        
+        if (item.componenti && Array.isArray(item.componenti) && item.componenti.length > 0) {
+            dettagliHtml += `Componenti: ${item.componenti.join(', ')}<br>`;
+        }
+        
+        let pUnit = parseFloat(item.prezzo_unitario);
+        if (isNaN(pUnit)) pUnit = 0;
+        dettagliHtml += `Prezzo netto cad.: € ${pUnit.toFixed(2)}<br>`;
+  
+        if (item.dettagli_taglie && Object.keys(item.dettagli_taglie).length > 0) {
+            dettagliHtml += `Dettagli Taglie:<br>`;
+            for (const genere in item.dettagli_taglie) {
+                const taglie = Object.entries(item.dettagli_taglie[genere])
+                    .map(([taglia, qty]) => `${taglia}: ${qty}`)
+                    .join(', ');
+                dettagliHtml += `&nbsp;&nbsp;- ${genere}: ${taglie}<br>`;
+            }
+        }
+        
+        if (item.note && item.note.trim() !== '') {
+            dettagliHtml += `Note: ${item.note}<br>`;
+        }
+
+        if (item.personalizzazione_url && item.personalizzazione_url !== 'Nessun file collegato direttamente.') {
+           dettagliHtml += `<span style="color: #d63384; font-weight:bold;">📎 File Allegato:</span> <a href="${item.personalizzazione_url}" target="_blank" style="color: #007bff; text-decoration: underline;">Apri Allegato</a><br>`;
+        }
+    });
+
+    // --- 5. FOOTER E TOTALI ---
+    dettagliHtml += '<br>-----------------------------------------------------------------------------------------<br>'; 
+    dettagliHtml += 'Per procedere con l\'ordine effettuare Bonifico intestato a : Tessitore s.r.l.<br>';
+    dettagliHtml += 'BANCA : SELLA  IBAN : IT56 O032 6804 6070 5227 9191 820<br>';
+
+    const ivaRate = 0.22; 
+    let totaleImponibileNumerico = parseFloat(totaleImponibile) || 0; 
+    
+    if (totaleImponibileNumerico > 0) {
+        const ivaDovuta = totaleImponibileNumerico * ivaRate;
+        const totaleFinale = totaleImponibileNumerico + ivaDovuta;
+        
+        dettagliHtml += `<br>-------------------------------------------------------------------------<br>`;
+        dettagliHtml += `<strong>TOTALE IMPONIBILE (Netto): € ${totaleImponibileNumerico.toFixed(2)}</strong>`;
+        dettagliHtml += `<br>IVA (22%): € ${ivaDovuta.toFixed(2)}`;
+        dettagliHtml += `<br><span style="font-size: 1.2em; color: #28a745;"><strong>TOTALE DOVUTO (IVA Incl.): € ${totaleFinale.toFixed(2)}</strong></span><br>`;
+        dettagliHtml += `-------------------------------------------------------------------------<br>`;
+    }
+
     modalBody.innerHTML = dettagliHtml;
+
+    // --- 6. TASTO STAMPA ---
+    let btnStampa = document.getElementById('btnStampaOrdine');
+    if (!btnStampa) {
+        btnStampa = document.createElement('button');
+        btnStampa.id = 'btnStampaOrdine'; 
+        btnStampa.textContent = '🖨️ Stampa Ordine';
+        btnStampa.style.marginTop = '15px';
+        btnStampa.style.padding = '10px 20px';
+        btnStampa.style.backgroundColor = '#6c757d'; 
+        btnStampa.style.color = 'white';
+        btnStampa.style.border = 'none';
+        btnStampa.style.borderRadius = '5px';
+        btnStampa.style.cursor = 'pointer';
+        btnStampa.style.fontSize = '1rem';
+        btnStampa.style.float = 'right'; 
+        
+        btnStampa.onclick = function() {
+            window.print();
+        };
+        modalBody.parentNode.insertBefore(btnStampa, modalBody.nextSibling);
+    }
+
     modal.style.display = 'block';
 }
 
-// Funzione di utilità per copiare solo le celle
+/**
+ * Funzione helper per copiare la tabella negli appunti
+ */
 window.copyTableToClipboard = function() {
     const table = document.getElementById('tableToCopy');
+    if (!table) return;
+    
     const range = document.createRange();
     range.selectNode(table);
     window.getSelection().removeAllRanges();
     window.getSelection().addRange(range);
+    
     try {
         document.execCommand('copy');
-        alert('Dati copiati! Ora vai su Excel e incolla nella colonna Descrizione.');
+        alert('Dati copiati correttamente! Ora puoi incollarli su Excel.');
     } catch (err) {
-        alert('Errore nella copia automatica.');
+        alert('Impossibile copiare i dati automaticamente.');
     }
+    
     window.getSelection().removeAllRanges();
 };
-
-
 
 
 
