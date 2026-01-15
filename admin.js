@@ -163,12 +163,7 @@ function renderOrderList(ordiniDaVisualizzare) {
                 </td>
 
                 
-                <td>
-                        <button onclick="preparaEApriDettagli('${ordine.id}')" class="btn-primary" style="padding: 5px 10px;">
-                        Vedi Dettagli
-                        </button>
-                </td>
-
+               
                 <td style="display: flex; gap: 5px;">
                     <button onclick="preparaEApriDettagli('${ordine.id}')" class="btn-primary" style="padding: 5px 10px;">
                     Vedi Dettagli
