@@ -168,6 +168,15 @@ function renderOrderList(ordiniDaVisualizzare) {
                         Vedi Dettagli
                         </button>
                 </td>
+
+                <td style="display: flex; gap: 5px;">
+                    <button onclick="preparaEApriDettagli('${ordine.id}')" class="btn-primary" style="padding: 5px 10px;">
+                    Vedi Dettagli
+                    </button>
+                    <button onclick="esportaOrdineCSV('${ordine.id}')" class="btn-secondary" style="padding: 5px 10px; background-color: #28a745; color: white; border: none;">
+                    <i class="fas fa-file-csv"></i> 📥 Esporta
+                    </button>
+                </td>   
                 
             </tr>
         `;
@@ -826,3 +835,61 @@ window.preparaEApriDettagli = function(id) {
         mostraDettagli(ordine.id, dettagliString, numeroOrdine, ordine.totale || 0);
     }
 };
+
+
+/**
+ * Funzione per generare ed esportare il file CSV dell'ordine
+ */
+function esportaOrdineCSV(ordineId) {
+    const ordine = allOrders.find(o => o.id === ordineId);
+    if (!ordine || !ordine.dettagli_prodotti) return;
+
+    // Header del CSV basato sulla tua immagine (Cod., Descrizione, Taglia/Colore, Q.tà, Prezzo netto, U.m., Sconti, Eco-contrib., Iva, Mag., Importo, Note)
+    let csvContent = "Cod.;Descrizione;Taglia/Colore;Q.tà;Prezzo netto;U.m.;Sconti;Eco-contrib.;Iva;Mag.;Importo;Note\n";
+
+    ordine.dettagli_prodotti.forEach(item => {
+        // Saltiamo l'oggetto INFO_CLIENTE se presente nei dettagli
+        if (item.tipo === 'INFO_CLIENTE') return;
+
+        const descrizione = (item.prodotto || "").replace(/;/g, ","); // Evitiamo conflitti con il separatore ;
+        const quantita = item.quantita || 0;
+        const prezzo = item.prezzo_unitario || 0;
+        const importo = (quantita * prezzo).toFixed(2);
+
+        // Costruiamo la riga lasciando vuote le colonne non richieste (come da tua richiesta)
+        // Ma popolando Descrizione (B), Q.tà (D) e Prezzo netto (E) + Importo (K) per utilità
+        let riga = [
+            "",             // A: Cod.
+            descrizione,    // B: Descrizione
+            "",             // C: Taglia/Colore
+            quantita,       // D: Q.tà
+            prezzo,         // E: Prezzo netto
+            "pz",           // F: U.m.
+            "",             // G: Sconti
+            "",             // H: Eco-contrib.
+            "22",           // I: Iva
+            "No",           // J: Mag.
+            importo,        // K: Importo
+            ""              // L: Note
+        ];
+
+        csvContent += riga.join(";") + "\n";
+    });
+
+    // Creazione del file e download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    const dataOggi = new Date().toISOString().slice(0, 10);
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Ordine_${ordine.num_ordine_prog || ordineId.substring(0,8)}_${dataOggi}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+
+
+
