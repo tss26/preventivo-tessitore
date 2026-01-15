@@ -161,10 +161,14 @@ function renderOrderList(ordiniDaVisualizzare) {
         ${ordine.note_condivise ? ordine.note_condivise : '➕'}
                     </div>
                 </td>
+
                 
                 <td>
-                    <button onclick="mostraDettagli('${ordine.id}', '${dettagliProdotti}', '${numeroOrdine}', ${ordine.totale || 0})" class="btn-primary" style="padding: 5px 10px;">Vedi Dettagli</button>
+                        <button onclick="preparaEApriDettagli('${ordine.id}')" class="btn-primary" style="padding: 5px 10px;">
+                        Vedi Dettagli
+                        </button>
                 </td>
+                
             </tr>
         `;
     });
@@ -812,3 +816,13 @@ async function eseguiSalvataggioNotaAdmin() {
         console.log("Salvataggio admin completato.");
     }
 }
+
+// funzione ponte per passare i dettagli dell ordine quando l'utente clicca vede dettagli
+window.preparaEApriDettagli = function(id) {
+    const ordine = allOrders.find(o => o.id === id);
+    if (ordine) {
+        const numeroOrdine = ordine.num_ordine_prog || ordine.id.substring(0, 8).toUpperCase();
+        const dettagliString = JSON.stringify(ordine.dettagli_prodotti);
+        mostraDettagli(ordine.id, dettagliString, numeroOrdine, ordine.totale || 0);
+    }
+};
