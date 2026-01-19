@@ -707,7 +707,11 @@ function calcolaPrezzoDinamicoKit() {
     
     // 5. Calcola il prezzo MEDIO unitario finale (per visualizzazione dinamica)
     //---const prezzoMedioUnitario = costoTotaleFinale / qtaTotale;
-    const prezzoMedioUnitario = costoTotaleFinale ;
+    //const prezzoMedioUnitario = costoTotaleFinale ;
+
+    const prezzoMedioUnitario = prezzoUnitarioBase; 
+// Oppure, se vuoi includere l'ammortamento del costo impianto (20€) nel prezzo unitario:
+// const prezzoMedioUnitario = (costoTotaleBase + costoImpianto) / qtaTotale;
 
     // 6. SALVA IL COSTO TOTALE IN UN CAMPO NASCOSTO ***
     const costoTotaleInput = document.getElementById('kitCostoTotaleFinale');
