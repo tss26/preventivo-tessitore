@@ -40,6 +40,11 @@ body {
 }
 
 /* LAYOUT GENERALE */
+.sezione-prodotto {
+    display: none; /* Nasconde la sezione di default */
+}
+
+
 .container {
   display: grid;
   /* La griglia è FISSATA a una sola colonna per tutti gli schermi */
