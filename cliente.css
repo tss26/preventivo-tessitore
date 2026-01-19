@@ -40,9 +40,14 @@ body {
 }
 
 /* LAYOUT GENERALE */
+/*.sezione-prodotto {
+    display: none; 
+}*/
+
 .sezione-prodotto {
-    display: none; /* Nasconde la sezione di default */
+    display: none !important; /* Nasconde la sezione di default */
 }
+
 /* quado è tutto nascosto elimina gli spazi vuoti */
 .galleria-prodotti-container {
     grid-column: 1 / -1; /* Occupa tutta la larghezza */
