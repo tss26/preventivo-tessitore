@@ -2062,7 +2062,7 @@ function clearSearch() {
 }
 //------fine js per la ricerca sul menu cliente.html--------------------------
 
-
+/*
 // rendere l file visivamente piu pulito 
 function mostraSezione(idSezione) {
     // 1. Nascondi tutte le sezioni che hanno la classe 'sezione-prodotto'
@@ -2082,7 +2082,38 @@ function mostraSezione(idSezione) {
 }
 
 
+*/
 
+
+/**
+ * Gestisce la visualizzazione dinamica delle sezioni
+ * Nasconde tutto e mostra solo quella selezionata.
+ */
+function mostraSezione(idSezione) {
+    // 1. Seleziona tutte le sezioni che devono essere alternate
+    const sezioni = document.querySelectorAll('.sezione-prodotto');
+    
+    // 2. Nascondile tutte
+    sezioni.forEach(s => {
+        s.style.display = 'none';
+    });
+
+    // 3. Mostra la sezione specifica
+    const sezioneSelezionata = document.getElementById(idSezione);
+    if (sezioneSelezionata) {
+        sezioneSelezionata.style.display = 'block';
+        
+        // 4. Feedback visivo: scorre leggermente verso il contenuto
+        sezioneSelezionata.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+// Inizializzazione al caricamento della pagina
+document.addEventListener('DOMContentLoaded', () => {
+    // Assicuriamoci che all'apertura nessuna sezione sia visibile
+    const sezioni = document.querySelectorAll('.sezione-prodotto');
+    sezioni.forEach(s => s.style.display = 'none');
+});
 
 
 
