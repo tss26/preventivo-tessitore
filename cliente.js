@@ -2063,6 +2063,36 @@ function clearSearch() {
 //------fine js per la ricerca sul menu cliente.html--------------------------
 
 
+// rendere l file visivamente piu pulito 
+function mostraSezione(idSezione) {
+    // 1. Nascondi tutte le sezioni che hanno la classe 'sezione-prodotto'
+    const sezioni = document.querySelectorAll('.sezione-prodotto');
+    sezioni.forEach(s => {
+        s.style.display = 'none';
+    });
+
+    // 2. Mostra solo la sezione cliccata
+    const sezioneSelezionata = document.getElementById(idSezione);
+    if (sezioneSelezionata) {
+        sezioneSelezionata.style.display = 'block';
+        
+        // 3. Opzionale: scroll fluido verso la sezione per dare feedback all'utente
+        sezioneSelezionata.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
