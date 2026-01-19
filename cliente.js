@@ -706,13 +706,22 @@ function calcolaPrezzoDinamicoKit() {
     const costoTotaleFinale = costoTotaleBase ;
     
     // 5. Calcola il prezzo MEDIO unitario finale (per visualizzazione dinamica)
-    //---const prezzoMedioUnitario = costoTotaleFinale / qtaTotale;
     const prezzoMedioUnitario = costoTotaleFinale ;
 
     //---const prezzoMedioUnitario = prezzoUnitarioBase; 
 // Oppure, se vuoi includere l'ammortamento del costo impianto (20€) nel prezzo unitario:
 // const prezzoMedioUnitario = (costoTotaleBase + costoImpianto) / qtaTotale;
 
+    // Visualizzazione del Prezzo Base
+prezzoBaseSpan.textContent = `€ ${prezzoUnitarioBase.toFixed(2)}`;
+
+// --- SALVA IL PREZZO UNITARIO BASE NEL CAMPO NASCOSTO ---
+const prezzoUnitarioInput = document.getElementById('kitPrezzoUnitarioBase');
+if (prezzoUnitarioInput) {
+    prezzoUnitarioInput.value = prezzoUnitarioBase.toFixed(2);
+}
+
+    
     // 6. SALVA IL COSTO TOTALE IN UN CAMPO NASCOSTO ***
     const costoTotaleInput = document.getElementById('kitCostoTotaleFinale');
     if (costoTotaleInput) {
@@ -732,6 +741,7 @@ async function gestisciAggiuntaKitCalcio() {
     // Recupero dati numerici e testo
     const qtaTotale = parseInt(document.getElementById('kitQtaTotale').textContent) || 0;
     const prezzoDinamico = parseFloat(document.getElementById('kitPrezzoDinamico').textContent.replace('€', '').trim()) || 0;
+    const prezzoUnitarioBase = parseFloat(document.getElementById('kitPrezzoUnitarioBase')?.value) || 0;
     const kitNote = document.getElementById('kitNote').value;
 
     // --- 1. RILEVAZIONE FILE UPLOAD ---
@@ -848,7 +858,8 @@ async function gestisciAggiuntaKitCalcio() {
         id_unico: Date.now(), 
         prodotto: `KIT CALCIO - ${kitProdSelezionato}`, 
         quantita: qtaTotale, 
-        prezzo_unitario: parseFloat(prezzoDinamico.toFixed(2)), 
+        prezzo_unitario: prezzoUnitarioBase,
+        prezzo_dinamico: parseFloat(prezzoDinamico.toFixed(2)), 
         componenti: componenti,
         dettagli_taglie: dettagliTaglie,
         note: kitNote,
