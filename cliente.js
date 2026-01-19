@@ -1241,8 +1241,8 @@ function mostraVistaPreventivo() {
     const bannerNav = document.querySelector('.banner-iniziale-nav');
     if (bannerNav) bannerNav.style.display = 'block';
 
-   // const quickOrder = document.getElementById('quick-order-section');
-   // if (quickOrder) quickOrder.style.display = 'block';
+   // const quickOrder = document.getElementById('quick-order-section');  --- se voglio far in modo che quick order rimanga sempre attivo all'avvio 
+   // if (quickOrder) quickOrder.style.display = 'block';-------------------- della pagina cliente basta che tolgo i commenti su queste  2 righe
 }
 
 function mostraVistaOrdini() {
