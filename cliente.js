@@ -1241,8 +1241,8 @@ function mostraVistaPreventivo() {
     const bannerNav = document.querySelector('.banner-iniziale-nav');
     if (bannerNav) bannerNav.style.display = 'block';
 
-    const quickOrder = document.getElementById('quick-order-section');
-    if (quickOrder) quickOrder.style.display = 'block';
+   // const quickOrder = document.getElementById('quick-order-section');
+   // if (quickOrder) quickOrder.style.display = 'block';
 }
 
 function mostraVistaOrdini() {
