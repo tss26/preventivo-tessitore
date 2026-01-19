@@ -1493,6 +1493,13 @@ async function gestisciAggiuntaDTF() {
 document.addEventListener('DOMContentLoaded', async () => {
     const isLogged = await verificaCliente();
     if (isLogged) {
+        // --- 1. PULIZIA INIZIALE DELLA VISTA ---
+        // Nascondiamo tutte le sezioni prodotto all'avvio
+        const sezioni = document.querySelectorAll('.sezione-prodotto');
+        sezioni.forEach(s => s.style.display = 'none');
+
+
+        
         document.getElementById('logoutBtn').addEventListener('click', handleLogout);
         document.getElementById('aggiungiBandiera').addEventListener('click', gestisciAggiuntaAlCarrello);
         document.getElementById('richiediPreventivo').addEventListener('click', gestisciCheckout);
@@ -2107,14 +2114,14 @@ function mostraSezione(idSezione) {
         sezioneSelezionata.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
-
+/*
 // Inizializzazione al caricamento della pagina
 document.addEventListener('DOMContentLoaded', () => {
     // Assicuriamoci che all'apertura nessuna sezione sia visibile
     const sezioni = document.querySelectorAll('.sezione-prodotto');
     sezioni.forEach(s => s.style.display = 'none');
 });
-
+*/
 
 
 
