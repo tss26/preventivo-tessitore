@@ -718,8 +718,8 @@ function calcolaPrezzoDinamicoKit() {
     if (costoTotaleInput) {
         costoTotaleInput.value = costoTotaleFinale.toFixed(2);
     }
-
-    prezzoDinamicoSpan.textContent = `€ ${prezzoMedioUnitario.toFixed(2)}`;
+    //prezzoUnitarioBase     prezzoDinamicoSpan.textContent = `€ ${prezzoMedioUnitario.toFixed(2)}`;
+    prezzoDinamicoSpan.textContent = `€ ${prezzoUnitarioBase.toFixed(2)}`;
     qtaTotaleSpan.textContent = qtaTotale;
 }
 
