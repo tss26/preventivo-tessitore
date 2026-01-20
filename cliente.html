@@ -98,6 +98,12 @@
            data-keywords="calcio padel baske pantaloncinosenza tasche pantaloncino con tasche tessuto liscio tessuto dry tessuto traforato stampa sublimazione sublimatico sublimatica basket bascket palla completini personalzzati kit bimbo bambino scuola calcio soccer maglia pantaloncino completino sport divisa sublimazione t-shirt">
             <img src="MAGLIA_CALCIO.jpeg" alt="Sezione Kit Calcio Personalizzabile" />
         </a>
+      
+        <a href="javascript:void(0)" onclick="mostraSezione('kitBasketSection')" class="banner-item"
+             data-keywords="basket pallacanestro canotta pantaloncino double reversibile sport completino sublimazione maglia ">
+              <img src="../img/BASKET.jpeg" alt="Sezione Kit Basket" />
+          <div class="banner-item-content">Basket</div>
+        </a>      
         
         <a href="javascript:void(0)" onclick="mostraSezione('bandiereSection')" class="banner-item"
            data-keywords="bandiere bandiera flag sublimazione sublimatica resistente goccia vela creste crest aqualo scualo squal crest cresta bandiere personalizzata bandiere su misura pubblicità pubblicita negozio esposizione rectangualar quill zm-qll rettangolare espositori stand fiera pubblicità esterno">
@@ -246,6 +252,148 @@
         <button class="btn-add" id="aggiungiKitCalcioBtn" style="margin-top: 20px;">Aggiungi Kit al Preventivo</button>
     </div>
 </section>
+
+
+
+<section class="galleria-blocco sezione-prodotto" id="kitBasketSection">
+    <h1>Abbigliamento Basket - Personalizzato</h1>
+    
+    <div class="prodotti-base kit-grid" id="basketSelectionContainer">
+        <button class="kit-item" data-prodotto="CANOTTA_SOLO">
+            <img src="Tshirt.jpg" alt="Solo Canotta" style="width: 90px;"><br>
+            Solo Canotta
+        </button>
+        <button class="kit-item" data-prodotto="PANTALONCINO_SOLO">
+            <img src="Pantaloncino.jpg" alt="Solo Pantaloncino" style="width: 90px;"><br>
+            Solo Pant. Basket
+        </button>
+        <button class="kit-item" data-prodotto="COMPLETINO">
+            <img src="Completino.jpg" alt="Completino Basket" style="width: 90px;"><br>
+            Completino Basket
+        </button>
+    </div>
+
+    <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #ffeeba; text-align: center;">
+        <label style="font-weight: bold; color: #856404; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.1rem;">
+            <input type="checkbox" id="checkBasketDouble" style="transform: scale(1.5);">
+            SELEZIONA QUI SE VUOI CHE IL PRODOTTO SIA DOUBLE (Reversibile)
+        </label>
+        <small style="display: block; margin-top: 5px; color: #666;">(Opzione valida per Canotta, Pantaloncino o Completo)</small>
+    </div>
+
+    <div id="basketTaglieContainer" style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; display: none;">
+        
+        <h2>Quantità e Taglie per: <span id="basketProdottoSelezionato" style="color: #007bff;"></span></h2>
+
+        <h3>Tabella Taglie: UOMO</h3>
+        <table class="taglie-table" data-genere="UOMO">
+            <thead>
+                <tr>
+                    <th>Taglia</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>XXL</th><th>3XL</th><th>4XL</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Quantità</td>
+                    <td><input type="number" data-taglia="XS" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="S" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="M" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="L" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="XL" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="XXL" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="3XL" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="4XL" min="0" value="0"></td>
+                </tr>
+            </tbody>
+        </table>
+      
+        <h3>Tabella Taglie: BAMBINO</h3>
+        <table class="taglie-table" data-genere="BAMBINO">
+            <thead>
+                <tr>
+                    <th>Taglia (anni)</th><th>3-4</th><th>5-6</th><th>7-8</th><th>9-11</th><th>12-14</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Quantità</td>
+                    <td><input type="number" data-taglia="3-4" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="5-6" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="7-8" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="9-11" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="12-14" min="0" value="0"></td>
+                </tr>
+            </tbody>
+        </table>
+      
+        <h3>Tabella Taglie: DONNA</h3>
+        <table class="taglie-table" data-genere="DONNA">
+            <thead>
+                <tr>
+                    <th>Taglia</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>XXL</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Quantità</td>
+                    <td><input type="number" data-taglia="XS" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="S" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="M" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="L" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="XL" min="0" value="0"></td>
+                    <td><input type="number" data-taglia="XXL" min="0" value="0"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+            <h3>Note Aggiuntive e Numeri:</h3>
+            <textarea id="basketNote" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;" placeholder="Es: Numeri davanti e dietro, Nome giocatore..."></textarea>
+        </div>
+      
+        <div class="upload" style="margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px;">
+            <div style="font-weight: 600; margin-bottom: 10px; color: #333;">Carica Logo / Grafica Basket (.PNG / .PDF):</div>
+            <div class="upload-box">
+                <p>Trascina o carica file</p>
+                <input type="file" id="basketFileUpload" />
+            </div>
+            <div id="basketUploadStatusBox" style="margin-top: 15px; background: #e9ecef; padding: 10px; border-radius: 8px; display: none;">
+                <div style="font-weight: 600;" id="basketUploadMessage">In attesa...</div>
+                <div style="height: 8px; background: #ccc; border-radius: 4px; margin-top: 5px;">
+                    <div id="basketUploadProgressBar" style="height: 100%; width: 0%; background: #007bff; border-radius: 4px; transition: width 0.3s;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; font-size: 1.2rem; font-weight: 600;">
+            Quantità Totale Pezzi: <span id="basketQtaTotale" style="color: #dc3545;">0</span>
+        </div>
+        <div style="margin-top: 5px; font-size: 1rem; font-weight: 500; color: #6c757d;">
+            Prezzo Unitario Base: <span id="basketPrezzoBase">€ 0.00</span> 
+            <span id="labelDoubleAttivo" style="display:none; color: #d63384; font-size: 0.9em;">(+ DOUBLE)</span>
+        </div>
+        <div style="font-size: 1.2rem; font-weight: 600; color: #007bff;">
+            Prezzo Totale (Netto IVA): <span id="basketPrezzoDinamico">€ 0.00</span>
+        </div>
+        
+        <button class="btn-add" id="aggiungiBasketBtn" style="margin-top: 20px;">Aggiungi Basket al Preventivo</button>
+    </div>
+    
+    <input type="hidden" id="basketPrezzoUnitarioBase" value="0">
+    <input type="hidden" id="basketCostoTotaleFinale" value="0.00">
+</section>
+
+
+
+
+
+
+
+
+
+
+
+      
       <input type="hidden" id="kitPrezzoUnitarioBase" value="0">
       <input type="hidden" id="kitCostoTotaleFinale" value="0.00"> 
       
