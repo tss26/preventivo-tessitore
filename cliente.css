@@ -384,12 +384,12 @@ body {
 }
 
 .banner-grid {
-    /* Layout a griglia 3 colonne */
+    /* Layout a griglia 4 colonne */
     display: grid;
     grid-template-columns: repeat(4, 1fr);/*impostato cosi vuol dire che ci sono 4 colonne per n righe*/
     gap: 1.5rem; /* Spazio tra i blocchi */
   /* --- MODIFICA per gestire la larghezza delle immagini  nel menu iniziale   --- */
-    max-width: 600px; 
+    max-width: 1000px; 
     margin: 0 auto;   /* Questo serve a centrare il blocco nella pagina */
 }
 
