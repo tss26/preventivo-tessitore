@@ -92,7 +92,34 @@ const LISTINO_COMPLETO = {
     // --- CONFIGURAZIONE DTF (NON la lista dei prezzi, che è in LISTINO_DTF_METRO) ---
     "DTF": {
         "LARGHEZZA_FISSA_CM": 60 // Per riferimento nei componenti
-    }
+    },
+
+
+    "KIT_BASKET": {
+        // Prezzi unitari Base
+        "PREZZI_FASCIA": {
+            "1_5":     { COMPLETINO: 35.00, CANOTTA_SOLA: 20.00, PANTALONCINO_SOLO: 18.00 },
+            "6_20":    { COMPLETINO: 32.00, CANOTTA_SOLA: 19.00, PANTALONCINO_SOLO: 16.00 },
+            "21_50":   { COMPLETINO: 29.00, CANOTTA_SOLA: 17.00, PANTALONCINO_SOLO: 14.00 },
+            "51_70":   { COMPLETINO: 27.00, CANOTTA_SOLA: 16.00, PANTALONCINO_SOLO: 13.00 },
+            "71_100":  { COMPLETINO: 25.00, CANOTTA_SOLA: 15.00, PANTALONCINO_SOLO: 12.00 },
+            "101_150": { COMPLETINO: 24.00, CANOTTA_SOLA: 14.00, PANTALONCINO_SOLO: 11.00 },
+            "151_200": { COMPLETINO: 23.00, CANOTTA_SOLA: 13.50, PANTALONCINO_SOLO: 10.50 },
+            "201_250": { COMPLETINO: 22.00, CANOTTA_SOLA: 13.00, PANTALONCINO_SOLO: 10.00 },
+            "251_350": { COMPLETINO: 21.00, CANOTTA_SOLA: 12.50, PANTALONCINO_SOLO: 9.50 },
+            "351_500": { COMPLETINO: 20.00, CANOTTA_SOLA: 12.00, PANTALONCINO_SOLO: 9.00 }
+        },
+        // Qui definisci la percentuale di aumento. 
+        // Es: Scrivi 40 per aumentare del 40%, 50 per il 50%, 100 per raddoppiare il prezzo.
+        "PERCENTUALE_DOUBLE": 40, 
+        "COSTO_GRAFICO": 20.00 
+    },
+
+
+
+
+
+    
  }; 
     
 // --- NUOVO LISTINO TIER PER DTF (MTR) ---
@@ -1685,6 +1712,41 @@ window.selezionaForma = function(formaNome) {
             }
         });
 
+
+
+// --- EVENT LISTENER BASKET ---
+// 1. Selezione Icone Basket
+document.querySelectorAll('#basketSelectionContainer .kit-item').forEach(button => {
+    button.addEventListener('click', (e) => {
+        document.querySelectorAll('#basketSelectionContainer .kit-item').forEach(btn => btn.classList.remove('active'));
+        const target = e.target.closest('.kit-item');
+        target.classList.add('active');
+        
+        document.getElementById('basketTaglieContainer').style.display = 'block';
+        document.getElementById('basketProdottoSelezionato').textContent = target.dataset.prodotto;
+        calcolaPrezzoDinamicoBasket();
+    });
+});
+
+// 2. Cambio Checkbox Double
+document.getElementById('checkBasketDouble').addEventListener('change', calcolaPrezzoDinamicoBasket);
+
+// 3. Input Quantità Basket
+document.querySelectorAll('#basketTaglieContainer input[type="number"]').forEach(input => {
+    input.addEventListener('input', calcolaPrezzoDinamicoBasket);
+});
+
+// 4. Bottone Aggiungi Basket
+document.getElementById('aggiungiBasketBtn').addEventListener('click', gestisciAggiuntaBasket);
+
+
+
+
+
+
+
+        
+
         aggiornaUIPreventivo();
         //NOTA: mostraVistaPreventivo() QUI E' STATA RIMOSSA PERCHE' GESTITA ALL'INIZIO
         calcolaPrezzoDinamico(); // Inizializza il prezzo dinamico all'avvio (Bandiere)
@@ -2126,7 +2188,186 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+// ===========================================
+// FUNZIONI PER IL BASKET (CON GESTIONE DOUBLE)
+// ===========================================
 
+function calcolaPrezzoDinamicoBasket() {
+    const prezzoDinamicoSpan = document.getElementById('basketPrezzoDinamico');
+    const qtaTotaleSpan = document.getElementById('basketQtaTotale');
+    const prezzoBaseSpan = document.getElementById('basketPrezzoBase');
+    const labelDouble = document.getElementById('labelDoubleAttivo');
+    const basketProdSelezionato = document.querySelector('#basketSelectionContainer .kit-item.active')?.dataset.prodotto;
+    const isDouble = document.getElementById('checkBasketDouble').checked;
+
+    if (!basketProdSelezionato || !prezzoDinamicoSpan) return;
+
+    // 1. Calcolo Quantità Totale
+    let qtaTotale = 0;
+    document.querySelectorAll('#basketTaglieContainer .taglie-table input[type="number"]').forEach(input => {
+        qtaTotale += parseInt(input.value) || 0;
+    });
+
+    if (qtaTotale === 0) {
+        prezzoDinamicoSpan.textContent = '€ 0.00';
+        qtaTotaleSpan.textContent = '0';
+        prezzoBaseSpan.textContent = '€ 0.00';
+        if(labelDouble) labelDouble.style.display = 'none';
+        return;
+    }
+
+    // 2. Trova Fascia e Prezzo Base dal Listino
+    const listinoBasket = LISTINO_COMPLETO.KIT_BASKET;
+    const fascia = FASCE_QUANTITA_KIT.find(f => qtaTotale <= f.max);
+    let prezzoUnitarioBase = 0;
+
+    if (fascia) {
+        const prezzi = listinoBasket.PREZZI_FASCIA[fascia.key];
+        if (basketProdSelezionato === 'COMPLETINO') prezzoUnitarioBase = prezzi.COMPLETINO;
+        else if (basketProdSelezionato === 'CANOTTA_SOLO') prezzoUnitarioBase = prezzi.CANOTTA_SOLA;
+        else if (basketProdSelezionato === 'PANTALONCINO_SOLO') prezzoUnitarioBase = prezzi.PANTALONCINO_SOLO;
+    }
+
+    // 3. CALCOLO INCREMENTO PERCENTUALE DOUBLE (Logica Modificata)
+    if (isDouble) {
+        // Calcola l'aumento in euro basato sulla percentuale
+        const percentuale = listinoBasket.PERCENTUALE_DOUBLE || 0; // Prende il valore (es. 40)
+        const incrementoEuro = prezzoUnitarioBase * (percentuale / 100);
+        
+        prezzoUnitarioBase += incrementoEuro;
+
+        // Aggiorna la scritta rossa (+ DOUBLE) per mostrare quanto aumenta
+        if(labelDouble) {
+            labelDouble.style.display = 'inline';
+            labelDouble.textContent = `(+ ${percentuale}% Double)`;
+        }
+    } else {
+        if(labelDouble) labelDouble.style.display = 'none';
+    }
+
+    // 4. Aggiorna UI e Input Nascosti
+    prezzoBaseSpan.textContent = `€ ${prezzoUnitarioBase.toFixed(2)}`;
+    
+    const costoTotale = qtaTotale * prezzoUnitarioBase;
+    
+    prezzoDinamicoSpan.textContent = `€ ${costoTotale.toFixed(2)}`;
+    qtaTotaleSpan.textContent = qtaTotale;
+    
+    // Salva i valori nei campi nascosti per il carrello
+    document.getElementById('basketPrezzoUnitarioBase').value = prezzoUnitarioBase.toFixed(2);
+    document.getElementById('basketCostoTotaleFinale').value = costoTotale.toFixed(2);
+}
+
+async function gestisciAggiuntaBasket() {
+    const qtaTotale = parseInt(document.getElementById('basketQtaTotale').textContent) || 0;
+    const prezzoBase = parseFloat(document.getElementById('basketPrezzoUnitarioBase').value) || 0;
+    const prodSel = document.querySelector('#basketSelectionContainer .kit-item.active')?.dataset.prodotto;
+    const isDouble = document.getElementById('checkBasketDouble').checked;
+    const note = document.getElementById('basketNote').value;
+    
+    if (!prodSel || qtaTotale === 0) {
+        alert("Seleziona un prodotto e inserisci le quantità.");
+        return;
+    }
+
+    // Gestione Taglie
+    let dettagliTaglie = {};
+    document.querySelectorAll('#basketTaglieContainer .taglie-table').forEach(table => {
+        const genere = table.dataset.genere;
+        dettagliTaglie[genere] = {};
+        table.querySelectorAll('input[type="number"]').forEach(inp => {
+            const val = parseInt(inp.value) || 0;
+            if (val > 0) dettagliTaglie[genere][inp.dataset.taglia] = val;
+        });
+        if (Object.keys(dettagliTaglie[genere]).length === 0) delete dettagliTaglie[genere];
+    });
+
+    // Costruzione Nome Prodotto
+    let nomeProdotto = `BASKET - ${prodSel}`;
+    if (isDouble) nomeProdotto += " (VERSIONE DOUBLE)";
+
+    // Gestione Upload (Semplificata)
+    const fileInput = document.getElementById('basketFileUpload');
+    let fileUrl = 'Nessun file caricato';
+    
+    // --- INIZIO CODICE AGGIUNTO ---
+    const fileToUpload = fileInput ? fileInput.files[0] : null; 
+    const uploadStatusBox = document.getElementById('basketUploadStatusBox');
+    const uploadMessage = document.getElementById('basketUploadMessage');
+    const uploadProgressBar = document.getElementById('basketUploadProgressBar');
+
+    // 1. Controllo Dimensione
+    const MAX_FILE_SIZE_MB = 5;
+    if (fileToUpload && fileToUpload.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+        alert(`Il file è troppo grande. Max ${MAX_FILE_SIZE_MB} MB.`);
+        fileInput.value = ''; 
+        return;
+    }
+
+    // 2. Logica Upload su Supabase
+    if (fileToUpload) {
+        const BUCKET_NAME = 'personalizzazioni'; 
+        
+        if (uploadStatusBox) {
+            uploadStatusBox.style.display = 'block';
+            uploadMessage.textContent = 'Caricamento grafica in corso...';
+            uploadProgressBar.style.width = '0%';
+            uploadProgressBar.style.backgroundColor = '#007bff';
+        }
+
+        try {
+            const extension = fileToUpload.name.split('.').pop();
+            // Nota: Uso prefisso BASKET nel nome file
+            const filePath = `${utenteCorrenteId}/BASKET-${Date.now()}-${Math.random().toString(36).substring(2)}.${extension}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from(BUCKET_NAME)
+                .upload(filePath, fileToUpload, { cacheControl: '3600', upsert: false });
+
+            if (uploadError) throw uploadError;
+
+            if (uploadProgressBar) uploadProgressBar.style.width = '100%';
+            if (uploadMessage) uploadMessage.textContent = '✅ File caricato.';
+
+            fileUrl = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath).data.publicUrl;
+
+            // Tracciamento scadenza file (72h)
+            const expirationTime = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
+            const { error: dbError } = await supabase
+                .from('temp_files')
+                .insert([{ storage_path: `${BUCKET_NAME}/${filePath}`, expires_at: expirationTime }]);
+
+            if (dbError) console.error("Errore tracciamento scadenza file", dbError);
+
+        } catch (e) {
+            console.error('Errore Upload Basket:', e.message);
+            alert(`Errore durante il caricamento del file: ${e.message}`);
+            if (uploadStatusBox) uploadStatusBox.style.display = 'none';
+            return; 
+        }
+    }
+    // --- FINE CODICE AGGIUNTO ---
+    
+    const nuovoArticolo = {
+        id_unico: Date.now(),
+        prodotto: nomeProdotto,
+        quantita: qtaTotale,
+        prezzo_unitario: prezzoBase,
+        note: note,
+        dettagli_taglie: dettagliTaglie,
+        componenti: isDouble ? ["Opzione Reversibile (Double) Inclusa"] : [],
+        personalizzazione_url: fileUrl 
+    };
+
+    aggiungiAlCarrello(nuovoArticolo);
+    alert(`Aggiunto ${nomeProdotto} al carrello!`);
+    
+    // Reset
+    document.getElementById('basketNote').value = '';
+    document.querySelectorAll('#basketTaglieContainer input').forEach(i => i.value = 0);
+    document.getElementById('checkBasketDouble').checked = false;
+    calcolaPrezzoDinamicoBasket();
+}
 
 
 
