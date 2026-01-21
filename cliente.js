@@ -1688,13 +1688,30 @@ window.selezionaForma = function(formaNome) {
         // 4. Listener per il pulsante "Bandiera Completa"
         document.getElementById('selezionaCompleto').addEventListener('click', (e) => {
             e.preventDefault();
-            
+
+           // SELEZIONIAMO SOLO I COMPONENTI STANDARD (Escludendo la BASE_RIEMPIBILE)
+            const checkboxesStandard = document.querySelectorAll('.componenti input[type="checkbox"]:not([disabled]):not([value="BASE_RIEMPIBILE"])');
+            
+            // Controlliamo se sono tutti checkati
+            const allChecked = Array.from(checkboxesStandard).every(cb => cb.checked);
+
+            // Invertiamo lo stato solo di quelli standard
+            checkboxesStandard.forEach(cb => {
+                cb.checked = !allChecked;
+            });
+            
+            // Nota: La "Base riempibile" non viene toccata da questo click.
+
+
+
+            
+            /*
             const checkboxes = document.querySelectorAll('.componenti input[type="checkbox"]:not([disabled])');
             const allChecked = Array.from(checkboxes).every(cb => cb.checked);
 
             checkboxes.forEach(cb => {
                 cb.checked = !allChecked;
-            });
+            });*/
 
              
             aggiornaUIPreventivo();
