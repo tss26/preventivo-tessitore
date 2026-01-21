@@ -878,8 +878,15 @@ async function gestisciAggiuntaKitCalcio() {
     });
     
     // --- 3. CREAZIONE OGGETTO CARRELLO ---
+    // *** NUOVO: Recupero il valore del radio button selezionato ***
+    // Cerca l'input selezionato, se non lo trova mette una stringa vuota di sicurezza
+    const tessutoRadio = document.querySelector('input[name="tessutoCalcio"]:checked');
+    const tessutoScelto = tessutoRadio ? tessutoRadio.value : "Tessuto Non Specificato";
+
+
+    
     // Traccia il costo impianto grafico come componente fisso
-    const componenti = [`Sublimazione`, `Costo Impianto Grafico (€${LISTINO_COMPLETO.KIT_CALCIO.COSTO_GRAFICO.toFixed(2)})`];
+    const componenti = [`Tessuto: ${tessutoScelto}`,`Sublimazione`, `Costo Impianto Grafico (€${LISTINO_COMPLETO.KIT_CALCIO.COSTO_GRAFICO.toFixed(2)})`];
 
     const nuovoArticolo = { 
         id_unico: Date.now(), 
@@ -903,6 +910,10 @@ async function gestisciAggiuntaKitCalcio() {
     // Reset dell'interfaccia dopo l'aggiunta 
     document.getElementById('kitNote').value = '';
     taglieTables.forEach(table => table.querySelectorAll('input[type="number"]').forEach(input => input.value = '0'));
+
+    // *** NUOVO: Reset del Radio Button su DRY (Default) ***
+    const radioDry = document.querySelector('input[name="tessutoCalcio"][value^="DRY"]');
+    if(radioDry) radioDry.checked = true;
     
     // Reset File e Progress Bar
     if (fileInput) fileInput.value = '';
