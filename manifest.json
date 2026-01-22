@@ -1,7 +1,7 @@
 {
-  "name": "Preventivo Abbigliamento",
-  "short_name": "Preventivo",
-  "start_url": "index.html",
+  "name": "Tessitore Preventivo",
+  "short_name": "Tessitore",
+  "start_url": "login.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#007bff",
