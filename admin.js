@@ -681,7 +681,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ===========================================
 
 let allUsers = []; 
-
+/*
 function showSection(sectionId) {
     document.querySelectorAll('.content-section').forEach(section => {
         section.style.display = 'none';
@@ -702,7 +702,23 @@ function showSection(sectionId) {
         caricaUtenti();
     }
 }
+*/
 
+//FUNZIONE SHOW SECTIONE MODIFICATA PER ANALISI --- quella di prima funzionava benissimo
+// Gestione classe active sui tab...
+    document.querySelectorAll('.tab-nav a').forEach(tab => tab.classList.remove('active'));
+    const activeTab = document.getElementById(sectionId + '-tab');
+    if (activeTab) activeTab.classList.add('active');
+
+    // CARICAMENTI DATI
+    if (sectionId === 'orders') {
+        caricaOrdini();
+    } else if (sectionId === 'users') {
+        caricaUtenti();
+    } else if (sectionId === 'stats') {  // <--- AGGIUNTA FONDAMENTALE
+        inizializzaStatistiche();
+    }
+}
 
 /**
  * 1. Recupera tutti gli utenti.
@@ -1240,3 +1256,202 @@ function esportaOrdineXLSX(ordineId) {
     XLSX.writeFile(wb, `${rifCliente}_Import.xlsx`, { bookType: 'xlsx', type: 'binary' });
 }
 
+
+
+// ===========================================
+// LOGICA STATISTICHE E BUSINESS INTELLIGENCE
+// ===========================================
+
+let myChartAndamento = null;
+let myChartTorta = null;
+
+async function inizializzaStatistiche() {
+    console.log("Inizializzazione statistiche...");
+    await popolaSelectClientiStats();
+    await aggiornaStatistiche();
+}
+
+/**
+ * 1. Popola il menu a tendina con tutti i clienti (per il filtro)
+ */
+async function popolaSelectClientiStats() {
+    const select = document.getElementById('statsSelectCliente');
+    if (select.options.length > 1) return; // Evita di ricaricare se già popolato
+
+    const { data: utenti, error } = await supabase
+        .from('utenti')
+        .select('id, ragione_sociale, email')
+        .order('ragione_sociale');
+
+    if (error) console.error("Errore loading utenti stats:", error);
+    else {
+        utenti.forEach(u => {
+            const option = document.createElement('option');
+            option.value = u.id;
+            option.textContent = u.ragione_sociale || u.email;
+            select.appendChild(option);
+        });
+    }
+}
+
+/**
+ * 2. Funzione Principale: Recupera dati, calcola KPI e disegna i grafici
+ */
+async function aggiornaStatistiche() {
+    const clienteId = document.getElementById('statsSelectCliente').value;
+    const anno = document.getElementById('statsSelectAnno').value;
+    
+    // Costruiamo la query su righe_statistiche
+    let query = supabase
+        .from('righe_statistiche')
+        .select('*');
+
+    // Filtro per Anno (su data_ordine)
+    const dataInizio = `${anno}-01-01T00:00:00`;
+    const dataFine = `${anno}-12-31T23:59:59`;
+    query = query.gte('data_ordine', dataInizio).lte('data_ordine', dataFine);
+
+    // Filtro per Cliente (se selezionato)
+    if (clienteId !== 'ALL') {
+        query = query.eq('user_id', clienteId);
+    }
+
+    const { data: righe, error } = await query;
+
+    if (error) {
+        alert("Errore caricamento statistiche: " + error.message);
+        return;
+    }
+
+    // --- ELABORAZIONE DATI ---
+    calcolaEKPI(righe);
+    disegnaGrafici(righe);
+    popolaTabellaDettaglio(righe);
+}
+
+/**
+ * 3. Calcola e mostra i numeri nei box colorati (KPI)
+ */
+function calcolaEKPI(righe) {
+    let fatturatoTotale = 0;
+    let ordiniSet = new Set(); // Set per contare ID ordini univoci
+    let categorieCount = {};
+
+    righe.forEach(r => {
+        fatturatoTotale += parseFloat(r.prezzo_totale || 0);
+        ordiniSet.add(r.ordine_id);
+        
+        // Conta categorie per la "Top Categoria"
+        const cat = r.categoria || 'Altro';
+        categorieCount[cat] = (categorieCount[cat] || 0) + parseFloat(r.prezzo_totale);
+    });
+
+    const numOrdini = ordiniSet.size;
+    const scontrinoMedio = numOrdini > 0 ? (fatturatoTotale / numOrdini) : 0;
+
+    // Trova la categoria top
+    let bestCat = "---";
+    let maxVal = 0;
+    for (const [cat, val] of Object.entries(categorieCount)) {
+        if (val > maxVal) { maxVal = val; bestCat = cat; }
+    }
+
+    // Aggiorna DOM
+    document.getElementById('kpiFatturato').innerText = `€ ${fatturatoTotale.toLocaleString('it-IT', {minimumFractionDigits: 2})}`;
+    document.getElementById('kpiOrdini').innerText = numOrdini;
+    document.getElementById('kpiMedio').innerText = `€ ${scontrinoMedio.toLocaleString('it-IT', {minimumFractionDigits: 2})}`;
+    document.getElementById('kpiBestCat').innerText = bestCat;
+}
+
+/**
+ * 4. Genera i grafici usando Chart.js
+ */
+function disegnaGrafici(righe) {
+    // A. Preparazione Dati Temporali (Mesi)
+    const datiMesi = Array(12).fill(0);
+    const labelsMesi = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
+
+    // B. Preparazione Dati Categorie
+    const datiCategorie = {};
+
+    righe.forEach(r => {
+        const data = new Date(r.data_ordine);
+        const meseIndex = data.getMonth(); // 0-11
+        datiMesi[meseIndex] += parseFloat(r.prezzo_totale);
+
+        const cat = r.categoria || 'Altro';
+        datiCategorie[cat] = (datiCategorie[cat] || 0) + parseFloat(r.prezzo_totale);
+    });
+
+    // --- GRAFICO ANDAMENTO (Linea) ---
+    const ctxAndamento = document.getElementById('chartAndamento').getContext('2d');
+    if (myChartAndamento) myChartAndamento.destroy(); // Distruggi vecchio grafico se esiste
+
+    myChartAndamento = new Chart(ctxAndamento, {
+        type: 'line',
+        data: {
+            labels: labelsMesi,
+            datasets: [{
+                label: 'Fatturato Mensile (€)',
+                data: datiMesi,
+                borderColor: '#007bff',
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: { responsive: true }
+    });
+
+    // --- GRAFICO CATEGORIE (Torta) ---
+    const ctxTorta = document.getElementById('chartTorta').getContext('2d');
+    if (myChartTorta) myChartTorta.destroy();
+
+    myChartTorta = new Chart(ctxTorta, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(datiCategorie),
+            datasets: [{
+                data: Object.values(datiCategorie),
+                backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796'],
+                hoverOffset: 4
+            }]
+        },
+        options: { responsive: true }
+    });
+}
+
+/**
+ * 5. Riempie la tabella in basso con i dettagli aggregati
+ */
+function popolaTabellaDettaglio(righe) {
+    const tbody = document.querySelector('#tabellaStatsBody tbody');
+    tbody.innerHTML = '';
+
+    // Aggreghiamo per Prodotto
+    const prodottiStats = {};
+
+    righe.forEach(r => {
+        const key = r.prodotto_nome || 'Prodotto generico';
+        if (!prodottiStats[key]) {
+            prodottiStats[key] = { qta: 0, totale: 0, cat: r.categoria };
+        }
+        prodottiStats[key].qta += r.quantita;
+        prodottiStats[key].totale += parseFloat(r.prezzo_totale);
+    });
+
+    // Ordina per Fatturato decrescente
+    const sortedProd = Object.entries(prodottiStats).sort((a, b) => b[1].totale - a[1].totale);
+
+    // Disegna righe (Top 50)
+    sortedProd.slice(0, 50).forEach(([nome, dati]) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><span class="badge-cat">${dati.cat}</span></td>
+            <td>${nome}</td>
+            <td style="text-align:center;">${dati.qta}</td>
+            <td style="text-align:right; font-weight:bold;">€ ${dati.totale.toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
