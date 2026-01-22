@@ -1522,7 +1522,186 @@ async function gestisciAggiuntaDTF() {
     document.getElementById('dtfCopie').value = '1';
     calcolaPrezzoDinamicoDTF(); 
 }
+//*** INZIO CODICE E FUNZIONI PER CALCOLO -----SCALDACOLLO-----
 
+// ===========================================
+// FUNZIONI PER LO SCALDACOLLO
+// ===========================================
+
+// LISTINO PREZZI (Definito in base alla tua richiesta)
+const LISTINO_SCALDACOLLO = {
+    "PILE": [
+        { max: 8, price: 6.00 },
+        { max: 30, price: 4.50 },
+        { max: 50, price: 3.90 },
+        { max: 100, price: 3.50 },
+        { max: 200, price: 3.00 },
+        { max: 300, price: 2.70 },
+        { max: 550, price: 2.50 },
+        { max: 999999, price: 2.50 }
+    ],
+    // Per Interlock: Minimo 25, Multipli di 25
+    "INTERLOCK": [
+        { max: 25, price: 3.50 },
+        { max: 50, price: 2.80 },
+        { max: 75, price: 2.50 },
+        { max: 100, price: 2.30 },
+        { max: 300, price: 2.25 },
+        { max: 999999, price: 2.15 }
+    ]
+};
+
+function calcolaPrezzoScaldacollo() {
+    const tessuto = document.querySelector('input[name="scaldacolloTessuto"]:checked').value;
+    const inputQta = document.getElementById('scaldacolloQta');
+    const hint = document.getElementById('scaldacolloHint');
+    
+    // Aggiornamento vincoli input in base al tessuto
+    if (tessuto === 'INTERLOCK') {
+        inputQta.min = 25;
+        inputQta.step = 25;
+        hint.textContent = "Minimo 25 pz - Solo multipli di 25 (es. 25, 50, 75...)";
+        // Se l'utente ha messo un numero non valido mentre cambiava tessuto, lo correggiamo visivamente (o lo lasciamo gestire alla validazione)
+        if (inputQta.value < 25) inputQta.value = 25;
+    } else {
+        inputQta.min = 1;
+        inputQta.step = 1;
+        hint.textContent = "Minimo 1 pz";
+    }
+
+    const qta = parseInt(inputQta.value) || 0;
+    
+    // Recupero Elementi UI Prezzi
+    const elUnitario = document.getElementById('scaldacolloPrezzoUnitario');
+    const elTotNetto = document.getElementById('scaldacolloTotaleNetto');
+    const elTotIvato = document.getElementById('scaldacolloTotaleIvato');
+
+    if (qta === 0) {
+        elUnitario.textContent = "€ 0.00";
+        elTotNetto.textContent = "€ 0.00";
+        elTotIvato.textContent = "€ 0.00";
+        return;
+    }
+
+    // Logica Prezzo
+    let prezzoUnitario = 0;
+    const fasce = LISTINO_SCALDACOLLO[tessuto];
+
+    // Trova la fascia corretta
+    const fasciaTrovata = fasce.find(f => qta <= f.max);
+    
+    if (fasciaTrovata) {
+        prezzoUnitario = fasciaTrovata.price;
+    } else {
+        // Fallback sull'ultima fascia se supera il max (gestito comunque dal 999999)
+        prezzoUnitario = fasce[fasce.length - 1].price;
+    }
+
+    const totaleNetto = qta * prezzoUnitario;
+    const totaleIvato = totaleNetto * 1.22; // IVA 22%
+
+    elUnitario.textContent = `€ ${prezzoUnitario.toFixed(2)}`;
+    elTotNetto.textContent = `€ ${totaleNetto.toFixed(2)}`;
+    elTotIvato.textContent = `€ ${totaleIvato.toFixed(2)}`;
+}
+
+async function gestisciAggiuntaScaldacollo() {
+    const tessuto = document.querySelector('input[name="scaldacolloTessuto"]:checked').value;
+    const qta = parseInt(document.getElementById('scaldacolloQta').value) || 0;
+    const note = document.getElementById('scaldacolloNote').value;
+    
+    // Validazione Specifica Interlock
+    if (tessuto === 'INTERLOCK') {
+        if (qta < 25 || qta % 25 !== 0) {
+            alert("Per il tessuto INTERLOCK la quantità deve essere almeno 25 e un multiplo di 25 (es. 25, 50, 75).");
+            return;
+        }
+    } else {
+        if (qta < 1) {
+            alert("Inserisci una quantità valida.");
+            return;
+        }
+    }
+
+    if (!utenteCorrenteId) {
+        alert("Utente non loggato.");
+        return;
+    }
+
+    // Gestione Upload (Simile alle altre funzioni)
+    const fileInput = document.getElementById('scaldacolloFileUpload');
+    const fileToUpload = fileInput.files[0];
+    const uploadStatusBox = document.getElementById('scaldacolloUploadStatusBox');
+    const uploadMessage = document.getElementById('scaldacolloUploadMessage');
+    const uploadProgressBar = document.getElementById('scaldacolloUploadProgressBar');
+    let fileUrl = 'Nessun file caricato';
+
+    // Controllo dimensione
+    if (fileToUpload && fileToUpload.size > 5 * 1024 * 1024) {
+        alert("File troppo grande (Max 5MB).");
+        return;
+    }
+
+    if (fileToUpload) {
+        const BUCKET_NAME = 'personalizzazioni';
+        if (uploadStatusBox) {
+            uploadStatusBox.style.display = 'block';
+            uploadProgressBar.style.width = '0%';
+        }
+
+        try {
+            const extension = fileToUpload.name.split('.').pop();
+            const filePath = `${utenteCorrenteId}/SCALDACOLLO-${Date.now()}.${extension}`;
+            
+            const { error: uploadError } = await supabase.storage
+                .from(BUCKET_NAME)
+                .upload(filePath, fileToUpload, { cacheControl: '3600', upsert: false });
+
+            if (uploadError) throw uploadError;
+
+            if (uploadProgressBar) uploadProgressBar.style.width = '100%';
+            if (uploadMessage) uploadMessage.textContent = '✅ File caricato.';
+
+            fileUrl = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath).data.publicUrl;
+            
+            // Tracciamento scadenza (Opzionale, copia dalle altre funzioni se necessario)
+             const expirationTime = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
+             await supabase.from('temp_files').insert([{ storage_path: `${BUCKET_NAME}/${filePath}`, expires_at: expirationTime }]);
+
+        } catch (e) {
+            console.error(e);
+            alert("Errore upload file: " + e.message);
+            if (uploadStatusBox) uploadStatusBox.style.display = 'none';
+            return;
+        }
+    }
+
+    // Recupero il prezzo unitario calcolato
+    const prezzoUnitarioText = document.getElementById('scaldacolloPrezzoUnitario').textContent.replace('€', '').trim();
+    const prezzoUnitario = parseFloat(prezzoUnitarioText) || 0;
+
+    const nuovoArticolo = {
+        id_unico: Date.now(),
+        prodotto: `SCALDACOLLO - ${tessuto}`,
+        quantita: qta,
+        prezzo_unitario: prezzoUnitario,
+        note: note,
+        componenti: [`Tessuto: ${tessuto}`, `Stampa Sublimatica`],
+        personalizzazione_url: fileUrl,
+        dettagli_taglie: {} // Vuoto per scaldacollo
+    };
+
+    aggiungiAlCarrello(nuovoArticolo);
+    alert(`Aggiunti ${qta} Scaldacollo (${tessuto}) al carrello!`);
+
+    // Reset
+    document.getElementById('scaldacolloNote').value = '';
+    if (fileInput) fileInput.value = '';
+    if (uploadStatusBox) setTimeout(() => { uploadStatusBox.style.display = 'none'; }, 2000);
+}
+
+
+//---- FINE SCALDACOLLO-----------------
 
 // ===========================================
 // INIZIALIZZAZIONE & EVENT LISTENERS
@@ -1788,7 +1967,31 @@ document.getElementById('aggiungiBasketBtn').addEventListener('click', gestisciA
             setupRigaEvents(primaRiga);
         }
         // --- FINE INTEGRAZIONE CONFIGURATORE ---
+
+
+        // --- LISTENER SCALDACOLLO ---
+        // 1. Cambio Tessuto (ricalcola e imposta vincoli)
+        document.querySelectorAll('input[name="scaldacolloTessuto"]').forEach(radio => {
+            radio.addEventListener('change', calcolaPrezzoScaldacollo);
+        });
+
+        // 2. Cambio Quantità
+        document.getElementById('scaldacolloQta').addEventListener('input', calcolaPrezzoScaldacollo);
+
+        // 3. Bottone Aggiungi
+        document.getElementById('aggiungiScaldacolloBtn').addEventListener('click', gestisciAggiuntaScaldacollo);
+
+        // 4. Bottone Info (Mostra/Nascondi)
+        document.getElementById('scaldacolloInfoIcon').addEventListener('click', () => {
+            const content = document.getElementById('scaldacolloInfoContent');
+            content.style.display = (content.style.display === 'none' || content.style.display === '') ? 'block' : 'none';
+        });
         
+        // Inizializza il calcolo all'avvio
+        calcolaPrezzoScaldacollo();
+
+
+       
     }
 });
 
