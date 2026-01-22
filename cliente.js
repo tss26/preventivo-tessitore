@@ -1289,6 +1289,13 @@ function mostraVistaOrdini() {
     // Nascondi galleria e carrello
     document.getElementById('galleriaView').style.display = 'none'; 
     document.getElementById('sezioneCarrello').style.display = 'none';
+
+    // 2. *** FIX CRITICO ***: Nascondi forzatamente TUTTE le singole sezioni prodotto
+    // Questo assicura che Shopper o Scaldacollo spariscano anche se sono fuori dal div galleria
+    const sezioni = document.querySelectorAll('.sezione-prodotto');
+    sezioni.forEach(s => {
+        s.style.display = 'none';
+    });
     
     // Mostra la sezione ordini
     document.getElementById('ordiniCliente').style.display = 'block'; 
