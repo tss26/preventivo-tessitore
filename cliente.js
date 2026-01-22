@@ -1703,6 +1703,194 @@ async function gestisciAggiuntaScaldacollo() {
 
 //---- FINE SCALDACOLLO-----------------
 
+
+//------- INIZIO SHOPPER---------------
+// ===========================================
+// FUNZIONI PER LE SHOPPER
+// ===========================================
+
+// LISTINO PREZZI DETTAGLIATO PER MATERIALE
+const LISTINO_SHOPPER = {
+    "POLIESTERE": [
+        { max: 10, price: 4.50 },
+        { max: 30, price: 3.90 },
+        { max: 50, price: 3.20 },
+        { max: 71, price: 2.99 },
+        { max: 100, price: 2.54 },
+        { max: 300, price: 2.34 },
+        { max: 500, price: 2.21 },
+        { max: 750, price: 2.10 },
+        { max: 3000, price: 1.95 },
+        { max: 999999, price: 1.80 }
+    ],
+    "TNT": [
+        { max: 10, price: 4.50 },
+        { max: 30, price: 3.50 },
+        { max: 50, price: 2.40 },
+        { max: 71, price: 2.20 },
+        { max: 100, price: 2.10 },
+        { max: 300, price: 1.99 },
+        { max: 500, price: 1.90 },
+        { max: 750, price: 1.80 },
+        { max: 1000, price: 1.75 },
+        { max: 999999, price: 1.70 }
+    ],
+    "GABARDINA": [
+        { max: 10, price: 5.50 },
+        { max: 30, price: 4.50 },
+        { max: 50, price: 3.50 },
+        { max: 71, price: 3.35 },
+        { max: 100, price: 3.10 },
+        { max: 300, price: 2.95 },
+        { max: 500, price: 2.50 },
+        { max: 750, price: 2.20 },
+        { max: 3000, price: 2.15 },
+        { max: 999999, price: 2.05 }
+    ]
+};
+
+function calcolaPrezzoShopper() {
+    // 1. Recupera il tessuto selezionato (POLIESTERE, GABARDINA o TNT)
+    const tessutoRadio = document.querySelector('input[name="shopperTessuto"]:checked');
+    const tessuto = tessutoRadio ? tessutoRadio.value : "POLIESTERE";
+    
+    // 2. Recupera quantità
+    const inputQta = document.getElementById('shopperQta');
+    const qta = parseInt(inputQta.value) || 0;
+    
+    // Elementi UI
+    const elUnitario = document.getElementById('shopperPrezzoUnitario');
+    const elTotNetto = document.getElementById('shopperTotaleNetto');
+    const elTotIvato = document.getElementById('shopperTotaleIvato');
+
+    // Minimo d'ordine 10
+    if (qta < 10) { 
+        elUnitario.textContent = "€ 0.00";
+        elTotNetto.textContent = "€ 0.00";
+        elTotIvato.textContent = "€ 0.00";
+        return;
+    }
+
+    // 3. Trova la lista prezzi specifica per il tessuto
+    const listinoSelezionato = LISTINO_SHOPPER[tessuto];
+    
+    // 4. Trova la fascia di prezzo corretta
+    let prezzoUnitario = 0;
+    const fascia = listinoSelezionato.find(f => qta <= f.max);
+    
+    if (fascia) {
+        prezzoUnitario = fascia.price;
+    } else {
+        // Fallback sull'ultimo prezzo se supera il massimo definito
+        prezzoUnitario = listinoSelezionato[listinoSelezionato.length - 1].price;
+    }
+
+    // 5. Calcoli Totali
+    const totaleNetto = qta * prezzoUnitario;
+    const totaleIvato = totaleNetto * 1.22; // IVA 22%
+
+    // 6. Aggiorna UI
+    elUnitario.textContent = `€ ${prezzoUnitario.toFixed(2)}`;
+    elTotNetto.textContent = `€ ${totaleNetto.toFixed(2)}`;
+    elTotIvato.textContent = `€ ${totaleIvato.toFixed(2)}`;
+}
+
+async function gestisciAggiuntaShopper() {
+    const tessuto = document.querySelector('input[name="shopperTessuto"]:checked').value;
+    const qta = parseInt(document.getElementById('shopperQta').value) || 0;
+    const note = document.getElementById('shopperNote').value;
+
+    if (qta < 10) {
+        alert("Il minimo ordinabile per le Shopper è di 10 pezzi.");
+        return;
+    }
+
+    if (!utenteCorrenteId) {
+        alert("Sessione scaduta o utente non loggato. Effettua il login.");
+        return;
+    }
+
+    // --- Gestione Upload ---
+    const fileInput = document.getElementById('shopperFileUpload');
+    const fileToUpload = fileInput.files[0];
+    const uploadStatusBox = document.getElementById('shopperUploadStatusBox');
+    const uploadMessage = document.getElementById('shopperUploadMessage');
+    const uploadProgressBar = document.getElementById('shopperUploadProgressBar');
+    let fileUrl = 'Nessun file caricato';
+
+    // Controllo Dimensione File
+    if (fileToUpload && fileToUpload.size > 5 * 1024 * 1024) {
+        alert("File troppo grande (Max 5MB).");
+        return;
+    }
+
+    if (fileToUpload) {
+        const BUCKET_NAME = 'personalizzazioni';
+        if (uploadStatusBox) {
+            uploadStatusBox.style.display = 'block';
+            uploadProgressBar.style.width = '0%';
+            uploadStatusBox.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        try {
+            const extension = fileToUpload.name.split('.').pop();
+            const filePath = `${utenteCorrenteId}/SHOPPER-${Date.now()}.${extension}`;
+            
+            const { error: uploadError } = await supabase.storage
+                .from(BUCKET_NAME)
+                .upload(filePath, fileToUpload, { cacheControl: '3600', upsert: false });
+
+            if (uploadError) throw uploadError;
+
+            if (uploadProgressBar) uploadProgressBar.style.width = '100%';
+            if (uploadMessage) uploadMessage.textContent = '✅ File caricato.';
+
+            fileUrl = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath).data.publicUrl;
+            
+            // Tracciamento scadenza nel DB
+            const expirationTime = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
+            await supabase.from('temp_files').insert([{ storage_path: `${BUCKET_NAME}/${filePath}`, expires_at: expirationTime }]);
+
+        } catch (e) {
+            console.error(e);
+            alert("Errore durante l'upload: " + e.message);
+            if (uploadStatusBox) uploadStatusBox.style.display = 'none';
+            return;
+        }
+    }
+
+    // Recupero Prezzo Calcolato dall'UI (che è stato aggiornato da calcolaPrezzoShopper)
+    const prezzoUnitarioText = document.getElementById('shopperPrezzoUnitario').textContent.replace('€', '').trim();
+    const prezzoUnitario = parseFloat(prezzoUnitarioText) || 0;
+
+    const nuovoArticolo = {
+        id_unico: Date.now(),
+        prodotto: `SHOPPER PERSONALIZZATA - ${tessuto}`,
+        quantita: qta,
+        prezzo_unitario: prezzoUnitario,
+        note: note,
+        componenti: [
+            `Materiale: ${tessuto}`,
+            `Dimensione: 38x42 cm (Manici Lunghi)`,
+            `Stampa Sublimatica`
+        ],
+        personalizzazione_url: fileUrl,
+        dettagli_taglie: {} 
+    };
+
+    aggiungiAlCarrello(nuovoArticolo);
+    alert(`Aggiunte ${qta} Shopper (${tessuto}) al preventivo!`);
+
+    // Reset Interfaccia
+    document.getElementById('shopperNote').value = '';
+    if (fileInput) fileInput.value = '';
+    if (uploadStatusBox) setTimeout(() => { uploadStatusBox.style.display = 'none'; }, 2000);
+}
+//------- FINE SHOPPER-------------------------
+
+
+
+
 // ===========================================
 // INIZIALIZZAZIONE & EVENT LISTENERS
 // ===========================================
@@ -1969,7 +2157,7 @@ document.getElementById('aggiungiBasketBtn').addEventListener('click', gestisciA
         // --- FINE INTEGRAZIONE CONFIGURATORE ---
 
 
-        // --- LISTENER SCALDACOLLO ---
+        // --- LISTENER SCALDACOLLO -----------------------------------------------------------------------------------
         // 1. Cambio Tessuto (ricalcola e imposta vincoli)
         document.querySelectorAll('input[name="scaldacolloTessuto"]').forEach(radio => {
             radio.addEventListener('change', calcolaPrezzoScaldacollo);
@@ -1989,6 +2177,28 @@ document.getElementById('aggiungiBasketBtn').addEventListener('click', gestisciA
         
         // Inizializza il calcolo all'avvio
         calcolaPrezzoScaldacollo();
+
+
+        // --- LISTENER SHOPPER --------------------------------------------------------------------------------------------------
+        // 1. Cambio Tessuto
+        document.querySelectorAll('input[name="shopperTessuto"]').forEach(radio => {
+            radio.addEventListener('change', calcolaPrezzoShopper);
+        });
+
+        // 2. Cambio Quantità
+        document.getElementById('shopperQta').addEventListener('input', calcolaPrezzoShopper);
+
+        // 3. Bottone Aggiungi
+        document.getElementById('aggiungiShopperBtn').addEventListener('click', gestisciAggiuntaShopper);
+
+        // 4. Info Box
+        document.getElementById('shopperInfoIcon').addEventListener('click', () => {
+            const content = document.getElementById('shopperInfoContent');
+            content.style.display = (content.style.display === 'none' || content.style.display === '') ? 'block' : 'none';
+        });
+
+        // Inizializza Calcolo
+        calcolaPrezzoShopper();
 
 
        
