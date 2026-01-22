@@ -123,6 +123,11 @@
            data-keywords="scaldacollo neck warmer pile interlock bandana inverno sport sci moto personalizzato bandana multiuso moto motore viaggio regalo economico sublimazione stampa all over intera elastico elastica scarf balaclava wristband hairband foulard">
             <img src="img/scaldacollo.jpeg" alt="Scaldacollo Personalizzato" onerror="this.src='https://placehold.co/400x300?text=Scaldacollo'"/>
         </a>
+      
+        <a href="javascript:void(0)" onclick="mostraSezione('shopperSection')" class="banner-item" 
+           data-keywords="shopper borsa spesa bag poliestere tnt gabardina fiera gadget 38x42 manici lunghi stampa sublimazione economico busta sacco">
+            <img src="img/shopper.png" alt="Shopper Personalizzate" onerror="this.src='https://placehold.co/400x300?text=Shopper'"/>
+        </a>
 
     </div>
 
@@ -648,6 +653,81 @@
             </div>
 
             <button class="btn-add" id="aggiungiScaldacolloBtn" style="margin-top: 20px; width: 100%; font-size: 1.1em;">AGGIUNGI AL PREVENTIVO</button>
+
+        </div>
+    </section>
+
+
+
+    <section class="galleria-blocco sezione-prodotto" id="shopperSection">
+        <h1>Shopper Personalizzate 38x42 cm (Sublimazione)</h1>
+        
+        <div style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            
+            <div style="margin-bottom: 20px;">
+                <span id="shopperInfoIcon" class="info-icon" style="cursor: pointer; background: #17a2b8; color: white; padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 0.9em;">
+                    ℹ️ INFO TESSUTI & DETTAGLI
+                </span>
+                <div id="shopperInfoContent" class="info-content" style="display: none; margin-top: 10px; background: #e3f2fd; padding: 15px; border-radius: 5px; border: 1px solid #b6d4fe; font-size: 0.9em;">
+                    <p><strong>Dimensioni:</strong> 38x42 cm con Manici Lunghi.</p>
+                    <hr>
+                    <p>⭐ <strong>BEST SELLER:</strong> Poliestere 160gr (Resistente e ottima resa cromatica).</p>
+                    <p>💰 <strong>ECONOMICA:</strong> TNT (Tessuto Non Tessuto).</p>
+                    <p>💎 <strong>PREMIUM:</strong> Gabardina di Poliestere (Tessuto pregiato e strutturato).</p>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: 600; display: block; margin-bottom: 10px;">Seleziona Materiale:</label>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        <input type="radio" name="shopperTessuto" value="POLIESTERE" checked style="transform: scale(1.2);">
+                        Poliestere 160gr
+                    </label>
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        <input type="radio" name="shopperTessuto" value="GABARDINA" style="transform: scale(1.2);">
+                        Gabardina (Premium)
+                    </label>
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        <input type="radio" name="shopperTessuto" value="TNT" style="transform: scale(1.2);">
+                        TNT (Economico)
+                    </label>
+                </div>
+            </div>
+
+            <div class="input-group" style="max-width: 200px; margin-bottom: 20px;">
+                <label for="shopperQta" style="font-weight: 600;">Quantità:</label>
+                <input type="number" id="shopperQta" value="10" min="10" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1.1em;">
+                <small style="color: #dc3545; display: block; margin-top: 5px; font-weight: 600;">Minimo ordinabile: 10 pezzi</small>
+            </div>
+
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; border: 1px solid #ddd; margin-bottom: 20px;">
+                <p style="margin: 5px 0;">Prezzo Netto Cadauno: <strong id="shopperPrezzoUnitario" style="font-size: 1.2em;">€ 0.00</strong></p>
+                <p style="margin: 5px 0;">Totale Imponibile (Netto): <strong id="shopperTotaleNetto" style="color: #007bff; font-size: 1.2em;">€ 0.00</strong></p>
+                <p style="margin: 5px 0; border-top: 1px solid #ccc; padding-top: 5px;">
+                    Totale Ivato (22%): <strong id="shopperTotaleIvato" style="color: #28a745; font-size: 1.4em;">€ 0.00</strong>
+                </p>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label for="shopperNote" style="font-weight: 600;">Note:</label>
+                <textarea id="shopperNote" rows="2" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" placeholder="Es: Grafica fronte/retro uguale..."></textarea>
+            </div>
+
+            <div class="upload">
+                <div class="upload-box">
+                    <p>Trascina o carica grafica Shopper (.PDF / .PNG)</p>
+                    <input type="file" id="shopperFileUpload" />
+                </div>
+                <div id="shopperUploadStatusBox" style="margin-top: 15px; background: #e9ecef; padding: 10px; border-radius: 8px; display: none;">
+                    <div style="font-weight: 600;" id="shopperUploadMessage">In attesa...</div>
+                    <div style="height: 8px; background: #ccc; border-radius: 4px; margin-top: 5px;">
+                        <div id="shopperUploadProgressBar" style="height: 100%; width: 0%; background: #007bff; border-radius: 4px; transition: width 0.3s;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-add" id="aggiungiShopperBtn" style="margin-top: 20px; width: 100%; font-size: 1.1em;">AGGIUNGI SHOPPER AL PREVENTIVO</button>
 
         </div>
     </section>
