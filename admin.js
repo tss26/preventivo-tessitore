@@ -680,8 +680,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 // FUNZIONALITÀ UTENTI E PERMESSI
 // ===========================================
 
-let allUsers = []; 
-/*
+/*let allUsers = []; 
+
 function showSection(sectionId) {
     document.querySelectorAll('.content-section').forEach(section => {
         section.style.display = 'none';
@@ -704,18 +704,33 @@ function showSection(sectionId) {
 }
 */
 
-//FUNZIONE SHOW SECTIONE MODIFICATA PER ANALISI --- quella di prima funzionava benissimo
-// Gestione classe active sui tab...
+// ===========================================
+// FUNZIONALITÀ UTENTI E PERMESSI
+// ===========================================
+
+let allUsers = []; 
+
+function showSection(sectionId) {
+    // 1. Nascondi TUTTE le sezioni
+    document.querySelectorAll('.content-section').forEach(section => {
+        section.style.display = 'none';
+    });
+
+    // 2. Mostra la sezione richiesta
+    const targetSection = document.getElementById(sectionId + '-section');
+    if (targetSection) targetSection.style.display = 'block';
+
+    // 3. Gestione classe active sui tab
     document.querySelectorAll('.tab-nav a').forEach(tab => tab.classList.remove('active'));
     const activeTab = document.getElementById(sectionId + '-tab');
     if (activeTab) activeTab.classList.add('active');
 
-    // CARICAMENTI DATI
+    // 4. CARICAMENTI DATI SPECIFICI
     if (sectionId === 'orders') {
         caricaOrdini();
     } else if (sectionId === 'users') {
         caricaUtenti();
-    } else if (sectionId === 'stats') {  // <--- AGGIUNTA FONDAMENTALE
+    } else if (sectionId === 'stats') {  // <--- NUOVA SEZIONE ANALISI
         inizializzaStatistiche();
     }
 }
