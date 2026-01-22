@@ -1311,20 +1311,40 @@ async function popolaSelectClientiStats() {
 
 /**
  * 2. Funzione Principale: Recupera dati, calcola KPI e disegna i grafici
+ * (AGGIORNATA: Filtro per range di date specifico)
  */
 async function aggiornaStatistiche() {
     const clienteId = document.getElementById('statsSelectCliente').value;
-    const anno = document.getElementById('statsSelectAnno').value;
+    
+    // Recuperiamo le date dai nuovi input
+    const dataInizioVal = document.getElementById('statsDataInizio').value;
+    const dataFineVal = document.getElementById('statsDataFine').value;
+
+    // Se le date non sono selezionate, impostiamo l'anno corrente come default
+    let filtroStart, filtroEnd;
+    
+    if (dataInizioVal && dataFineVal) {
+        filtroStart = `${dataInizioVal}T00:00:00`;
+        filtroEnd = `${dataFineVal}T23:59:59`;
+    } else {
+        // Default: Anno corrente intero
+        const annoCorrente = new Date().getFullYear();
+        filtroStart = `${annoCorrente}-01-01T00:00:00`;
+        filtroEnd = `${annoCorrente}-12-31T23:59:59`;
+        
+        // Aggiorniamo visivamente gli input per chiarezza
+        if(document.getElementById('statsDataInizio')) 
+            document.getElementById('statsDataInizio').value = `${annoCorrente}-01-01`;
+        if(document.getElementById('statsDataFine')) 
+            document.getElementById('statsDataFine').value = `${annoCorrente}-12-31`;
+    }
     
     // Costruiamo la query su righe_statistiche
     let query = supabase
         .from('righe_statistiche')
-        .select('*');
-
-    // Filtro per Anno (su data_ordine)
-    const dataInizio = `${anno}-01-01T00:00:00`;
-    const dataFine = `${anno}-12-31T23:59:59`;
-    query = query.gte('data_ordine', dataInizio).lte('data_ordine', dataFine);
+        .select('*')
+        .gte('data_ordine', filtroStart) // Maggiore o uguale data inizio
+        .lte('data_ordine', filtroEnd);  // Minore o uguale data fine
 
     // Filtro per Cliente (se selezionato)
     if (clienteId !== 'ALL') {
@@ -1343,7 +1363,6 @@ async function aggiornaStatistiche() {
     disegnaGrafici(righe);
     popolaTabellaDettaglio(righe);
 }
-
 /**
  * 3. Calcola e mostra i numeri nei box colorati (KPI)
  */
