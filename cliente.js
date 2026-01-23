@@ -954,6 +954,9 @@ async function gestisciAggiuntaKitCalcio() {
 // ===========================================
 
 let ordiniCaricatiLocali = []; // Variabile globale per salvare i dati
+// *** Variabili paginazione cliente ***
+let paginaCorrenteCliente = 1;
+let cacheOrdiniCliente = [];
 
 // 1. CARICAMENTO DATI (Sostituisce la tua vecchia funzione)
 async function caricaMieiOrdini() {
@@ -1030,10 +1033,23 @@ function applicaFiltriCliente() {
     renderOrdiniCliente(ordiniFiltrati);
 }
 
+
+
+// -----Funzione globale cambio pagina cliente----
+window.cambiaPaginaCliente = function(delta) {
+    paginaCorrenteCliente += delta;
+    renderOrdiniCliente(cacheOrdiniCliente, true);
+};
+
 // 3. FUNZIONE DI DISEGNO TABELLA (Nuova)
-function renderOrdiniCliente(ordiniDaMostrare) {
+function renderOrdiniCliente(ordiniDaMostrare, mantieniPagina = false) {
     const container = document.getElementById('ordiniListaCliente');
     
+    if (!mantieniPagina) {
+        cacheOrdiniCliente = ordiniDaMostrare;
+        paginaCorrenteCliente = 1;
+    }
+
     if (ordiniDaMostrare.length === 0) {
         container.innerHTML = '<p style="text-align:center; padding:20px;">Nessun ordine trovato con i filtri selezionati.</p>';
         return;
@@ -1051,11 +1067,16 @@ function renderOrdiniCliente(ordiniDaMostrare) {
                     <th>Dettagli</th>
                 </tr>
             </thead>
-            <tbody>`;
+           <tbody>`;
     
-    ordiniDaMostrare.forEach(ordine => {
-        const numeroOrdine = ordine.num_ordine_prog || ordine.id.substring(0, 30).toUpperCase();
+    // Paginazione Cliente (30 items)
+    const inizio = (paginaCorrenteCliente - 1) * 30;
+    const fine = inizio + 30;
+    const ordiniPagina = ordiniDaMostrare.slice(inizio, fine);
 
+    ordiniPagina.forEach(ordine => {
+        const numeroOrdine = ordine.num_ordine_prog || ordine.id.substring(0, 8).toUpperCase();
+            
         // Estrazione del Riferimento
         let riferimentoCliente = "---";
         if (ordine.dettagli_prodotti && Array.isArray(ordine.dettagli_prodotti)) {
@@ -1081,6 +1102,16 @@ function renderOrdiniCliente(ordiniDaMostrare) {
     });
     
     html += '</tbody></table></div>';
+
+    // *** MODIFICA QUI: Bottoni Paginazione Cliente ***
+    const totPagine = Math.ceil(ordiniDaMostrare.length / 30);
+    html += `
+    <div style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-top: 15px;">
+        <button onclick="cambiaPaginaCliente(-1)" class="btn-secondary" ${paginaCorrenteCliente === 1 ? 'disabled' : ''} style="padding: 8px 15px;">⬅️ Indietro</button>
+        <span style="font-weight: 600;">Pagina ${paginaCorrenteCliente} di ${totPagine || 1}</span>
+        <button onclick="cambiaPaginaCliente(1)" class="btn-secondary" ${paginaCorrenteCliente >= totPagine ? 'disabled' : ''} style="padding: 8px 15px;">Avanti ➡️</button>
+    </div>`;
+
     container.innerHTML = html;
 }
 
