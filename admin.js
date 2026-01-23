@@ -105,6 +105,10 @@ function renderOrderList(ordiniDaVisualizzare) {
         <table><thead><tr>
         <th>N. Ordine</th><th>Account</th><th>Riferimento</th><th>P. IVA</th><th>Data</th><th>Totale</th><th>Stato</th><th>Note</th><th>Azioni</th>
         </tr></thead><tbody>`;
+
+    // MODIFICA QUI: Aggiunto .slice(0, 30) prima del forEach
+    ordiniDaVisualizzare.slice(0, 30).forEach(ordine => {
+        const dettagliProdotti = JSON.stringify(ordine.dettagli_prodotti).replace(/"/g, '&quot;');
     
     ordiniDaVisualizzare.forEach(ordine => {
         const dettagliProdotti = JSON.stringify(ordine.dettagli_prodotti).replace(/"/g, '&quot;');
@@ -1477,8 +1481,8 @@ function popolaTabellaDettaglio(righe) {
     // Ordina per Fatturato decrescente
     const sortedProd = Object.entries(prodottiStats).sort((a, b) => b[1].totale - a[1].totale);
 
-    // Disegna righe (Top 50)
-    sortedProd.slice(0, 50).forEach(([nome, dati]) => {
+    // Disegna righe (Top 30)
+    sortedProd.slice(0, 30).forEach(([nome, dati]) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><span class="badge-cat">${dati.cat}</span></td>
