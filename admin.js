@@ -1390,6 +1390,7 @@ async function aggiornaStatistiche() {
     // --- ELABORAZIONE DATI ---
     calcolaEKPI(righe);
     disegnaGrafici(righe);
+    generareRiepilogoCategorie(righe);
     popolaTabellaDettaglio(righe);
 }
 /**
@@ -1483,6 +1484,93 @@ function disegnaGrafici(righe) {
         options: { responsive: true }
     });
 }
+
+
+
+/**
+ * NUOVA FUNZIONE: Genera i box con il riepilogo quantità e ordini per categoria
+ * Con dettaglio specifico per le forme delle bandiere.
+ */
+function generareRiepilogoCategorie(righe) {
+    const container = document.getElementById('containerRiepilogoCat');
+    if (!container) return;
+    container.innerHTML = ''; // Pulisci
+
+    // 1. Struttura dati per aggregazione
+    // Oggetto: { "NOME_CAT": { pezzi: 0, ordiniSet: Set(), dettagli: {} } }
+    const aggregato = {};
+
+    righe.forEach(r => {
+        // Normalizza la categoria
+        let cat = r.categoria || 'ALTRO';
+        
+        // Fix per Scaldacollo se non categorizzato dal DB
+        if ((r.prodotto_nome || '').toUpperCase().includes('SCALDACOLLO')) cat = 'SCALDACOLLO';
+
+        if (!aggregato[cat]) {
+            aggregato[cat] = { 
+                pezzi: 0, 
+                ordiniSet: new Set(), // Set per contare ID univoci degli ordini
+                dettagli: {} // Per sottotipi (es. forme bandiere)
+            };
+        }
+
+        // Somma Pezzi
+        aggregato[cat].pezzi += r.quantita;
+        // Aggiungi ID ordine al Set (evita duplicati se un ordine ha 2 righe della stessa categoria)
+        aggregato[cat].ordiniSet.add(r.ordine_id);
+
+        // --- LOGICA SPECIFICA PER LE BANDIERE ---
+        if (cat === 'BANDIERE') {
+            const nomeProd = (r.prodotto_nome || '').toUpperCase();
+            let tipo = 'Altro';
+            if (nomeProd.includes('GOCCIA')) tipo = 'Goccia';
+            else if (nomeProd.includes('VELA')) tipo = 'Vela';
+            else if (nomeProd.includes('CRESTA') || nomeProd.includes('CREST')) tipo = 'Cresta';
+            else if (nomeProd.includes('RETTANGOLARE') || nomeProd.includes('RECTANGULAR')) tipo = 'Rettangolare';
+            else if (nomeProd.includes('SQUALO')) tipo = 'Squalo';
+
+            if (!aggregato[cat].dettagli[tipo]) aggregato[cat].dettagli[tipo] = 0;
+            aggregato[cat].dettagli[tipo] += r.quantita;
+        }
+    });
+
+    // 2. Generazione HTML
+    // Ordina le categorie per numero di pezzi decrescente
+    const categorieOrdinate = Object.entries(aggregato).sort((a, b) => b[1].pezzi - a[1].pezzi);
+
+    categorieOrdinate.forEach(([catNome, dati]) => {
+        const numOrdini = dati.ordiniSet.size;
+        
+        // Creazione Card
+        const card = document.createElement('div');
+        card.style.cssText = "background: #fff; padding: 15px; border-radius: 8px; border-left: 4px solid #007bff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-size: 0.9em;";
+        
+        let htmlDettagli = '';
+        
+        // Se ci sono dettagli (es. Bandiere), costruisci la lista
+        if (Object.keys(dati.dettagli).length > 0) {
+            htmlDettagli += `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #eee; font-size: 0.85em; color: #666;">`;
+            for (const [tipo, qta] of Object.entries(dati.dettagli)) {
+                htmlDettagli += `<div style="display:flex; justify-content:space-between;"><span>• ${tipo}</span> <strong>${qta} pz</strong></div>`;
+            }
+            htmlDettagli += `</div>`;
+        }
+
+        card.innerHTML = `
+            <div style="font-weight: bold; color: #333; margin-bottom: 5px; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px;">${catNome}</div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                <span style="font-size: 1.4rem; font-weight: 700; color: #007bff;">${dati.pezzi} <span style="font-size:0.6em; font-weight:normal; color:#666;">pz</span></span>
+                <span style="font-size: 0.9rem; color: #555;">in <strong>${numOrdini}</strong> ordini</span>
+            </div>
+            ${htmlDettagli}
+        `;
+
+        container.appendChild(card);
+    });
+}
+
+
 
 /**
  * 5. Riempie la tabella in basso con i dettagli aggregati
