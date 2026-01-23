@@ -20,6 +20,9 @@ if (!supabase) {
 
 // VARIABILE GLOBALE PER IL FILTRAGGIO
 let allOrders = []; 
+// *** MODIFICA QUI: Variabili per la paginazione ***
+let paginaCorrenteAdmin = 1;
+let ordiniFiltratiCache = [];
 
 // ===========================================
 // FUNZIONI DI BASE ADMIN (Corrette con 'permessi')
@@ -92,25 +95,37 @@ async function caricaOrdini() {
 /**
  * Funzione di utilità per disegnare la tabella degli ordini
  */
-function renderOrderList(ordiniDaVisualizzare) { 
+// Funzione globale per cambiare pagina
+window.cambiaPaginaAdmin = function(delta) {
+    paginaCorrenteAdmin += delta;
+    renderOrderList(ordiniFiltratiCache, true); // true = non resettare la pagina
+};
+
+function renderOrderList(ordiniDaVisualizzare, mantieniPagina = false) { 
     const container = document.getElementById('ordiniLista');
     
+    // Se è una nuova ricerca (non un cambio pagina), salviamo i dati e resettiamo a pag 1
+    if (!mantieniPagina) {
+        ordiniFiltratiCache = ordiniDaVisualizzare;
+        paginaCorrenteAdmin = 1;
+    }
+
     if (ordiniDaVisualizzare.length === 0) {
         container.innerHTML = '<h2>Nessun ordine trovato con i filtri applicati.</h2>';
         return;
     }
 
-    // Header Tabella
-    let html = `<div class="admin-table">
+   let html = `<div class="admin-table">
         <table><thead><tr>
         <th>N. Ordine</th><th>Account</th><th>Riferimento</th><th>P. IVA</th><th>Data</th><th>Totale</th><th>Stato</th><th>Note</th><th>Azioni</th>
         </tr></thead><tbody>`;
-
-    // MODIFICA QUI: Aggiunto .slice(0, 30) prima del forEach
-    ordiniDaVisualizzare.slice(0, 30).forEach(ordine => {
-        const dettagliProdotti = JSON.stringify(ordine.dettagli_prodotti).replace(/"/g, '&quot;');
     
-    ordiniDaVisualizzare.forEach(ordine => {
+    // Calcolo indici per la paginazione (30 per pagina)
+    const inizio = (paginaCorrenteAdmin - 1) * 30;
+    const fine = inizio + 30;
+    const ordiniPagina = ordiniDaVisualizzare.slice(inizio, fine);
+
+    ordiniPagina.forEach(ordine => {
         const dettagliProdotti = JSON.stringify(ordine.dettagli_prodotti).replace(/"/g, '&quot;');
         
         // Calcolo del numero ordine leggibile
@@ -183,6 +198,16 @@ function renderOrderList(ordiniDaVisualizzare) {
     });
     
     html += '</tbody></table></div>';
+
+    // *** MODIFICA QUI: Aggiunta Bottoni Paginazione ***
+    const totPagine = Math.ceil(ordiniDaVisualizzare.length / 30);
+    html += `
+    <div style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-top: 15px;">
+        <button onclick="cambiaPaginaAdmin(-1)" class="btn-secondary" ${paginaCorrenteAdmin === 1 ? 'disabled' : ''} style="padding: 5px 15px;">⬅️ Precedenti</button>
+        <span style="font-weight: bold;">Pagina ${paginaCorrenteAdmin} di ${totPagine || 1} (Tot. ${ordiniDaVisualizzare.length} ordini)</span>
+        <button onclick="cambiaPaginaAdmin(1)" class="btn-secondary" ${paginaCorrenteAdmin >= totPagine ? 'disabled' : ''} style="padding: 5px 15px;">Successivi ➡️</button>
+    </div>`;
+
     container.innerHTML = html;
     
     document.querySelectorAll('.stato-select').forEach(select => {
