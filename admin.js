@@ -176,7 +176,7 @@ function renderOrderList(ordiniDaVisualizzare, mantieniPagina = false) {
                 <td>
                     <div id="nota-preview-${ordine.id}" 
          style="cursor:pointer; max-width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#007bff; text-decoration:underline; font-size: 0.85em;"
-         onclick="apriModaleNotaAdmin('${ordine.id}', \`${(ordine.note_condivise || '').replace(/`/g, '\\`').replace(/\n/g, '\\n')}\`)">
+         onclick="apriModaleNotaAdmin('${ordine.id}', \`${(ordine.note_condivise || '').replace(/\`/g, '\\`').replace(/\n/g, '\\n')}\`)">
         ${ordine.note_condivise ? ordine.note_condivise : '➕'}
                     </div>
                 </td>
