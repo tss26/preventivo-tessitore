@@ -1054,7 +1054,7 @@ function renderOrdiniCliente(ordiniDaMostrare) {
             <tbody>`;
     
     ordiniDaMostrare.forEach(ordine => {
-        const numeroOrdine = ordine.num_ordine_prog || ordine.id.substring(0, 8).toUpperCase();
+        const numeroOrdine = ordine.num_ordine_prog || ordine.id.substring(0, 30).toUpperCase();
 
         // Estrazione del Riferimento
         let riferimentoCliente = "---";
