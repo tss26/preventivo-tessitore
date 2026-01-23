@@ -1489,7 +1489,7 @@ function disegnaGrafici(righe) {
 
 /**
  * NUOVA FUNZIONE: Genera i box con il riepilogo quantità e ordini per categoria
- * Con dettaglio specifico per le forme delle bandiere.
+ * Con dettaglio specifico per Bandiere e Abbigliamento Sport.
  */
 function generareRiepilogoCategorie(righe) {
     const container = document.getElementById('containerRiepilogoCat');
@@ -1497,38 +1497,56 @@ function generareRiepilogoCategorie(righe) {
     container.innerHTML = ''; // Pulisci
 
     // 1. Struttura dati per aggregazione
-    // Oggetto: { "NOME_CAT": { pezzi: 0, ordiniSet: Set(), dettagli: {} } }
     const aggregato = {};
 
     righe.forEach(r => {
         // Normalizza la categoria
         let cat = r.categoria || 'ALTRO';
+        const nomeProd = (r.prodotto_nome || '').toUpperCase();
         
         // Fix per Scaldacollo se non categorizzato dal DB
-        if ((r.prodotto_nome || '').toUpperCase().includes('SCALDACOLLO')) cat = 'SCALDACOLLO';
+        if (nomeProd.includes('SCALDACOLLO')) cat = 'SCALDACOLLO';
 
         if (!aggregato[cat]) {
             aggregato[cat] = { 
                 pezzi: 0, 
-                ordiniSet: new Set(), // Set per contare ID univoci degli ordini
-                dettagli: {} // Per sottotipi (es. forme bandiere)
+                ordiniSet: new Set(), 
+                dettagli: {} 
             };
         }
 
-        // Somma Pezzi
+        // Somma Pezzi e traccia Ordine
         aggregato[cat].pezzi += r.quantita;
-        // Aggiungi ID ordine al Set (evita duplicati se un ordine ha 2 righe della stessa categoria)
         aggregato[cat].ordiniSet.add(r.ordine_id);
 
-        // --- LOGICA SPECIFICA PER LE BANDIERE ---
+        // --- LOGICA A: BANDIERE ---
         if (cat === 'BANDIERE') {
-            const nomeProd = (r.prodotto_nome || '').toUpperCase();
             let tipo = 'Altro';
             if (nomeProd.includes('GOCCIA')) tipo = 'Goccia';
             else if (nomeProd.includes('VELA')) tipo = 'Vela';
             else if (nomeProd.includes('CRESTA') || nomeProd.includes('CREST')) tipo = 'Cresta';
-            else if (nomeProd.includes('RETTANGOLARE') || nomeProd.includes('RECTANGULAR')) tipo = 'Rettangolare';
-            else if (nomeProd.includes('SQUALO')) tipo = 'Squalo';
+            else if (nomeProd.includes('RETTANGOLARE')) tipo = 'Rettangolare';
+            
+            if (!aggregato[cat].dettagli[tipo]) aggregato[cat].dettagli[tipo] = 0;
+            aggregato[cat].dettagli[tipo] += r.quantita;
+        }
+
+        // --- LOGICA B: ABBIGLIAMENTO SPORT (Nuova!) ---
+        else if (cat === 'ABBIGLIAMENTO SPORT') {
+            let tipo = 'Altro Sport';
+
+            // Logica CALCIO
+            if (nomeProd.includes('CALCIO')) {
+                if (nomeProd.includes('COMPLETINO')) tipo = 'Completo Calcio';
+                else if (nomeProd.includes('T-SHIRT') || nomeProd.includes('MAGLIA')) tipo = 'Solo Maglia Calcio';
+                else if (nomeProd.includes('PANTALONCINO') || nomeProd.includes('PANT')) tipo = 'Solo Pant. Calcio';
+            }
+            // Logica BASKET
+            else if (nomeProd.includes('BASKET')) {
+                if (nomeProd.includes('COMPLETINO')) tipo = 'Completo Basket';
+                else if (nomeProd.includes('CANOTTA')) tipo = 'Solo Canotta Basket';
+                else if (nomeProd.includes('PANTALONCINO') || nomeProd.includes('PANT')) tipo = 'Solo Pant. Basket';
+            }
 
             if (!aggregato[cat].dettagli[tipo]) aggregato[cat].dettagli[tipo] = 0;
             aggregato[cat].dettagli[tipo] += r.quantita;
@@ -1536,7 +1554,6 @@ function generareRiepilogoCategorie(righe) {
     });
 
     // 2. Generazione HTML
-    // Ordina le categorie per numero di pezzi decrescente
     const categorieOrdinate = Object.entries(aggregato).sort((a, b) => b[1].pezzi - a[1].pezzi);
 
     categorieOrdinate.forEach(([catNome, dati]) => {
@@ -1548,11 +1565,18 @@ function generareRiepilogoCategorie(righe) {
         
         let htmlDettagli = '';
         
-        // Se ci sono dettagli (es. Bandiere), costruisci la lista
+        // Se ci sono dettagli, costruisci la lista
         if (Object.keys(dati.dettagli).length > 0) {
             htmlDettagli += `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #eee; font-size: 0.85em; color: #666;">`;
-            for (const [tipo, qta] of Object.entries(dati.dettagli)) {
-                htmlDettagli += `<div style="display:flex; justify-content:space-between;"><span>• ${tipo}</span> <strong>${qta} pz</strong></div>`;
+            
+            // Ordina i dettagli per quantità decrescente
+            const dettagliOrdinati = Object.entries(dati.dettagli).sort((a, b) => b[1] - a[1]);
+            
+            for (const [tipo, qta] of dettagliOrdinati) {
+                htmlDettagli += `<div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                    <span>• ${tipo}</span> 
+                    <strong>${qta} pz</strong>
+                </div>`;
             }
             htmlDettagli += `</div>`;
         }
@@ -1560,7 +1584,7 @@ function generareRiepilogoCategorie(righe) {
         card.innerHTML = `
             <div style="font-weight: bold; color: #333; margin-bottom: 5px; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px;">${catNome}</div>
             <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                <span style="font-size: 1.4rem; font-weight: 700; color: #007bff;">${dati.pezzi} <span style="font-size:0.6em; font-weight:normal; color:#666;">pz</span></span>
+                <span style="font-size: 1.4rem; font-weight: 700; color: #007bff;">${dati.pezzi} <span style="font-size:0.6em; font-weight:normal; color:#666;">pz tot</span></span>
                 <span style="font-size: 0.9rem; color: #555;">in <strong>${numOrdini}</strong> ordini</span>
             </div>
             ${htmlDettagli}
@@ -1569,7 +1593,6 @@ function generareRiepilogoCategorie(righe) {
         container.appendChild(card);
     });
 }
-
 
 
 /**
