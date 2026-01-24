@@ -26,18 +26,13 @@ let utenteCorrenteId = null; 
 let carrello = JSON.parse(localStorage.getItem('carrello')) || [];
 
 // Fasce di quantità per il listino Kit Calcio (Totale Pezzi)
-const FASCE_QUANTITA_KIT = [
-    { max: 5, key: "1_5" },
-    { max: 20, key: "6_20" },
-    { max: 50, key: "21_50" },
-    { max: 70, key: "51_70" },
-    { max: 100, key: "71_100" },
-    { max: 150, key: "101_150" },
-    { max: 200, key: "151_200" },
-    { max: 250, key: "201_250" },
-    { max: 350, key: "251_350" },
-    { max: 500, key: "351_500" },
-    { max: 999999, key: "351_500" }
+// --- NUOVE FASCE SPECIFICHE PER IL BASKET ---
+const FASCE_QUANTITA_BASKET = [
+    { max: 5, key: "1_5" },
+    { max: 9, key: "6_9" },
+    { max: 40, key: "10_40" },
+    { max: 100, key: "41_100" },
+    { max: 999999, key: "101_OLTRE" }
 ];
 
 
@@ -96,24 +91,28 @@ const LISTINO_COMPLETO = {
 
 
     "KIT_BASKET": {
-        // Prezzi unitari Base
+        // Prezzi BASE unitari (dalla tabella foto) per la versione NORMALE (Single)
         "PREZZI_FASCIA": {
-            "1_5":     { COMPLETINO: 35.00, CANOTTA_SOLA: 20.00, PANTALONCINO_SOLO: 18.00 },
-            "6_20":    { COMPLETINO: 32.00, CANOTTA_SOLA: 19.00, PANTALONCINO_SOLO: 16.00 },
-            "21_50":   { COMPLETINO: 29.00, CANOTTA_SOLA: 17.00, PANTALONCINO_SOLO: 14.00 },
-            "51_70":   { COMPLETINO: 27.00, CANOTTA_SOLA: 16.00, PANTALONCINO_SOLO: 13.00 },
-            "71_100":  { COMPLETINO: 25.00, CANOTTA_SOLA: 15.00, PANTALONCINO_SOLO: 12.00 },
-            "101_150": { COMPLETINO: 24.00, CANOTTA_SOLA: 14.00, PANTALONCINO_SOLO: 11.00 },
-            "151_200": { COMPLETINO: 23.00, CANOTTA_SOLA: 13.50, PANTALONCINO_SOLO: 10.50 },
-            "201_250": { COMPLETINO: 22.00, CANOTTA_SOLA: 13.00, PANTALONCINO_SOLO: 10.00 },
-            "251_350": { COMPLETINO: 21.00, CANOTTA_SOLA: 12.50, PANTALONCINO_SOLO: 9.50 },
-            "351_500": { COMPLETINO: 20.00, CANOTTA_SOLA: 12.00, PANTALONCINO_SOLO: 9.00 }
+            "1_5":       { COMPLETINO: 29.00, CANOTTA_SOLA: 17.00, PANTALONCINO_SOLO: 14.00 },
+            "6_9":       { COMPLETINO: 27.00, CANOTTA_SOLA: 16.00, PANTALONCINO_SOLO: 12.50 },
+            "10_40":     { COMPLETINO: 24.00, CANOTTA_SOLA: 15.00, PANTALONCINO_SOLO: 11.50 },
+            "41_100":    { COMPLETINO: 22.00, CANOTTA_SOLA: 13.50, PANTALONCINO_SOLO: 10.50 },
+            "101_OLTRE": { COMPLETINO: 19.00, CANOTTA_SOLA: 12.20, PANTALONCINO_SOLO: 9.30 }
         },
-        // Qui definisci la percentuale di aumento. 
-        // Es: Scrivi 40 per aumentare del 40%, 50 per il 50%, 100 per raddoppiare il prezzo.
-        "PERCENTUALE_DOUBLE": 40, 
+        // Percentuali di aumento SPECIFICHE se si sceglie "Double"
+        "EXTRA_DOUBLE": {
+            "COMPLETINO": 14.0, 
+            "CANOTTA_SOLA": 16.7,
+            "PANTALONCINO_SOLO": 5.7
+        },
         "COSTO_GRAFICO": 20.00 
     },
+
+
+
+
+
+    
 
 
 
@@ -3261,7 +3260,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // ===========================================
 // FUNZIONI PER IL BASKET (CON GESTIONE DOUBLE)
 // ===========================================
-
 function calcolaPrezzoDinamicoBasket() {
     const prezzoDinamicoSpan = document.getElementById('basketPrezzoDinamico');
     const qtaTotaleSpan = document.getElementById('basketQtaTotale');
@@ -3286,46 +3284,55 @@ function calcolaPrezzoDinamicoBasket() {
         return;
     }
 
-    // 2. Trova Fascia e Prezzo Base dal Listino
+    // 2. Trova il Prezzo Base (Versione Normale)
     const listinoBasket = LISTINO_COMPLETO.KIT_BASKET;
-    const fascia = FASCE_QUANTITA_KIT.find(f => qtaTotale <= f.max);
-    let prezzoUnitarioBase = 0;
+    // Usa la nuova costante fasce specifica per Basket (definita al passo 1)
+    const fascia = FASCE_QUANTITA_BASKET.find(f => qtaTotale <= f.max);
+    
+    let prezzoUnitarioFinale = 0;
 
     if (fascia) {
         const prezzi = listinoBasket.PREZZI_FASCIA[fascia.key];
-        if (basketProdSelezionato === 'COMPLETINO') prezzoUnitarioBase = prezzi.COMPLETINO;
-        else if (basketProdSelezionato === 'CANOTTA_SOLO') prezzoUnitarioBase = prezzi.CANOTTA_SOLA;
-        else if (basketProdSelezionato === 'PANTALONCINO_SOLO') prezzoUnitarioBase = prezzi.PANTALONCINO_SOLO;
+        if (basketProdSelezionato === 'COMPLETINO') prezzoUnitarioFinale = prezzi.COMPLETINO;
+        else if (basketProdSelezionato === 'CANOTTA_SOLO') prezzoUnitarioFinale = prezzi.CANOTTA_SOLA;
+        else if (basketProdSelezionato === 'PANTALONCINO_SOLO') prezzoUnitarioFinale = prezzi.PANTALONCINO_SOLO;
     }
 
-    // 3. CALCOLO INCREMENTO PERCENTUALE DOUBLE (Logica Modificata)
+    // 3. APPLICAZIONE MAGGIORAZIONE DOUBLE (Logica specifica per prodotto)
     if (isDouble) {
-        // Calcola l'aumento in euro basato sulla percentuale
-        const percentuale = listinoBasket.PERCENTUALE_DOUBLE || 0; // Prende il valore (es. 40)
-        const incrementoEuro = prezzoUnitarioBase * (percentuale / 100);
+        let percentualeExtra = 0;
         
-        prezzoUnitarioBase += incrementoEuro;
+        // Seleziona la percentuale corretta in base al prodotto (Step 2)
+        if (basketProdSelezionato === 'COMPLETINO') percentualeExtra = listinoBasket.EXTRA_DOUBLE.COMPLETINO;
+        else if (basketProdSelezionato === 'CANOTTA_SOLO') percentualeExtra = listinoBasket.EXTRA_DOUBLE.CANOTTA_SOLA;
+        else if (basketProdSelezionato === 'PANTALONCINO_SOLO') percentualeExtra = listinoBasket.EXTRA_DOUBLE.PANTALONCINO_SOLO;
 
-        // Aggiorna la scritta rossa (+ DOUBLE) per mostrare quanto aumenta
+        // Calcola l'aumento
+        prezzoUnitarioFinale += prezzoUnitarioFinale * (percentualeExtra / 100);
+        
+        // Mostra l'etichetta rossa con la percentuale applicata
         if(labelDouble) {
             labelDouble.style.display = 'inline';
-            labelDouble.textContent = `(+ ${percentuale}% Double)`;
+            labelDouble.textContent = `(+${percentualeExtra}% Double)`;
         }
     } else {
         if(labelDouble) labelDouble.style.display = 'none';
     }
 
     // 4. Aggiorna UI e Input Nascosti
-    prezzoBaseSpan.textContent = `€ ${prezzoUnitarioBase.toFixed(2)}`;
+    prezzoBaseSpan.textContent = `€ ${prezzoUnitarioFinale.toFixed(2)}`;
     
-    const costoTotale = qtaTotale * prezzoUnitarioBase;
+    const costoTotale = qtaTotale * prezzoUnitarioFinale;
     
     prezzoDinamicoSpan.textContent = `€ ${costoTotale.toFixed(2)}`;
     qtaTotaleSpan.textContent = qtaTotale;
     
-    // Salva i valori nei campi nascosti per il carrello
-    document.getElementById('basketPrezzoUnitarioBase').value = prezzoUnitarioBase.toFixed(2);
-    document.getElementById('basketCostoTotaleFinale').value = costoTotale.toFixed(2);
+    // Salva i valori nei campi nascosti per inviarli al carrello
+    const hiddenUnitario = document.getElementById('basketPrezzoUnitarioBase');
+    const hiddenTotale = document.getElementById('basketCostoTotaleFinale');
+    
+    if (hiddenUnitario) hiddenUnitario.value = prezzoUnitarioFinale.toFixed(2);
+    if (hiddenTotale) hiddenTotale.value = costoTotale.toFixed(2);
 }
 
 async function gestisciAggiuntaBasket() {
