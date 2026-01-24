@@ -1266,7 +1266,7 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
 // ===========================================
 const LISTINO_STRISCIONI = {
     MATERIALI_MQ: {
-        "FLAG_NAUTICO": 9.4,    // Prezzo esempio al MQ
+        "FLAG_NAUTICO": 9.33,    // Prezzo esempio al MQ
         "RASO": 7.3,           // Prezzo esempio al MQ
         "POLIESTERE_160": 9.4  // Prezzo esempio al MQ
     },
