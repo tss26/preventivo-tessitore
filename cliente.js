@@ -2807,6 +2807,26 @@ document.getElementById('aggiungiBasketBtn').addEventListener('click', gestisciA
         // Inizializza
         calcolaPrezzoLanyard();
 
+        // --- LISTENER STRISCIONI & BANDIERE ---------------------------------------------------------------------------------
+        // 1. Input Dimensioni, Materiale E QUANTITÀ
+        const inputBanner = document.querySelectorAll('#bannerLargh, #bannerAlt, #bannerQta, input[name="bannerMateriale"], .banner-finish, #bannerFreqOcchielli, #bannerFreqDring, input[name="bannerLaccetto"]');
+
+        // 2. Attacca l'evento a tutti i campi
+        inputBanner.forEach(el => {
+        // Se l'elemento esiste (sicurezza), aggiungi l'ascoltatore
+        if (el) {
+            el.addEventListener('input', calcolaPrezzoBanner);
+            el.addEventListener('change', calcolaPrezzoBanner);
+            }
+        });
+
+        // 3. Bottone Aggiungi
+        const btnAddBanner = document.getElementById('aggiungiBannerBtn');
+        if (btnAddBanner) btnAddBanner.addEventListener('click', gestisciAggiuntaBanner);
+
+        // 4. Inizializza calcolo all'avvio
+        calcolaPrezzoBanner();
+
         
 
 
