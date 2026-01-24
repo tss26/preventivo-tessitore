@@ -1273,9 +1273,9 @@ const LISTINO_STRISCIONI = {
     COSTI_EXTRA: {
         CUCITURA_INTERMEDIA: 2.50, // Prezzo al metro lineare per cucitura sormonto
         ASOLA: 1.50,               // Prezzo al metro
-        OCCHIELLI: 0.50,           // Prezzo cadauno
-        RINFORZO: 1.00,            // Prezzo al metro
-        DRING: 0.80,               // Prezzo cadauno
+        OCCHIELLI: 0.60,           // Prezzo cadauno
+        RINFORZO: 2.50,            // Prezzo al metro
+        DRING: 1.20,               // Prezzo cadauno
         LACCETTI: {
             "NESSUNO": 0,
             "V_SHAPE": 0.50,
