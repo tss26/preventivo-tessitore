@@ -1258,6 +1258,225 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
 
 // --- NUOVA FUNZIONE: GESTIONE CHIUSURA MODALE ---
 
+// --- gestione bandiere al metro INIZIOOOOO ---
+
+
+// ===========================================
+// CONFIGURAZIONE PREZZI STRISCIONI & BANDIERE
+// ===========================================
+const LISTINO_STRISCIONI = {
+    MATERIALI_MQ: {
+        "FLAG_NAUTICO": 4.2,    // Prezzo esempio al MQ
+        "RASO": 3.3,           // Prezzo esempio al MQ
+        "POLIESTERE_160": 4.2  // Prezzo esempio al MQ
+    },
+    COSTI_EXTRA: {
+        CUCITURA_INTERMEDIA: 2.50, // Prezzo al metro lineare per cucitura sormonto
+        ASOLA: 1.50,               // Prezzo al metro
+        OCCHIELLI: 0.50,           // Prezzo cadauno
+        RINFORZO: 1.00,            // Prezzo al metro
+        DRING: 0.80,               // Prezzo cadauno
+        LACCETTI: {
+            "NESSUNO": 0,
+            "V_SHAPE": 0.50,
+            "20CM": 1.00,
+            "50CM": 2.00,
+            "100CM": 3.00
+        }
+    }
+};
+
+function calcolaPrezzoBanner() {
+    const larghezzaCm = parseFloat(document.getElementById('bannerLargh').value) || 0;
+    const altezzaCm = parseFloat(document.getElementById('bannerAlt').value) || 0;
+    
+    // Recupera materiale
+    const matRadio = document.querySelector('input[name="bannerMateriale"]:checked');
+    const materiale = matRadio ? matRadio.value : "FLAG_NAUTICO";
+    
+    const infoExtraDiv = document.getElementById('bannerInfoExtra');
+    const prezzoOutput = document.getElementById('bannerPrezzoUnitario');
+    
+    if (larghezzaCm <= 0 || altezzaCm <= 0) {
+        prezzoOutput.textContent = "€ 0.00";
+        return;
+    }
+
+    // Conversioni
+    const larghezzaMt = larghezzaCm / 100;
+    const altezzaMt = altezzaCm / 100;
+    const areaMq = larghezzaMt * altezzaMt;
+
+    // 1. COSTO MATERIALE BASE
+    const prezzoMq = LISTINO_STRISCIONI.MATERIALI_MQ[materiale] || 0;
+    let costoTotale = areaMq * prezzoMq;
+    let dettagliCalcolo = [`Materiale (${materiale}): €${costoTotale.toFixed(2)}`];
+
+    // 2. LOGICA SORMONTO (Cucitura Intermedia)
+    // "se sia larghezza che altezza sono maggiori di 160cm"
+    if (larghezzaCm > 160 && altezzaCm > 160) {
+        const latoMinore = Math.min(larghezzaCm, altezzaCm);
+        const latoMaggiore = Math.max(larghezzaCm, altezzaCm);
+        
+        // "divide il lato minore per 160 ... serve solo la parte intera"
+        const ripetizioni = Math.floor(latoMinore / 160);
+        
+        // "moltiplicare per il lato lungo (in metri) e moltiplico per costante"
+        const latoMaggioreMt = latoMaggiore / 100;
+        const costoSormonto = ripetizioni * latoMaggioreMt * LISTINO_STRISCIONI.COSTI_EXTRA.CUCITURA_INTERMEDIA;
+        
+        costoTotale += costoSormonto;
+        dettagliCalcolo.push(`Sormonto Fuori Formato (${ripetizioni} cuciture): €${costoSormonto.toFixed(2)}`);
+    }
+
+    // 3. CALCOLO FINITURE
+    let costoFiniture = 0;
+
+    // A. ASOLA & RINFORZO (Costo al metro lineare sui lati selezionati)
+    document.querySelectorAll('.banner-finish:checked').forEach(chk => {
+        const tipo = chk.dataset.tipo; // ASOLA, RINFORZO, OCCHIELLI, DRING
+        const lato = chk.value; // Alto, Basso, Sinistra, Destra
+        let lunghezzaLato = 0;
+
+        if (lato === 'Alto' || lato === 'Basso') lunghezzaLato = larghezzaMt;
+        else lunghezzaLato = altezzaMt;
+
+        if (tipo === 'ASOLA') {
+            costoFiniture += lunghezzaLato * LISTINO_STRISCIONI.COSTI_EXTRA.ASOLA;
+        } else if (tipo === 'RINFORZO') {
+            costoFiniture += lunghezzaLato * LISTINO_STRISCIONI.COSTI_EXTRA.RINFORZO;
+        }
+    });
+
+    // B. OCCHIELLI (Conteggio puntuale)
+    const freqOcchielli = parseInt(document.getElementById('bannerFreqOcchielli').value) || 50;
+    const latiOcchielli = Array.from(document.querySelectorAll('.banner-finish[data-tipo="OCCHIELLI"]:checked')).map(c => c.value);
+    
+    latiOcchielli.forEach(lato => {
+        let lunghezzaLatoCm = (lato === 'Alto' || lato === 'Basso') ? larghezzaCm : altezzaCm;
+        // Calcolo numero occhielli: Lunghezza / Frequenza + 1 (per chiudere l'angolo)
+        // Semplificazione: Lunghezza / Frequenza.
+        let numOcchielli = Math.floor(lunghezzaLatoCm / freqOcchielli) + 1;
+        costoFiniture += numOcchielli * LISTINO_STRISCIONI.COSTI_EXTRA.OCCHIELLI;
+    });
+
+    // C. D-RINGS (Conteggio puntuale)
+    const freqDring = parseInt(document.getElementById('bannerFreqDring').value) || 50;
+    const latiDring = Array.from(document.querySelectorAll('.banner-finish[data-tipo="DRING"]:checked')).map(c => c.value);
+    
+    latiDring.forEach(lato => {
+        let lunghezzaLatoCm = (lato === 'Alto' || lato === 'Basso') ? larghezzaCm : altezzaCm;
+        let numDring = Math.floor(lunghezzaLatoCm / freqDring) + 1;
+        costoFiniture += numDring * LISTINO_STRISCIONI.COSTI_EXTRA.DRING;
+    });
+
+    // D. LACCETTI
+    const laccettoVal = document.querySelector('input[name="bannerLaccetto"]:checked').value;
+    const costoLaccetto = LISTINO_STRISCIONI.COSTI_EXTRA.LACCETTI[laccettoVal] || 0;
+    costoFiniture += costoLaccetto;
+
+    costoTotale += costoFiniture;
+    if (costoFiniture > 0) dettagliCalcolo.push(`Finiture: €${costoFiniture.toFixed(2)}`);
+
+    // OUTPUT
+    prezzoOutput.textContent = `€ ${costoTotale.toFixed(2)}`;
+    infoExtraDiv.innerHTML = dettagliCalcolo.join('<br>');
+    
+    // Salva valore in un attributo data per il recupero facile
+    prezzoOutput.dataset.valore = costoTotale.toFixed(2);
+}
+
+// FUNZIONE DI AGGIUNTA AL CARRELLO
+async function gestisciAggiuntaBanner() {
+    const larghezza = document.getElementById('bannerLargh').value;
+    const altezza = document.getElementById('bannerAlt').value;
+    const prezzoTotale = parseFloat(document.getElementById('bannerPrezzoUnitario').dataset.valore) || 0;
+    const note = document.getElementById('bannerNote').value;
+    const materiale = document.querySelector('input[name="bannerMateriale"]:checked').value;
+    
+    if (prezzoTotale <= 0) { alert("Dimensioni non valide."); return; }
+    if (!utenteCorrenteId) { alert("Effettua il login."); return; }
+
+    // Raccogli finiture per descrizione
+    let descrizioneFiniture = [];
+    
+    // Raccogli Checkbox
+    const finitureMap = {};
+    document.querySelectorAll('.banner-finish:checked').forEach(chk => {
+        if(!finitureMap[chk.dataset.tipo]) finitureMap[chk.dataset.tipo] = [];
+        finitureMap[chk.dataset.tipo].push(chk.value);
+    });
+    
+    for (const [tipo, lati] of Object.entries(finitureMap)) {
+        let desc = `${tipo}: ${lati.join(', ')}`;
+        if (tipo === 'OCCHIELLI') desc += ` (Ogni ${document.getElementById('bannerFreqOcchielli').value}cm)`;
+        if (tipo === 'DRING') desc += ` (Ogni ${document.getElementById('bannerFreqDring').value}cm)`;
+        descrizioneFiniture.push(desc);
+    }
+    
+    const laccetto = document.querySelector('input[name="bannerLaccetto"]:checked').value;
+    if (laccetto !== 'NESSUNO') descrizioneFiniture.push(`Laccetto: ${laccetto}`);
+
+    // GESTIONE UPLOAD (Standardizzato con le tue funzioni esistenti)
+    const fileInput = document.getElementById('bannerFileUpload');
+    const fileToUpload = fileInput.files[0];
+    const uploadStatusBox = document.getElementById('bannerUploadStatusBox');
+    const uploadMessage = document.getElementById('bannerUploadMessage');
+    const uploadProgressBar = document.getElementById('bannerUploadProgressBar');
+    let fileUrl = 'Nessun file caricato';
+
+    if (fileToUpload) {
+        // ... (Copia qui la logica di upload identica a gestisciAggiuntaDTF o Shopper)
+        // Per brevità uso una versione compatta, ma tu usa quella completa col try/catch
+        const BUCKET_NAME = 'personalizzazioni';
+        if (uploadStatusBox) { uploadStatusBox.style.display = 'block'; uploadProgressBar.style.width = '0%'; }
+        
+        try {
+            const ext = fileToUpload.name.split('.').pop();
+            const path = `${utenteCorrenteId}/BANNER-${Date.now()}.${ext}`;
+            const { error } = await supabase.storage.from(BUCKET_NAME).upload(path, fileToUpload);
+            if (error) throw error;
+            fileUrl = supabase.storage.from(BUCKET_NAME).getPublicUrl(path).data.publicUrl;
+            if (uploadProgressBar) uploadProgressBar.style.width = '100%';
+            if (uploadMessage) uploadMessage.textContent = '✅ File OK';
+        } catch(e) {
+            alert("Errore Upload: " + e.message);
+            return;
+        }
+    }
+
+    const nuovoArticolo = {
+        id_unico: Date.now(),
+        prodotto: `STRISCIONE SU MISURA - ${materiale}`,
+        quantita: 1, // Di base 1, o aggiungi input quantità
+        prezzo_unitario: prezzoTotale,
+        note: note,
+        componenti: [
+            `Dim: ${larghezza}x${altezza} cm`,
+            ...descrizioneFiniture
+        ],
+        personalizzazione_url: fileUrl
+    };
+
+    aggiungiAlCarrello(nuovoArticolo);
+    alert("Striscione aggiunto al preventivo!");
+    
+    // Reset
+    document.getElementById('bannerNote').value = '';
+    fileInput.value = '';
+    if(uploadStatusBox) uploadStatusBox.style.display = 'none';
+}
+
+
+
+// --- gestione bandiere al metro FINEEEEE ---
+
+
+
+
+
+
+
 document.addEventListener('DOMContentLoaded', () => {
     // ... (All'interno del tuo blocco DOMContentLoaded)
     
@@ -2100,6 +2319,32 @@ async function gestisciAggiuntaLanyard() {
 
 
 //------- FINE LANYARD-------------------------
+// --- LISTENER STRISCIONI & BANDIERE ---
+// 1. Input Dimensioni e Materiale
+const inputBanner = document.querySelectorAll('#bannerLargh, #bannerAlt, input[name="bannerMateriale"], .banner-finish, #bannerFreqOcchielli, #bannerFreqDring, input[name="bannerLaccetto"]');
+inputBanner.forEach(el => {
+    el.addEventListener('input', calcolaPrezzoBanner);
+    el.addEventListener('change', calcolaPrezzoBanner);
+});
+
+// 2. Bottone Aggiungi
+const btnAddBanner = document.getElementById('aggiungiBannerBtn');
+if (btnAddBanner) btnAddBanner.addEventListener('click', gestisciAggiuntaBanner);
+
+// 3. Inizializza calcolo
+calcolaPrezzoBanner();
+
+//------- INIZIO BANDIERE AL METRO -------------------------
+
+
+
+
+
+
+
+//------- FINE BANDIERE AL METRO -------------------------
+
+
 
 
 // ===========================================
