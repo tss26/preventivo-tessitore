@@ -1297,25 +1297,23 @@ const LISTINO_STRISCIONI = {
     ]
 };
 
-function calcolaPrezzoBanner() {
-    // --- 1. CONTROLLO DI SICUREZZA ---
+
+   function calcolaPrezzoBanner() {
+    // --- 1. CONTROLLO DI SICUREZZA AGGIORNATO ---
     const inputLargh = document.getElementById('bannerLargh');
     const inputAlt = document.getElementById('bannerAlt');
+    const inputQta = document.getElementById('bannerQta'); // <--- AGGIUNTO QUESTO
 
-    // Se gli input non esistono nella pagina, esci dalla funzione senza fare nulla
-    if (!inputLargh || !inputAlt) {
+    // Se manca ANCHE SOLO UNO degli input, fermati.
+    if (!inputLargh || !inputAlt || !inputQta) {
         return; 
     }
-    // --- 1. INPUT UTENTE (Ora siamo sicuri che .value non darà errore) ---
+
+    // --- 2. INPUT UTENTE SICURO (Usa le variabili sopra, non cercare di nuovo nel documento) ---
     const larghezzaCm = parseFloat(inputLargh.value) || 0;
     const altezzaCm = parseFloat(inputAlt.value) || 0;
+    const qta = parseInt(inputQta.value) || 1; // <--- ORA È SICURO
 
-    
-    // 1. INPUT UTENTE
-    //const larghezzaCm = parseFloat(document.getElementById('bannerLargh').value) || 0;
-    //const altezzaCm = parseFloat(document.getElementById('bannerAlt').value) || 0;
-    const qta = parseInt(document.getElementById('bannerQta').value) || 1; // Recupera quantità
-    
     // Recupera materiale
     const matRadio = document.querySelector('input[name="bannerMateriale"]:checked');
     const materiale = matRadio ? matRadio.value : "FLAG_NAUTICO";
