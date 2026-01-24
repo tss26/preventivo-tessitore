@@ -1268,7 +1268,7 @@ const LISTINO_STRISCIONI = {
     MATERIALI_MQ: {
         "FLAG_NAUTICO": 4.2,    // Prezzo esempio al MQ
         "RASO": 3.3,            // Prezzo esempio al MQ
-        "POLIESTERE_160": 9.40   // Prezzo esempio al MQ
+        "POLIESTERE_160": 4.2   // Prezzo esempio al MQ
     },
     COSTI_EXTRA: {
         CUCITURA_INTERMEDIA: 2.50, // Prezzo al metro lineare per cucitura sormonto
