@@ -2391,7 +2391,7 @@ async function gestisciAggiuntaLanyard() {
 //------- FINE LANYARD-------------------------
 // --- LISTENER STRISCIONI & BANDIERE ---
 // 1. Input Dimensioni e Materiale
-const inputBanner = document.querySelectorAll('#bannerLargh, #bannerAlt, input[name="bannerMateriale"], .banner-finish, #bannerFreqOcchielli, #bannerFreqDring, input[name="bannerLaccetto"]');
+/*const inputBanner = document.querySelectorAll('#bannerLargh, #bannerAlt, input[name="bannerMateriale"], .banner-finish, #bannerFreqOcchielli, #bannerFreqDring, input[name="bannerLaccetto"]');
 inputBanner.forEach(el => {
     el.addEventListener('input', calcolaPrezzoBanner);
     el.addEventListener('change', calcolaPrezzoBanner);
@@ -2403,8 +2403,28 @@ if (btnAddBanner) btnAddBanner.addEventListener('click', gestisciAggiuntaBanner)
 
 // 3. Inizializza calcolo
 calcolaPrezzoBanner();
+*/
 
-//------- INIZIO BANDIERE AL METRO -------------------------
+
+
+
+// --- LISTENER STRISCIONI & BANDIERE ---
+    // Verifica che gli elementi esistano prima di attaccare i listener
+    const inputBanner = document.querySelectorAll('#bannerLargh, #bannerAlt, input[name="bannerMateriale"], .banner-finish, #bannerFreqOcchielli, #bannerFreqDring, input[name="bannerLaccetto"]');
+    
+    if (document.getElementById('bannerLargh')) { // Controllo di sicurezza
+        inputBanner.forEach(el => {
+            el.addEventListener('input', calcolaPrezzoBanner);
+            el.addEventListener('change', calcolaPrezzoBanner);
+        });
+
+        // 2. Bottone Aggiungi
+        const btnAddBanner = document.getElementById('aggiungiBannerBtn');
+        if (btnAddBanner) btnAddBanner.addEventListener('click', gestisciAggiuntaBanner);
+
+        // 3. Inizializza calcolo ORA che siamo sicuri che l'HTML è carico
+        calcolaPrezzoBanner();
+    }
 
 
 
