@@ -1260,15 +1260,14 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
 
 // --- gestione bandiere al metro INIZIOOOOO ---
 
-
 // ===========================================
 // CONFIGURAZIONE PREZZI STRISCIONI & BANDIERE
 // ===========================================
 const LISTINO_STRISCIONI = {
     MATERIALI_MQ: {
         "FLAG_NAUTICO": 9.33,    // Prezzo esempio al MQ
-        "RASO": 7.3,           // Prezzo esempio al MQ
-        "POLIESTERE_160": 9.4  // Prezzo esempio al MQ
+        "RASO": 7.30,            // Prezzo esempio al MQ
+        "POLIESTERE_160": 9.40   // Prezzo esempio al MQ
     },
     COSTI_EXTRA: {
         CUCITURA_INTERMEDIA: 2.50, // Prezzo al metro lineare per cucitura sormonto
@@ -1283,12 +1282,26 @@ const LISTINO_STRISCIONI = {
             "50CM": 2.00,
             "100CM": 3.00
         }
-    }
+    },
+    // NUOVO: Fasce di ricarico in base alla quantità
+    MARKUP_QUANTITA: [
+        { max: 5, perc: 70 },      // 1-5 pz: +70%
+        { max: 12, perc: 60 },     // 6-12 pz: +60%
+        { max: 24, perc: 50 },     // 13-24 pz: +50%
+        { max: 50, perc: 40 },     // 25-50 pz: +40%
+        { max: 100, perc: 35 },    // 51-100 pz: +35%
+        { max: 250, perc: 33 },    // 101-250 pz: +33%
+        { max: 500, perc: 30 },    // 251-500 pz: +30%
+        { max: 1000, perc: 26 },   // 501-1000 pz: +26%
+        { max: 999999, perc: 23 }  // Oltre 1000 pz: +23%
+    ]
 };
 
 function calcolaPrezzoBanner() {
+    // 1. INPUT UTENTE
     const larghezzaCm = parseFloat(document.getElementById('bannerLargh').value) || 0;
     const altezzaCm = parseFloat(document.getElementById('bannerAlt').value) || 0;
+    const qta = parseInt(document.getElementById('bannerQta').value) || 1; // Recupera quantità
     
     // Recupera materiale
     const matRadio = document.querySelector('input[name="bannerMateriale"]:checked');
@@ -1297,7 +1310,7 @@ function calcolaPrezzoBanner() {
     const infoExtraDiv = document.getElementById('bannerInfoExtra');
     const prezzoOutput = document.getElementById('bannerPrezzoUnitario');
     
-    if (larghezzaCm <= 0 || altezzaCm <= 0) {
+    if (larghezzaCm <= 0 || altezzaCm <= 0 || qta <= 0) {
         prezzoOutput.textContent = "€ 0.00";
         return;
     }
@@ -1307,39 +1320,41 @@ function calcolaPrezzoBanner() {
     const altezzaMt = altezzaCm / 100;
     const areaMq = larghezzaMt * altezzaMt;
 
+    let dettagliCalcolo = []; 
+
+    // ---------------------------------------------------------
+    // A. CALCOLO COSTO BASE (Materiale + Lavorazioni)
+    // ---------------------------------------------------------
+
     // 1. COSTO MATERIALE BASE
     const prezzoMq = LISTINO_STRISCIONI.MATERIALI_MQ[materiale] || 0;
-    let costoTotale = areaMq * prezzoMq;
-    let dettagliCalcolo = [`Materiale (${materiale}): €${costoTotale.toFixed(2)}`];
+    let costoBase = areaMq * prezzoMq;
+    // dettagliCalcolo.push(`Base Materiale: €${costoBase.toFixed(2)}`);
 
     // 2. LOGICA SORMONTO (Cucitura Intermedia)
-    // "se sia larghezza che altezza sono maggiori di 160cm"
     if (larghezzaCm > 160 && altezzaCm > 160) {
         const latoMinore = Math.min(larghezzaCm, altezzaCm);
         const latoMaggiore = Math.max(larghezzaCm, altezzaCm);
         
-        // "divide il lato minore per 160 ... serve solo la parte intera"
+        // divide il lato minore per 160 -> parte intera
         const ripetizioni = Math.floor(latoMinore / 160);
         
-        // "moltiplicare per il lato lungo (in metri) e moltiplico per costante"
+        // moltiplicare per il lato lungo (in metri) e per costante
         const latoMaggioreMt = latoMaggiore / 100;
         const costoSormonto = ripetizioni * latoMaggioreMt * LISTINO_STRISCIONI.COSTI_EXTRA.CUCITURA_INTERMEDIA;
         
-        costoTotale += costoSormonto;
+        costoBase += costoSormonto;
         dettagliCalcolo.push(`Sormonto Fuori Formato (${ripetizioni} cuciture): €${costoSormonto.toFixed(2)}`);
     }
 
     // 3. CALCOLO FINITURE
     let costoFiniture = 0;
 
-    // A. ASOLA & RINFORZO (Costo al metro lineare sui lati selezionati)
+    // A. ASOLA & RINFORZO
     document.querySelectorAll('.banner-finish:checked').forEach(chk => {
-        const tipo = chk.dataset.tipo; // ASOLA, RINFORZO, OCCHIELLI, DRING
-        const lato = chk.value; // Alto, Basso, Sinistra, Destra
-        let lunghezzaLato = 0;
-
-        if (lato === 'Alto' || lato === 'Basso') lunghezzaLato = larghezzaMt;
-        else lunghezzaLato = altezzaMt;
+        const tipo = chk.dataset.tipo; 
+        const lato = chk.value; 
+        let lunghezzaLato = (lato === 'Alto' || lato === 'Basso') ? larghezzaMt : altezzaMt;
 
         if (tipo === 'ASOLA') {
             costoFiniture += lunghezzaLato * LISTINO_STRISCIONI.COSTI_EXTRA.ASOLA;
@@ -1348,22 +1363,18 @@ function calcolaPrezzoBanner() {
         }
     });
 
-    // B. OCCHIELLI (Conteggio puntuale)
+    // B. OCCHIELLI
     const freqOcchielli = parseInt(document.getElementById('bannerFreqOcchielli').value) || 50;
     const latiOcchielli = Array.from(document.querySelectorAll('.banner-finish[data-tipo="OCCHIELLI"]:checked')).map(c => c.value);
-    
     latiOcchielli.forEach(lato => {
         let lunghezzaLatoCm = (lato === 'Alto' || lato === 'Basso') ? larghezzaCm : altezzaCm;
-        // Calcolo numero occhielli: Lunghezza / Frequenza + 1 (per chiudere l'angolo)
-        // Semplificazione: Lunghezza / Frequenza.
         let numOcchielli = Math.floor(lunghezzaLatoCm / freqOcchielli) + 1;
         costoFiniture += numOcchielli * LISTINO_STRISCIONI.COSTI_EXTRA.OCCHIELLI;
     });
 
-    // C. D-RINGS (Conteggio puntuale)
+    // C. D-RINGS
     const freqDring = parseInt(document.getElementById('bannerFreqDring').value) || 50;
     const latiDring = Array.from(document.querySelectorAll('.banner-finish[data-tipo="DRING"]:checked')).map(c => c.value);
-    
     latiDring.forEach(lato => {
         let lunghezzaLatoCm = (lato === 'Alto' || lato === 'Basso') ? larghezzaCm : altezzaCm;
         let numDring = Math.floor(lunghezzaLatoCm / freqDring) + 1;
@@ -1372,52 +1383,84 @@ function calcolaPrezzoBanner() {
 
     // D. LACCETTI
     const laccettoVal = document.querySelector('input[name="bannerLaccetto"]:checked').value;
-    const costoLaccetto = LISTINO_STRISCIONI.COSTI_EXTRA.LACCETTI[laccettoVal] || 0;
-    costoFiniture += costoLaccetto;
+    costoFiniture += LISTINO_STRISCIONI.COSTI_EXTRA.LACCETTI[laccettoVal] || 0;
 
-    costoTotale += costoFiniture;
-    if (costoFiniture > 0) dettagliCalcolo.push(`Finiture: €${costoFiniture.toFixed(2)}`);
+    costoBase += costoFiniture;
+    if (costoFiniture > 0) dettagliCalcolo.push(`Finiture extra: €${costoFiniture.toFixed(2)}`);
+
+    // ---------------------------------------------------------
+    // B. APPLICAZIONE MARKUP QUANTITÀ
+    // ---------------------------------------------------------
+    
+    // Trova la percentuale corretta in base alla quantità
+    const fascia = LISTINO_STRISCIONI.MARKUP_QUANTITA.find(f => qta <= f.max);
+    // Se supera l'ultima fascia, prendi l'ultima disponibile
+    const percentualeAumento = fascia ? fascia.perc : LISTINO_STRISCIONI.MARKUP_QUANTITA[LISTINO_STRISCIONI.MARKUP_QUANTITA.length -1].perc;
+
+    // Calcolo Prezzo Finale Unitario
+    const prezzoFinaleUnitario = costoBase * (1 + (percentualeAumento / 100));
+
+    // Aggiungi info al riepilogo
+    dettagliCalcolo.push(`<strong>Costo Base Produzione:</strong> €${costoBase.toFixed(2)}`);
+    dettagliCalcolo.push(`<strong>Margine Qta (${qta}pz):</strong> +${percentualeAumento}%`);
 
     // OUTPUT
-    prezzoOutput.textContent = `€ ${costoTotale.toFixed(2)}`;
+    prezzoOutput.textContent = `€ ${prezzoFinaleUnitario.toFixed(2)}`;
     infoExtraDiv.innerHTML = dettagliCalcolo.join('<br>');
     
-    // Salva valore in un attributo data per il recupero facile
-    prezzoOutput.dataset.valore = costoTotale.toFixed(2);
+    // Salva valore in un attributo data per il recupero facile nella funzione di aggiunta
+    prezzoOutput.dataset.valore = prezzoFinaleUnitario.toFixed(2);
 }
 
-// FUNZIONE DI AGGIUNTA AL CARRELLO
+// FUNZIONE DI AGGIUNTA AL CARRELLO (Con Logica Upload e Quantità)
 async function gestisciAggiuntaBanner() {
+    // 1. RECUPERO DATI
     const larghezza = document.getElementById('bannerLargh').value;
     const altezza = document.getElementById('bannerAlt').value;
-    const prezzoTotale = parseFloat(document.getElementById('bannerPrezzoUnitario').dataset.valore) || 0;
     const note = document.getElementById('bannerNote').value;
     const materiale = document.querySelector('input[name="bannerMateriale"]:checked').value;
     
-    if (prezzoTotale <= 0) { alert("Dimensioni non valide."); return; }
-    if (!utenteCorrenteId) { alert("Effettua il login."); return; }
+    // Recupera Quantità
+    const qtaInput = document.getElementById('bannerQta');
+    const qta = qtaInput ? (parseInt(qtaInput.value) || 1) : 1;
 
-    // Raccogli finiture per descrizione
-    let descrizioneFiniture = [];
+    // Recupera il prezzo unitario calcolato (già comprensivo di ricarico)
+    const prezzoUnitarioElement = document.getElementById('bannerPrezzoUnitario');
+    const prezzoUnitario = parseFloat(prezzoUnitarioElement.dataset.valore) || 0;
+
+    // 2. VALIDAZIONI
+    if (prezzoUnitario <= 0) {
+        alert("Attenzione: Dimensioni non valide o prezzo a zero.");
+        return;
+    }
+    if (!utenteCorrenteId) {
+        alert("Sessione scaduta o utente non loggato. Effettua il login.");
+        return;
+    }
+
+    // 3. COSTRUZIONE DESCRIZIONE FINITURE
+    let componentiList = [`Dim: ${larghezza}x${altezza} cm`, `Materiale: ${materiale}`];
     
-    // Raccogli Checkbox
-    const finitureMap = {};
+    const finitureMap = {}; 
     document.querySelectorAll('.banner-finish:checked').forEach(chk => {
-        if(!finitureMap[chk.dataset.tipo]) finitureMap[chk.dataset.tipo] = [];
-        finitureMap[chk.dataset.tipo].push(chk.value);
+        const tipo = chk.dataset.tipo;
+        if (!finitureMap[tipo]) finitureMap[tipo] = [];
+        finitureMap[tipo].push(chk.value);
     });
-    
+
     for (const [tipo, lati] of Object.entries(finitureMap)) {
         let desc = `${tipo}: ${lati.join(', ')}`;
-        if (tipo === 'OCCHIELLI') desc += ` (Ogni ${document.getElementById('bannerFreqOcchielli').value}cm)`;
-        if (tipo === 'DRING') desc += ` (Ogni ${document.getElementById('bannerFreqDring').value}cm)`;
-        descrizioneFiniture.push(desc);
+        if (tipo === 'OCCHIELLI') desc += ` (ogni ${document.getElementById('bannerFreqOcchielli').value}cm)`;
+        if (tipo === 'DRING') desc += ` (ogni ${document.getElementById('bannerFreqDring').value}cm)`;
+        componentiList.push(desc);
     }
-    
-    const laccetto = document.querySelector('input[name="bannerLaccetto"]:checked').value;
-    if (laccetto !== 'NESSUNO') descrizioneFiniture.push(`Laccetto: ${laccetto}`);
 
-    // GESTIONE UPLOAD (Standardizzato con le tue funzioni esistenti)
+    const laccettoRadio = document.querySelector('input[name="bannerLaccetto"]:checked');
+    if (laccettoRadio && laccettoRadio.value !== 'NESSUNO') {
+        componentiList.push(`Laccetto: ${laccettoRadio.value}`);
+    }
+
+    // 4. GESTIONE UPLOAD (Identica a Shopper ma adattata per Banner)
     const fileInput = document.getElementById('bannerFileUpload');
     const fileToUpload = fileInput.files[0];
     const uploadStatusBox = document.getElementById('bannerUploadStatusBox');
@@ -1425,48 +1468,75 @@ async function gestisciAggiuntaBanner() {
     const uploadProgressBar = document.getElementById('bannerUploadProgressBar');
     let fileUrl = 'Nessun file caricato';
 
+    // Controllo Dimensione File
+    if (fileToUpload && fileToUpload.size > 5 * 1024 * 1024) {
+        alert("File troppo grande (Max 5MB).");
+        return;
+    }
+
     if (fileToUpload) {
-        // ... (Copia qui la logica di upload identica a gestisciAggiuntaDTF o Shopper)
-        // Per brevità uso una versione compatta, ma tu usa quella completa col try/catch
         const BUCKET_NAME = 'personalizzazioni';
-        if (uploadStatusBox) { uploadStatusBox.style.display = 'block'; uploadProgressBar.style.width = '0%'; }
         
+        if (uploadStatusBox) {
+            uploadStatusBox.style.display = 'block';
+            uploadProgressBar.style.width = '0%';
+            // uploadStatusBox.scrollIntoView({ behavior: 'smooth' }); 
+        }
+
         try {
-            const ext = fileToUpload.name.split('.').pop();
-            const path = `${utenteCorrenteId}/BANNER-${Date.now()}.${ext}`;
-            const { error } = await supabase.storage.from(BUCKET_NAME).upload(path, fileToUpload);
-            if (error) throw error;
-            fileUrl = supabase.storage.from(BUCKET_NAME).getPublicUrl(path).data.publicUrl;
+            const extension = fileToUpload.name.split('.').pop();
+            const filePath = `${utenteCorrenteId}/BANNER-${Date.now()}.${extension}`;
+            
+            const { error: uploadError } = await supabase.storage
+                .from(BUCKET_NAME)
+                .upload(filePath, fileToUpload, { cacheControl: '3600', upsert: false });
+
+            if (uploadError) throw uploadError;
+
             if (uploadProgressBar) uploadProgressBar.style.width = '100%';
-            if (uploadMessage) uploadMessage.textContent = '✅ File OK';
-        } catch(e) {
-            alert("Errore Upload: " + e.message);
+            if (uploadMessage) uploadMessage.textContent = '✅ File caricato.';
+
+            fileUrl = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath).data.publicUrl;
+            
+            // Tracciamento scadenza
+            const expirationTime = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
+            await supabase.from('temp_files').insert([{ storage_path: `${BUCKET_NAME}/${filePath}`, expires_at: expirationTime }]);
+
+        } catch (e) {
+            console.error(e);
+            alert("Errore durante l'upload: " + e.message);
+            if (uploadStatusBox) uploadStatusBox.style.display = 'none';
             return;
         }
     }
 
+    // 5. CREAZIONE OGGETTO CARRELLO
     const nuovoArticolo = {
         id_unico: Date.now(),
-        prodotto: `STRISCIONE SU MISURA - ${materiale}`,
-        quantita: 1, // Di base 1, o aggiungi input quantità
-        prezzo_unitario: prezzoTotale,
+        prodotto: `STRISCIONE SU MISURA`,
+        quantita: qta, // Usa la quantità inserita
+        prezzo_unitario: prezzoUnitario, // Prezzo unitario calcolato col markup
         note: note,
-        componenti: [
-            `Dim: ${larghezza}x${altezza} cm`,
-            ...descrizioneFiniture
-        ],
-        personalizzazione_url: fileUrl
+        componenti: componentiList,
+        personalizzazione_url: fileUrl,
+        dettagli_taglie: {} 
     };
 
+    // 6. INVIO AL CARRELLO
     aggiungiAlCarrello(nuovoArticolo);
-    alert("Striscione aggiunto al preventivo!");
-    
-    // Reset
-    document.getElementById('bannerNote').value = '';
-    fileInput.value = '';
-    if(uploadStatusBox) uploadStatusBox.style.display = 'none';
-}
+    alert(`Aggiunti ${qta} Striscioni al preventivo!`);
 
+    // 7. RESET
+    document.getElementById('bannerNote').value = '';
+    document.getElementById('bannerQta').value = '1';
+    fileInput.value = '';
+    if (uploadStatusBox) {
+        setTimeout(() => { uploadStatusBox.style.display = 'none'; }, 2000);
+    }
+    
+    // Ricalcola il prezzo per riportarlo alla quantità 1
+    calcolaPrezzoBanner();
+}
 
 
 // --- gestione bandiere al metro FINEEEEE ---
