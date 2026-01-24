@@ -128,6 +128,11 @@
            data-keywords="shopper borsa spesa bag poliestere tnt gabardina fiera gadget 38x42 manici lunghi stampa sublimazione economico busta sacco">
             <img src="img/shopper.png" alt="Shopper Personalizzate" onerror="this.src='https://placehold.co/400x300?text=Shopper'"/>
         </a>
+      
+        <a href="javascript:void(0)" onclick="mostraSezione('lanyardSection')" class="banner-item" 
+           data-keywords="lanyard laccetto collarino collarini laccio lyanard lianard lynrd laniard lain lynrd portabadge fiera evento tracolla gancio metallo sublimazione personalizzato">
+            <img src="img/lanyard.jpeg" alt="Lanyard Portabadge" onerror="this.src='https://placehold.co/400x300?text=Lanyard'"/>
+        </a>
 
     </div>
 
@@ -728,6 +733,77 @@
             </div>
 
             <button class="btn-add" id="aggiungiShopperBtn" style="margin-top: 20px; width: 100%; font-size: 1.1em;">AGGIUNGI SHOPPER AL PREVENTIVO</button>
+
+        </div>
+    </section>
+
+
+
+
+
+    <section class="galleria-blocco sezione-prodotto" id="lanyardSection">
+        <h1>Lanyard / Laccetti Portabadge (20mm)</h1>
+        
+        <div style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            
+            <div style="margin-bottom: 20px;">
+                <span id="lanyardInfoIcon" class="info-icon" style="cursor: pointer; background: #17a2b8; color: white; padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 0.9em;">
+                    ℹ️ INFO TECNICHE & COSTI
+                </span>
+                <div id="lanyardInfoContent" class="info-content" style="display: none; margin-top: 10px; background: #e3f2fd; padding: 15px; border-radius: 5px; border: 1px solid #b6d4fe; font-size: 0.9em;">
+                    <p><strong>Dimensioni:</strong> Larghezza 20mm, Lunghezza 45cm (in doppio).</p>
+                    <p><strong>Accessori:</strong> Gancio metallico portabadge incluso.</p>
+                    <p><strong>Stampa:</strong> Sublimazione HD.</p>
+                    <hr>
+                    <p>⚠️ <strong>Minimo d'ordine:</strong> 50 pezzi (ordinabili a multipli di 50: 50, 100, 150...).</p>
+                    <p>💰 <strong>Costo Impianto Grafico:</strong> € 20,00 (fisso una tantum).</p>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px; background: #fff3cd; padding: 10px; border: 1px solid #ffeeba; border-radius: 5px; display: inline-block;">
+                <label style="font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; color: #856404;">
+                    <input type="checkbox" id="lanyardDoubleSide" style="transform: scale(1.3);">
+                    DESIDERO LA STAMPA SU ENTRAMBI I LATI (Fronte + Retro)
+                </label>
+                <small style="display: block; margin-top: 5px; color: #666;">(Se non selezionato, la stampa sarà solo su un lato e il retro sarà bianco)</small>
+            </div>
+
+            <div class="input-group" style="margin-bottom: 20px;">
+                <label for="lanyardQta" style="font-weight: 600;">Quantità (Multipli di 50):</label>
+                <input type="number" id="lanyardQta" value="50" min="50" step="50" style="width: 100%; max-width: 200px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1.1em;">
+                <small id="lanyardHint" style="color: #dc3545; display: block; margin-top: 5px; font-weight: 600;">Minimo 50 pz</small>
+            </div>
+
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; border: 1px solid #ddd; margin-bottom: 20px;">
+                <p style="margin: 5px 0;">Prezzo Listino Unitario: <strong id="lanyardPrezzoUnitarioBase">€ 0.00</strong></p>
+                <p style="margin: 5px 0; color: #666; font-size: 0.9em;">+ Costo Impianto Grafico: € 20.00</p>
+                <hr style="margin: 10px 0; border-top: 1px dashed #ccc;">
+                
+                <p style="margin: 5px 0;">Totale Imponibile (Merce + Impianto): <strong id="lanyardTotaleNetto" style="color: #007bff; font-size: 1.3em;">€ 0.00</strong></p>
+                <p style="margin: 5px 0;">
+                    Totale Ivato (22%): <strong id="lanyardTotaleIvato" style="color: #28a745; font-size: 1.4em;">€ 0.00</strong>
+                </p>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label for="lanyardNote" style="font-weight: 600;">Note:</label>
+                <textarea id="lanyardNote" rows="2" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" placeholder="Es: Colore Pantone, Logo ripetuto..."></textarea>
+            </div>
+
+            <div class="upload">
+                <div class="upload-box">
+                    <p>Trascina o carica grafica Lanyard (.PDF / .AI / .PNG)</p>
+                    <input type="file" id="lanyardFileUpload" />
+                </div>
+                <div id="lanyardUploadStatusBox" style="margin-top: 15px; background: #e9ecef; padding: 10px; border-radius: 8px; display: none;">
+                    <div style="font-weight: 600;" id="lanyardUploadMessage">In attesa...</div>
+                    <div style="height: 8px; background: #ccc; border-radius: 4px; margin-top: 5px;">
+                        <div id="lanyardUploadProgressBar" style="height: 100%; width: 0%; background: #007bff; border-radius: 4px; transition: width 0.3s;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-add" id="aggiungiLanyardBtn" style="margin-top: 20px; width: 100%; font-size: 1.1em;">AGGIUNGI LANYARD AL PREVENTIVO</button>
 
         </div>
     </section>
