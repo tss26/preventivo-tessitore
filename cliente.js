@@ -1298,9 +1298,22 @@ const LISTINO_STRISCIONI = {
 };
 
 function calcolaPrezzoBanner() {
+    // --- 1. CONTROLLO DI SICUREZZA ---
+    const inputLargh = document.getElementById('bannerLargh');
+    const inputAlt = document.getElementById('bannerAlt');
+
+    // Se gli input non esistono nella pagina, esci dalla funzione senza fare nulla
+    if (!inputLargh || !inputAlt) {
+        return; 
+    }
+    // --- 1. INPUT UTENTE (Ora siamo sicuri che .value non darà errore) ---
+    const larghezzaCm = parseFloat(inputLargh.value) || 0;
+    const altezzaCm = parseFloat(inputAlt.value) || 0;
+
+    
     // 1. INPUT UTENTE
-    const larghezzaCm = parseFloat(document.getElementById('bannerLargh').value) || 0;
-    const altezzaCm = parseFloat(document.getElementById('bannerAlt').value) || 0;
+    //const larghezzaCm = parseFloat(document.getElementById('bannerLargh').value) || 0;
+    //const altezzaCm = parseFloat(document.getElementById('bannerAlt').value) || 0;
     const qta = parseInt(document.getElementById('bannerQta').value) || 1; // Recupera quantità
     
     // Recupera materiale
