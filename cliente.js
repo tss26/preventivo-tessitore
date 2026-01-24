@@ -1926,7 +1926,180 @@ async function gestisciAggiuntaShopper() {
 }
 //------- FINE SHOPPER-------------------------
 
+//------- INIZIO LANYARD-------------------------
 
+// ===========================================
+// FUNZIONI PER I LANYARD
+// ===========================================
+
+const LISTINO_LANYARD = {
+    // Stampa Solo Lato A (1 Lato)
+    "SINGLE": [
+        { max: 100, price: 1.50 },
+        { max: 200, price: 1.20 },
+        { max: 300, price: 1.00 },
+        { max: 500, price: 0.90 },
+        { max: 1000, price: 0.85 },
+        { max: 999999, price: 0.78 }
+    ],
+    // Stampa Lato A + Lato B (2 Lati)
+    "DOUBLE": [
+        { max: 100, price: 1.90 },
+        { max: 200, price: 1.60 },
+        { max: 300, price: 1.30 },
+        { max: 500, price: 1.10 },
+        { max: 1000, price: 1.00 },
+        { max: 999999, price: 0.89 }
+    ]
+};
+
+const COSTO_IMPIANTO_LANYARD = 20.00;
+
+function calcolaPrezzoLanyard() {
+    const isDouble = document.getElementById('lanyardDoubleSide').checked;
+    const inputQta = document.getElementById('lanyardQta');
+    let qta = parseInt(inputQta.value) || 0;
+
+    // Elementi UI
+    const elUnitarioBase = document.getElementById('lanyardPrezzoUnitarioBase');
+    const elTotNetto = document.getElementById('lanyardTotaleNetto');
+    const elTotIvato = document.getElementById('lanyardTotaleIvato');
+
+    // Reset visuale se quantità non valida
+    if (qta < 50) {
+        elUnitarioBase.textContent = "€ 0.00";
+        elTotNetto.textContent = "€ 0.00";
+        elTotIvato.textContent = "€ 0.00";
+        return;
+    }
+
+    // Selezione Listino (SINGLE o DOUBLE)
+    const tipoStampa = isDouble ? "DOUBLE" : "SINGLE";
+    const fasce = LISTINO_LANYARD[tipoStampa];
+
+    // Trova il prezzo unitario in base alla fascia
+    let prezzoUnitario = 0;
+    const fascia = fasce.find(f => qta <= f.max);
+    if (fascia) {
+        prezzoUnitario = fascia.price;
+    } else {
+        prezzoUnitario = fasce[fasce.length - 1].price;
+    }
+
+    // Calcolo Totale: (Qta * Prezzo) + Impianto
+    const totaleMerce = qta * prezzoUnitario;
+    const totaleImponibile = totaleMerce + COSTO_IMPIANTO_LANYARD;
+    const totaleIvato = totaleImponibile * 1.22;
+
+    // Aggiornamento UI
+    elUnitarioBase.textContent = `€ ${prezzoUnitario.toFixed(2)}`;
+    elTotNetto.textContent = `€ ${totaleImponibile.toFixed(2)}`;
+    elTotIvato.textContent = `€ ${totaleIvato.toFixed(2)}`;
+}
+
+async function gestisciAggiuntaLanyard() {
+    const isDouble = document.getElementById('lanyardDoubleSide').checked;
+    const qta = parseInt(document.getElementById('lanyardQta').value) || 0;
+    const note = document.getElementById('lanyardNote').value;
+
+    // 1. Validazione Quantità (Minimo 50 e Multipli di 50)
+    if (qta < 50) {
+        alert("Il minimo ordinabile per i Lanyard è di 50 pezzi.");
+        return;
+    }
+    if (qta % 50 !== 0) {
+        alert("La quantità deve essere un multiplo di 50 (es. 50, 100, 150...).");
+        return;
+    }
+
+    if (!utenteCorrenteId) {
+        alert("Sessione scaduta. Effettua il login.");
+        return;
+    }
+
+    // Gestione Upload
+    const fileInput = document.getElementById('lanyardFileUpload');
+    const fileToUpload = fileInput.files[0];
+    const uploadStatusBox = document.getElementById('lanyardUploadStatusBox');
+    const uploadMessage = document.getElementById('lanyardUploadMessage');
+    const uploadProgressBar = document.getElementById('lanyardUploadProgressBar');
+    let fileUrl = 'Nessun file caricato';
+
+    if (fileToUpload && fileToUpload.size > 5 * 1024 * 1024) {
+        alert("File troppo grande (Max 5MB).");
+        return;
+    }
+
+    if (fileToUpload) {
+        const BUCKET_NAME = 'personalizzazioni';
+        if (uploadStatusBox) {
+            uploadStatusBox.style.display = 'block';
+            uploadProgressBar.style.width = '0%';
+        }
+
+        try {
+            const extension = fileToUpload.name.split('.').pop();
+            const filePath = `${utenteCorrenteId}/LANYARD-${Date.now()}.${extension}`;
+            
+            const { error: uploadError } = await supabase.storage
+                .from(BUCKET_NAME)
+                .upload(filePath, fileToUpload, { cacheControl: '3600', upsert: false });
+
+            if (uploadError) throw uploadError;
+
+            if (uploadProgressBar) uploadProgressBar.style.width = '100%';
+            if (uploadMessage) uploadMessage.textContent = '✅ File caricato.';
+
+            fileUrl = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath).data.publicUrl;
+            
+            const expirationTime = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
+            await supabase.from('temp_files').insert([{ storage_path: `${BUCKET_NAME}/${filePath}`, expires_at: expirationTime }]);
+
+        } catch (e) {
+            console.error(e);
+            alert("Errore upload: " + e.message);
+            if (uploadStatusBox) uploadStatusBox.style.display = 'none';
+            return;
+        }
+    }
+
+    // Recupero il totale imponibile calcolato per ricavare il prezzo unitario "effettivo" (spalmando l'impianto)
+    // OPPURE: Salviamo il prezzo base e mettiamo l'impianto nei componenti.
+    // Metodo scelto: Prezzo Unitario = Totale Imponibile / Qta (così il totale nel carrello torna)
+    
+    const totaleImponibileString = document.getElementById('lanyardTotaleNetto').textContent.replace('€', '').trim();
+    const totaleImponibile = parseFloat(totaleImponibileString) || 0;
+    const prezzoUnitarioMedio = totaleImponibile / qta;
+
+    const tipoStampaDesc = isDouble ? "Stampa su 2 Lati (A+B)" : "Stampa su 1 Lato (A)";
+
+    const nuovoArticolo = {
+        id_unico: Date.now(),
+        prodotto: `LANYARD 20mm - ${tipoStampaDesc}`,
+        quantita: qta,
+        prezzo_unitario: parseFloat(prezzoUnitarioMedio.toFixed(3)), // Usiamo 3 decimali per precisione media
+        note: note,
+        componenti: [
+            `Tipologia: ${tipoStampaDesc}`,
+            `Gancio metallico incluso`,
+            `Include costo impianto grafico (€ 20.00)`
+        ],
+        personalizzazione_url: fileUrl,
+        dettagli_taglie: {} 
+    };
+
+    aggiungiAlCarrello(nuovoArticolo);
+    alert(`Aggiunti ${qta} Lanyard al carrello!`);
+
+    // Reset
+    document.getElementById('lanyardNote').value = '';
+    if (fileInput) fileInput.value = '';
+    if (uploadStatusBox) setTimeout(() => { uploadStatusBox.style.display = 'none'; }, 2000);
+}
+
+
+
+//------- FINE LANYARD-------------------------
 
 
 // ===========================================
@@ -2237,6 +2410,30 @@ document.getElementById('aggiungiBasketBtn').addEventListener('click', gestisciA
 
         // Inizializza Calcolo
         calcolaPrezzoShopper();
+
+
+        // --- LISTENER LANYARD --------------------------------------------------------------------------------------------------
+        // --- LISTENER LANYARD ---
+        // 1. Checkbox Doppio Lato
+        document.getElementById('lanyardDoubleSide').addEventListener('change', calcolaPrezzoLanyard);
+
+        // 2. Input Quantità
+        document.getElementById('lanyardQta').addEventListener('input', calcolaPrezzoLanyard);
+        document.getElementById('lanyardQta').addEventListener('change', calcolaPrezzoLanyard); // Per i tastini up/down
+
+        // 3. Bottone Aggiungi
+        document.getElementById('aggiungiLanyardBtn').addEventListener('click', gestisciAggiuntaLanyard);
+
+        // 4. Info Box
+        document.getElementById('lanyardInfoIcon').addEventListener('click', () => {
+            const content = document.getElementById('lanyardInfoContent');
+            content.style.display = (content.style.display === 'none' || content.style.display === '') ? 'block' : 'none';
+        });
+
+        // Inizializza
+        calcolaPrezzoLanyard();
+
+        
 
 
        
