@@ -819,6 +819,147 @@
 
 
 
+<section class="galleria-blocco sezione-prodotto" id="customBannerSection">
+    <h1>Striscioni & Bandiere su Misura (Max Luce 160cm)</h1>
+    
+    <div style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+        
+        <h3 style="color: #007bff; border-bottom: 2px solid #eee; padding-bottom: 10px;">1. Dimensioni (cm)</h3>
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px;">
+            <div class="input-group">
+                <label style="font-weight: 600;">Larghezza (cm):</label>
+                <input type="number" id="bannerLargh" value="100" min="10" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px; width: 120px;">
+            </div>
+            <div class="input-group">
+                <label style="font-weight: 600;">Altezza (cm):</label>
+                <input type="number" id="bannerAlt" value="100" min="10" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px; width: 120px;">
+            </div>
+        </div>
+
+        <h3 style="color: #007bff; border-bottom: 2px solid #eee; padding-bottom: 10px;">2. Materiale</h3>
+        <div style="margin-bottom: 20px;">
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; background: #f8f9fa; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                    <input type="radio" name="bannerMateriale" value="FLAG_NAUTICO" checked style="transform: scale(1.2);">
+                    Flag Nautico (Default)
+                </label>
+                <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; background: #f8f9fa; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                    <input type="radio" name="bannerMateriale" value="RASO" style="transform: scale(1.2);">
+                    Raso
+                </label>
+                <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; background: #f8f9fa; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                    <input type="radio" name="bannerMateriale" value="POLIESTERE_160" style="transform: scale(1.2);">
+                    Poliestere 160gr
+                </label>
+            </div>
+        </div>
+
+        <h3 style="color: #007bff; border-bottom: 2px solid #eee; padding-bottom: 10px;">3. Lavorazioni & Finiture</h3>
+        
+        <div style="margin-bottom: 15px; padding: 15px; background: #f1f8ff; border-radius: 5px;">
+            <label style="font-weight: bold; display: block; margin-bottom: 5px;">ASOLA (Tasca per asta):</label>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <label><input type="checkbox" class="banner-finish" data-tipo="ASOLA" value="Alto"> Alto</label>
+                <label><input type="checkbox" class="banner-finish" data-tipo="ASOLA" value="Basso"> Basso</label>
+                <label><input type="checkbox" class="banner-finish" data-tipo="ASOLA" value="Sinistra"> Sinistra</label>
+                <label><input type="checkbox" class="banner-finish" data-tipo="ASOLA" value="Destra"> Destra</label>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 15px; padding: 15px; background: #fff3cd; border-radius: 5px;">
+            <label style="font-weight: bold; display: block; margin-bottom: 5px;">RINFORZO LATERALE (Cucitura doppia):</label>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <label><input type="checkbox" class="banner-finish" data-tipo="RINFORZO" value="Alto"> Alto</label>
+                <label><input type="checkbox" class="banner-finish" data-tipo="RINFORZO" value="Basso"> Basso</label>
+                <label><input type="checkbox" class="banner-finish" data-tipo="RINFORZO" value="Sinistra"> Sinistra</label>
+                <label><input type="checkbox" class="banner-finish" data-tipo="RINFORZO" value="Destra"> Destra</label>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 15px; padding: 15px; background: #e2e3e5; border-radius: 5px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <label style="font-weight: bold;">OCCHIELLI (Fori metallici):</label>
+                <select id="bannerFreqOcchielli" style="padding: 5px;">
+                    <option value="50">Ogni 50 cm</option>
+                    <option value="100">Ogni 100 cm</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <label><input type="checkbox" class="banner-finish" data-tipo="OCCHIELLI" value="Alto"> Alto</label>
+                <label><input type="checkbox" class="banner-finish" data-tipo="OCCHIELLI" value="Basso"> Basso</label>
+                <label><input type="checkbox" class="banner-finish" data-tipo="OCCHIELLI" value="Sinistra"> Sinistra</label>
+                <label><input type="checkbox" class="banner-finish" data-tipo="OCCHIELLI" value="Destra"> Destra</label>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 15px; padding: 15px; background: #d1ecf1; border-radius: 5px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <label style="font-weight: bold;">ANELLI D-RING:</label>
+                <select id="bannerFreqDring" style="padding: 5px;">
+                    <option value="50">Ogni 50 cm</option>
+                    <option value="100">Ogni 100 cm</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <label><input type="checkbox" class="banner-finish" data-tipo="DRING" value="Alto"> Alto</label>
+                <label><input type="checkbox" class="banner-finish" data-tipo="DRING" value="Basso"> Basso</label>
+                <label><input type="checkbox" class="banner-finish" data-tipo="DRING" value="Sinistra"> Sinistra</label>
+                <label><input type="checkbox" class="banner-finish" data-tipo="DRING" value="Destra"> Destra</label>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 15px; padding: 15px; background: #f8d7da; border-radius: 5px;">
+            <label style="font-weight: bold; display: block; margin-bottom: 5px;">LACCETTI DI TENUTA:</label>
+            <div style="display: flex; gap: 10px; flex-direction: column;">
+                <label><input type="radio" name="bannerLaccetto" value="NESSUNO" checked> Nessuno</label>
+                <label><input type="radio" name="bannerLaccetto" value="V_SHAPE"> A "V" (Standard)</label>
+                <label><input type="radio" name="bannerLaccetto" value="20CM"> Lungo 20cm (+1.00€)</label>
+                <label><input type="radio" name="bannerLaccetto" value="50CM"> Lungo 50cm (+2.00€)</label>
+                <label><input type="radio" name="bannerLaccetto" value="100CM"> Lungo 100cm (+3.00€)</label>
+            </div>
+        </div>
+
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; border: 1px solid #ddd; margin-bottom: 20px;">
+            <p style="margin: 5px 0;">Prezzo Netto Cadauno: <strong id="bannerPrezzoUnitario" style="font-size: 1.2em;">€ 0.00</strong></p>
+            <div id="bannerInfoExtra" style="font-size: 0.85em; color: #666; font-style: italic;"></div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="font-weight: 600;">Note:</label>
+            <textarea id="bannerNote" rows="2" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;"></textarea>
+        </div>
+
+        <div class="upload">
+            <div class="upload-box">
+                <p>Carica file grafica (.PDF / .PNG)</p>
+                <input type="file" id="bannerFileUpload" />
+            </div>
+             <div id="bannerUploadStatusBox" style="margin-top: 15px; background: #e9ecef; padding: 10px; border-radius: 8px; display: none;">
+                <div style="font-weight: 600;" id="bannerUploadMessage">In attesa...</div>
+                 <div style="height: 8px; background: #ccc; border-radius: 4px; margin-top: 5px;">
+                    <div id="bannerUploadProgressBar" style="height: 100%; width: 0%; background: #007bff; border-radius: 4px; transition: width 0.3s;"></div>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-add" id="aggiungiBannerBtn" style="margin-top: 20px; width: 100%; font-size: 1.1em;">AGGIUNGI AL PREVENTIVO</button>
+
+    </div>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
     
 
 
