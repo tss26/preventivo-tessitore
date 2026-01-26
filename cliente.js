@@ -36,6 +36,20 @@ const FASCE_QUANTITA_BASKET = [
 ];
 
 
+// Fasce di quantità per il listino Kit Calcio
+const FASCE_QUANTITA_KIT = [
+    { max: 5, key: "1_5" },
+    { max: 20, key: "6_20" },
+    { max: 50, key: "21_50" },
+    { max: 70, key: "51_70" },
+    { max: 100, key: "71_100" },
+    { max: 150, key: "101_150" },
+    { max: 200, key: "151_200" },
+    { max: 250, key: "201_250" },
+    { max: 350, key: "251_350" },
+    { max: 999999, key: "351_500" } // Usa l'ultimo prezzo per qualsiasi quantità sopra i 350
+];
+
 // ===========================================
 // LISTINO PREZZI BANDIERE (Dati Dinamici dalla foto)
 // ===========================================
