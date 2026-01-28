@@ -156,28 +156,37 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
-  // Nuovo codice intelligente:
-supabase.auth.getSession().then(async ({ data: { session } }) => {
-    // Se c'è una sessione attiva E l'utente è sulla pagina di login
-    if (session && window.location.pathname.endsWith('login.html')) {
-        
-        // Controlliamo al volo che ruolo ha per mandarlo alla pagina giusta
-        const { data: profilo } = await supabase
-            .from('utenti')
-            .select('permessi')
-            .eq('id', session.user.id)
-            .single();
+    // Nuovo codice intelligente (VERSIONE PROTETTA):
+    // Controlliamo che 'supabase' esista prima di usarlo per evitare crash
+    if (typeof supabase !== 'undefined' && supabase) {
+        supabase.auth.getSession().then(async ({ data: { session } }) => {
+            // Se c'è una sessione attiva E l'utente è sulla pagina di login
+            if (session && window.location.href.includes('login.html')) {
+                
+                console.log("Utente già loggato. Controllo permessi...");
 
-        if (profilo && profilo.permessi === 'admin') window.location.href = 'admin.html';
-        else if (profilo && profilo.permessi === 'operatore') window.location.href = 'operatore.html';
-        else if (profilo && profilo.permessi === 'rappresentante') window.location.href = 'rappresentante.html';
-        else window.location.href = 'cliente.html';
+                // Controlliamo al volo che ruolo ha per mandarlo alla pagina giusta
+                const { data: profilo, error } = await supabase
+                    .from('utenti')
+                    .select('permessi')
+                    .eq('id', session.user.id)
+                    .single();
+
+                // Se non troviamo il profilo o c'è un errore, mandiamo al cliente standard per sicurezza
+                if (error || !profilo) {
+                    window.location.href = 'cliente.html';
+                    return;
+                }
+
+                if (profilo.permessi === 'admin') window.location.href = 'admin.html';
+                else if (profilo.permessi === 'operatore') window.location.href = 'operatore.html';
+                else if (profilo.permessi === 'rappresentante') window.location.href = 'rappresentante.html';
+                else window.location.href = 'cliente.html';
+            }
+        }).catch(err => console.log("Nessuna sessione attiva o errore:", err));
     }
-});
 
-
-
+    // --- FINE DEL CODICE NUOVO ---
 // ===========================================
     // LOGICA RESET PASSWORD (NUOVA AGGIUNTA)
     // ===========================================
