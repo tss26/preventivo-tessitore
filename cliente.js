@@ -1181,15 +1181,17 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
         dettagliHtml += `</div>`;
 } //modifica nuova per tabellla html---------------------------------------------------------------------------------------------------------------------------- Chiudiamo l'IF infoCliente qui
 
-    // --- INIZIO NUOVA TABELLA PRODOTTI ---
-    dettagliHtml += `<h3 style="margin-bottom:10px; border-bottom:2px solid #eee; padding-bottom:5px;">Riepilogo Articoli</h3>`;
-    dettagliHtml += `<table style="width:100%; border-collapse:collapse; font-size:0.95em; margin-bottom:20px;">
+    // --- INIZIO TABELLA PRODOTTI (FIX LAYOUT) ---
+    dettagliHtml += `<h3 style="margin-bottom:10px; border-bottom:2px solid #eee; padding-bottom:5px; text-align:left;">Riepilogo Articoli</h3>`;
+    
+    // Aggiunto table-layout: fixed e larghezze percentuali per costringere le colonne a stare al loro posto
+    dettagliHtml += `<table style="width:100%; border-collapse:collapse; font-size:0.95em; margin-bottom:20px; table-layout: fixed;">
         <thead>
             <tr style="background:#f8f9fa; border-bottom:2px solid #dee2e6;">
-                <th style="padding:10px; text-align:left; color:#495057;">Prodotto & Dettagli</th>
-                <th style="padding:10px; text-align:center; color:#495057;">Q.tà</th>
-                <th style="padding:10px; text-align:right; color:#495057;">Prezzo</th>
-                <th style="padding:10px; text-align:center; color:#495057;">File</th>
+                <th style="padding:10px; text-align:left; color:#495057; width: 55%;">Prodotto & Dettagli</th>
+                <th style="padding:10px; text-align:center; color:#495057; width: 10%;">Q.tà</th>
+                <th style="padding:10px; text-align:right; color:#495057; width: 20%;">Prezzo</th>
+                <th style="padding:10px; text-align:center; color:#495057; width: 15%;">File</th>
             </tr>
         </thead>
         <tbody>`;
@@ -1200,10 +1202,10 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
         // Gestione Componenti e Note
         let extraInfo = '';
         if (item.componenti && item.componenti.length > 0) {
-            extraInfo += `<div style="font-size:0.85em; color:#666; margin-top:4px;">🔹 ${item.componenti.join('<br>🔹 ')}</div>`;
+            extraInfo += `<div style="font-size:0.85em; color:#666; margin-top:4px; text-align:left;">🔹 ${item.componenti.join('<br>🔹 ')}</div>`;
         }
         if (item.dettagli_taglie && Object.keys(item.dettagli_taglie).length > 0) {
-            extraInfo += `<div style="font-size:0.85em; color:#007bff; margin-top:4px;">📏 Taglie: `;
+            extraInfo += `<div style="font-size:0.85em; color:#007bff; margin-top:4px; text-align:left;">📏 Taglie: `;
             for (const g in item.dettagli_taglie) {
                 const t = Object.entries(item.dettagli_taglie[g]).map(([k,v])=>`${k}:${v}`).join(', ');
                 extraInfo += `${g} [${t}] `;
@@ -1211,33 +1213,33 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
             extraInfo += `</div>`;
         }
         if (item.note) {
-            extraInfo += `<div style="font-size:0.85em; font-style:italic; color:#dc3545; margin-top:4px;">📝 Note: ${item.note}</div>`;
+            extraInfo += `<div style="font-size:0.85em; font-style:italic; color:#dc3545; margin-top:4px; text-align:left;">📝 Note: ${item.note}</div>`;
         }
 
         // Gestione Bottone File
         let fileBtn = '<span style="color:#ccc;">-</span>';
         if (item.personalizzazione_url && item.personalizzazione_url.includes('http')) {
-            fileBtn = `<a href="${item.personalizzazione_url}" target="_blank" style="display:inline-block; padding:6px 12px; background:#17a2b8; color:white; text-decoration:none; border-radius:4px; font-weight:bold; font-size:0.85em;">📎 Apri File</a>`;
-        } else if (item.personalizzazione_url) {
-             fileBtn = `<small style="color:#666;">${item.personalizzazione_url}</small>`;
+            fileBtn = `<a href="${item.personalizzazione_url}" target="_blank" style="display:inline-block; padding:4px 8px; background:#17a2b8; color:white; text-decoration:none; border-radius:4px; font-weight:bold; font-size:0.8em;">📎 Apri</a>`;
+        } else if (item.personalizzazione_url && item.personalizzazione_url.length > 3) {
+             fileBtn = `<small style="color:#666;">Si</small>`;
         }
 
         let pUnit = parseFloat(item.prezzo_unitario) || 0;
 
         dettagliHtml += `
             <tr style="border-bottom:1px solid #eee;">
-                <td style="padding:10px; vertical-align:top;">
+                <td style="padding:10px; vertical-align:top; text-align:left; word-wrap: break-word;">
                     <strong style="font-size:1.05em; color:#333;">${item.prodotto}</strong>
                     ${extraInfo}
                 </td>
                 <td style="padding:10px; text-align:center; vertical-align:top; font-weight:bold;">${item.quantita}</td>
-                <td style="padding:10px; text-align:right; vertical-align:top;">€ ${pUnit.toFixed(2)}</td>
+                <td style="padding:10px; text-align:right; vertical-align:top; white-space: nowrap;">€ ${pUnit.toFixed(2)}</td>
                 <td style="padding:10px; text-align:center; vertical-align:top;">${fileBtn}</td>
             </tr>`;
     });
     
     dettagliHtml += `</tbody></table>`;
-    // --- FINE NUOVA TABELLA PRODOTTI ---
+    // --- FINE TABELLA PRODOTTI ---
 
 
 
