@@ -1162,6 +1162,7 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
     const modal = document.getElementById('orderDetailsModal');
     const modalBody = document.getElementById('modalOrderDetails');
     const modalTitle = document.getElementById('modalOrderId');
+    modalBody.style.whiteSpace = 'normal'; // <--- FONDAMENTALE: Ripristina lo stile corretto
     
     // --- Titolo Modale ---
     if (numeroOrdineProg && numeroOrdineProg !== 'null') {
@@ -1242,8 +1243,31 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
     // --- FINE TABELLA PRODOTTI ---
 
 
-
+    // --- Totali e Footer (CORRETTO HTML) ---
+    dettagliHtml += '<br><div style="border-top:1px dashed #ccc; margin-top:10px; padding-top:10px;">'; 
+    dettagliHtml += 'Per procedere con l\'ordine effettuare Bonifico intestato a : Tessitore s.r.l.<br>';
+    dettagliHtml += 'BANCA : SELLA  IBAN : IT56 O032 6804 6070 5227 9191 820</div>';
+    
+    const ivaRate = 0.22; 
+    let totaleImponibileNumerico = parseFloat(totaleImponibile) || 0; 
+    
+    if (totaleImponibileNumerico > 0) {
+        const ivaDovuta = totaleImponibileNumerico * ivaRate;
+        const totaleFinale = totaleImponibileNumerico + ivaDovuta;
         
+        dettagliHtml += `<div style="border-top:2px solid #333; margin-top:10px; padding-top:10px; text-align:right;">`;
+        dettagliHtml += `<strong>TOTALE IMPONIBILE:</strong> € ${totaleImponibileNumerico.toFixed(2)}<br>`;
+        dettagliHtml += `<strong>IVA (22%):</strong> € ${ivaDovuta.toFixed(2)}<br>`;
+        dettagliHtml += `<strong style="font-size:1.2em;">TOTALE DOVUTO: € ${totaleFinale.toFixed(2)}</strong>`;
+        dettagliHtml += `</div>`;
+    }
+    
+    // Assegnazione HTML (SENZA .replace, così la tabella non si rompe!)
+    modalBody.innerHTML = dettagliHtml;
+
+
+
+      /*  
 
     // --- Totali e Footer ---
     dettagliHtml += '\n-----------------------------------------------------------------------------------------\n'; 
@@ -1265,7 +1289,7 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
     }
     
     // Assegnazione HTML
-    modalBody.innerHTML = dettagliHtml.replace(/\n/g, '<br>');
+    modalBody.innerHTML = dettagliHtml.replace(/\n/g, '<br>');*/
 
     // Tasto Stampa
     let btnStampa = document.getElementById('btnStampaOrdine');
