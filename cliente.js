@@ -1222,7 +1222,7 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
         
         if (item.personalizzazione_url && item.personalizzazione_url.includes('http')) {
             // Se è un link valido, mostra il bottone verde
-            fileBtn = `<a href="${item.personalizzazione_url}" target="_blank" style="display:inline-block; padding:6px 12px; background:#28a745; color:white; text-decoration:none; border-radius:4px; font-weight:bold; font-size:0.85em; white-space:nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">📎 </a>`;
+            fileBtn = `<a href="${item.personalizzazione_url}" target="_blank" style="display:inline-block; padding:6px 12px; background:#007bff; color:white; text-decoration:none; border-radius:4px; font-weight:bold; font-size:0.85em; white-space:nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">📎 </a>`;
         } else if (item.personalizzazione_url && item.personalizzazione_url.length > 2 && item.personalizzazione_url !== 'Nessun file caricato') {
              // Se è solo testo (es. nome file senza link), mostralo come testo
              fileBtn = `<small style="color:#666;">${item.personalizzazione_url}</small>`;
