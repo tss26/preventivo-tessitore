@@ -1179,50 +1179,69 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
         dettagliHtml += `<strong>Cliente / Rag. Soc.:</strong> ${infoCliente.cliente || '---'}<br>`;
         dettagliHtml += `<strong>Contatti:</strong> ${infoCliente.contatti || '---'}`;
         dettagliHtml += `</div>`;
-        dettagliHtml += `----------------------------------------------------------\n\n`;
-    }
+} //modifica nuova per tabellla html---------------------------------------------------------------------------------------------------------------------------- Chiudiamo l'IF infoCliente qui
 
-    dettagliHtml += `DETTAGLI ARTICOLI:\n`;
+    // --- INIZIO NUOVA TABELLA PRODOTTI ---
+    dettagliHtml += `<h3 style="margin-bottom:10px; border-bottom:2px solid #eee; padding-bottom:5px;">Riepilogo Articoli</h3>`;
+    dettagliHtml += `<table style="width:100%; border-collapse:collapse; font-size:0.95em; margin-bottom:20px;">
+        <thead>
+            <tr style="background:#f8f9fa; border-bottom:2px solid #dee2e6;">
+                <th style="padding:10px; text-align:left; color:#495057;">Prodotto & Dettagli</th>
+                <th style="padding:10px; text-align:center; color:#495057;">Q.tà</th>
+                <th style="padding:10px; text-align:right; color:#495057;">Prezzo</th>
+                <th style="padding:10px; text-align:center; color:#495057;">File</th>
+            </tr>
+        </thead>
+        <tbody>`;
 
     dettagli.forEach(item => {
-        // Ignora l'oggetto INFO_CLIENTE nel loop prodotti
         if (item.tipo === 'INFO_CLIENTE') return;
 
-        dettagliHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
-        
+        // Gestione Componenti e Note
+        let extraInfo = '';
         if (item.componenti && item.componenti.length > 0) {
-             dettagliHtml += `Componenti: ${item.componenti.join(', ')}\n`;
+            extraInfo += `<div style="font-size:0.85em; color:#666; margin-top:4px;">🔹 ${item.componenti.join('<br>🔹 ')}</div>`;
         }
-        
-        let pUnit = parseFloat(item.prezzo_unitario);
-        if (isNaN(pUnit)) pUnit = 0;
-        dettagliHtml += `Prezzo netto cad.: € ${pUnit.toFixed(2)}\n`;
-        
         if (item.dettagli_taglie && Object.keys(item.dettagli_taglie).length > 0) {
-            dettagliHtml += `Dettagli Taglie:\n`;
-            for (const genere in item.dettagli_taglie) {
-                const taglie = Object.entries(item.dettagli_taglie[genere])
-                    .map(([taglia, qty]) => `${taglia}: ${qty}`)
-                    .join(', ');
-                dettagliHtml += `  - ${genere}: ${taglie}\n`;
+            extraInfo += `<div style="font-size:0.85em; color:#007bff; margin-top:4px;">📏 Taglie: `;
+            for (const g in item.dettagli_taglie) {
+                const t = Object.entries(item.dettagli_taglie[g]).map(([k,v])=>`${k}:${v}`).join(', ');
+                extraInfo += `${g} [${t}] `;
             }
+            extraInfo += `</div>`;
         }
-        
-        if (item.note && item.note.trim() !== '') {
-            dettagliHtml += `Note: ${item.note}\n`;
+        if (item.note) {
+            extraInfo += `<div style="font-size:0.85em; font-style:italic; color:#dc3545; margin-top:4px;">📝 Note: ${item.note}</div>`;
         }
 
-        // --- MODIFICA QUI: GESTIONE LINK FILE ---
-        if (item.personalizzazione_url && item.personalizzazione_url !== 'Nessun file collegato direttamente.') {
-            // Se contiene "http", è un link valido -> Creiamo il pulsante
-            if (item.personalizzazione_url.includes('http')) {
-                dettagliHtml += `File: <a href="${item.personalizzazione_url}" target="_blank" style="color: #007bff; text-decoration: underline; font-weight: bold; cursor: pointer;">Visualizza Allegato 📎</a>\n`;
-            } else {
-                // Altrimenti stampiamo il testo (es. "Nessun file caricato")
-                dettagliHtml += `File: ${item.personalizzazione_url}\n`;
-            }
+        // Gestione Bottone File
+        let fileBtn = '<span style="color:#ccc;">-</span>';
+        if (item.personalizzazione_url && item.personalizzazione_url.includes('http')) {
+            fileBtn = `<a href="${item.personalizzazione_url}" target="_blank" style="display:inline-block; padding:6px 12px; background:#17a2b8; color:white; text-decoration:none; border-radius:4px; font-weight:bold; font-size:0.85em;">📎 Apri File</a>`;
+        } else if (item.personalizzazione_url) {
+             fileBtn = `<small style="color:#666;">${item.personalizzazione_url}</small>`;
         }
+
+        let pUnit = parseFloat(item.prezzo_unitario) || 0;
+
+        dettagliHtml += `
+            <tr style="border-bottom:1px solid #eee;">
+                <td style="padding:10px; vertical-align:top;">
+                    <strong style="font-size:1.05em; color:#333;">${item.prodotto}</strong>
+                    ${extraInfo}
+                </td>
+                <td style="padding:10px; text-align:center; vertical-align:top; font-weight:bold;">${item.quantita}</td>
+                <td style="padding:10px; text-align:right; vertical-align:top;">€ ${pUnit.toFixed(2)}</td>
+                <td style="padding:10px; text-align:center; vertical-align:top;">${fileBtn}</td>
+            </tr>`;
     });
+    
+    dettagliHtml += `</tbody></table>`;
+    // --- FINE NUOVA TABELLA PRODOTTI ---
+
+
+
+        
 
     // --- Totali e Footer ---
     dettagliHtml += '\n-----------------------------------------------------------------------------------------\n'; 
