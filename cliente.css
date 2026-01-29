@@ -781,3 +781,76 @@ body {
 
 /*------------------------------------------fine modifiche mobile----------------------------------------------*/
 
+/* =========================================================== */
+/* FIX FORZATO PER IL MODALE E LA TABELLA (AGGIUNGI ALLA FINE) */
+/* =========================================================== */
+
+/* 1. RISOLVE LO SPAZIO VUOTO ENORME INIZIALE */
+/* Forza il testo a comportarsi normalmente ignorando gli 'a capo' del codice HTML */
+#modalOrderDetails {
+    white-space: normal !important; 
+}
+
+/* 2. SISTEMA LA TABELLA DEI DETTAGLI */
+/* Forza la tabella a occupare tutto lo spazio e fissa le colonne */
+#modalOrderDetails table {
+    width: 100% !important;
+    table-layout: fixed !important; 
+    border-collapse: collapse !important;
+    margin-bottom: 20px !important;
+}
+
+/* 3. GESTIONE DELLE CELLE */
+#modalOrderDetails th, 
+#modalOrderDetails td {
+    padding: 8px 5px !important; /* Un po' di spazio interno */
+    word-wrap: break-word !important; /* Manda a capo le parole lunghe se necessario */
+    overflow-wrap: break-word !important;
+    vertical-align: top !important;
+}
+
+/* 4. FORZA IL PREZZO SU UNA RIGA SOLA */
+/* Evita che "€ 17.00" si spezzi su due righe */
+#modalOrderDetails td:nth-child(3),
+#modalOrderDetails th:nth-child(3) {
+    white-space: nowrap !important;
+    width: 20% !important; /* Larghezza fissa per il prezzo */
+}
+
+/* 5. GESTIONE COLONNA QUANTITÀ */
+#modalOrderDetails td:nth-child(2),
+#modalOrderDetails th:nth-child(2) {
+    width: 10% !important;
+    text-align: center !important;
+}
+
+/* 6. GESTIONE COLONNA FILE */
+#modalOrderDetails td:nth-child(4),
+#modalOrderDetails th:nth-child(4) {
+    width: 15% !important;
+    text-align: center !important;
+}
+/*--------------------------------------fine aggiunzione css per modifica vista ordine cliente .js-------------------------*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
