@@ -1162,6 +1162,8 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
     const modal = document.getElementById('orderDetailsModal');
     const modalBody = document.getElementById('modalOrderDetails');
     const modalTitle = document.getElementById('modalOrderId');
+    // --- AGGIUNGI QUESTA RIGA QUI SOTTO ---
+    modalBody.style.whiteSpace = 'normal'; // <--- RISOLVE LO SPAZIO VUOTO
 
     // --- Titolo Modale ---
     if (numeroOrdineProg && numeroOrdineProg !== 'null') {
