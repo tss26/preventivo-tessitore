@@ -3379,7 +3379,7 @@ function calcolaPrezzoDinamicoBasket() {
         // Mostra l'etichetta rossa con la percentuale applicata
         if(labelDouble) {
             labelDouble.style.display = 'inline';
-            labelDouble.textContent = `(+${percentualeExtra}% Double)`;
+            //labelDouble.textContent = `(+${percentualeExtra}% Double)`;----------------togli il commento qui per vedere la percetuale
         }
     } else {
         if(labelDouble) labelDouble.style.display = 'none';
