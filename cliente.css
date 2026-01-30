@@ -520,6 +520,17 @@ body {
     text-decoration: none;
 }
 
+
+#kitCalcioSection h3 {
+    background: #eaffea;
+    padding: 10px;
+    border-left: 5px solid #28a745;
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+
+
 /* ======================================= */
 /* STILI PER IL BOTTONE CARRELLO FLUTTUANTE */
 /* ======================================= */
