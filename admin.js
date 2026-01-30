@@ -441,7 +441,7 @@ function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, 
 
 
 /**
- * Mostra i dettagli dell'ordine in un modale (Versione Aggiornata: Tabella + Fix Layout + Bottone Blu)
+ * Mostra i dettagli dell'ordine in un modale (Versione Finale: Logo + Stampa Full Width A4)
  */
 function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, totaleImponibile) {
     const dettagli = JSON.parse(dettagliProdottiString); 
@@ -454,22 +454,65 @@ function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, 
     }
 
     // --- 0. FIX IMPORTANTE PER IL LAYOUT ---
-    // Ripristina lo stile normale per evitare che la tabella si rompa o crei spazi vuoti
     modalBody.style.whiteSpace = 'normal'; 
 
-    // --- 1. GESTIONE TITOLO ---
+    // --- 1. GESTIONE TITOLO CON LOGO ---
     const h2Element = document.querySelector('#orderDetailsModal h2');
+    // HTML del logo (usa l'icona presente nel progetto)
+    const logoHtml = `<img src="icon-192.png" alt="Logo" style="height: 45px; vertical-align: middle; margin-right: 15px;">`;
+
     if (numeroOrdineVisibile && numeroOrdineVisibile.includes('/')) {
-        h2Element.innerHTML = `Numero Preventivo : <span style="color: #007bff;">${numeroOrdineVisibile}</span>`;
+        h2Element.innerHTML = `${logoHtml}Numero Preventivo : <span style="color: #007bff;">${numeroOrdineVisibile}</span>`;
     } else {
         const label = numeroOrdineVisibile || ordineId.substring(0, 8).toUpperCase();
-        h2Element.innerHTML = `Dettaglio Preventivo ID: <span style="color: #6c757d; font-size: 0.9em;">${label}</span>`;
+        h2Element.innerHTML = `${logoHtml}Dettaglio Preventivo ID: <span style="color: #6c757d; font-size: 0.9em;">${label}</span>`;
     }
 
     let dettagliHtml = "";
 
+    // --- INIEZIONE STILE STAMPA FULL WIDTH (Risolve i bordi bianchi) ---
+    dettagliHtml += `
+    <style>
+        @media print {
+            @page { 
+                margin: 0.5cm; /* Riduce i margini del foglio */
+            }
+            body * { 
+                visibility: hidden; 
+            }
+            #orderDetailsModal, #orderDetailsModal * { 
+                visibility: visible; 
+            }
+            #orderDetailsModal {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                background: white;
+            }
+            /* FORZA LA LARGHEZZA AL 100% */
+            .modal-content {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            #modalOrderDetails {
+                border: none !important;
+            }
+            /* Nasconde bottoni inutili in stampa */
+            .close-button, #btnStampaOrdine, button { 
+                display: none !important; 
+            }
+        }
+    </style>
+    `;
+
     // --- 2. BOX BLU DATI CLIENTE ---
-    // Riferimento ID Database
     dettagliHtml += `<div style="font-size: 0.85em; color: #999; margin-bottom: 5px;">Rif. Database: ${ordineId}</div>`;
 
     const infoCliente = dettagli.find(d => d.tipo === 'INFO_CLIENTE');
@@ -480,8 +523,8 @@ function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, 
         dettagliHtml += `</div>`;
     }
 
-    // --- 3. TABELLA PRODOTTI (NUOVO LAYOUT) ---
-    dettagliHtml += `<h4 style="margin:0 0 10px 0; color:#007bff; text-align:left;">📋 Dettaglio Articoli Ordine</h4>`;
+    // --- 3. TABELLA PRODOTTI ---
+    dettagliHtml += `<h4 style="margin:0 0 10px 0; color:#007bff; text-align:left;">📋 Dettaglio Articoli Preventivo</h4>`;
     
     dettagliHtml += `<div style="overflow-x:auto;">
     <table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-family:inherit; table-layout: fixed;">
@@ -498,7 +541,6 @@ function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, 
     dettagli.forEach(item => {
         if (item.tipo === 'INFO_CLIENTE') return;
 
-        // Costruzione dettagli (Componenti, Taglie, Note)
         let specs = '';
         if (item.componenti && item.componenti.length > 0) specs += `<div style="font-size:0.85em; margin-top:3px; color:#555; text-align:left;">🔹 ${item.componenti.join('<br>🔹 ')}</div>`;
         
@@ -513,10 +555,9 @@ function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, 
 
         if (item.note) specs += `<div style="font-size:0.85em; margin-top:3px; color:#dc3545; text-align:left;"><em>Note: ${item.note}</em></div>`;
 
-        // Bottone File Admin (COLORE CELESTE #007bff)
         let fileCell = '<span style="color:#ccc;">-</span>';
         if (item.personalizzazione_url && item.personalizzazione_url.includes('http')) {
-            fileCell = `<a href="${item.personalizzazione_url}" target="_blank" style="display:inline-block; padding:5px 10px; background:#007bff; color:white; border-radius:4px; text-decoration:none; font-weight:bold; font-size:0.8em; white-space:nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">📥 </a>`;
+            fileCell = `<a href="${item.personalizzazione_url}" target="_blank" style="display:inline-block; padding:5px 10px; background:#007bff; color:white; border-radius:4px; text-decoration:none; font-weight:bold; font-size:0.8em; white-space:nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">📥</a>`;
         }
 
         let pUnit = parseFloat(item.prezzo_unitario) || 0;
@@ -554,7 +595,6 @@ function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, 
         dettagliHtml += `</div>`;
     }
 
-    // Assegnazione HTML (Senza .replace)
     modalBody.innerHTML = dettagliHtml;
 
     // --- 5. TASTO STAMPA ---
@@ -582,7 +622,6 @@ function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, 
 
     modal.style.display = 'block';
 }
-
 
 
 
