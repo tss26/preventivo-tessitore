@@ -81,13 +81,13 @@ const LISTINO_COMPLETO = {
     },
 
 
-    // --- NUOVO LISTINO KIT CALCIO (Basato su Listini Completini Tessitore.pdf) ---
+    // --- NUOVO LISTINO KIT CALCIO (Basato su Listini Completini Tessitore.pdf) --- mod. fascia 21 50 compl 19.50 è 19, maglia 11.50 è 10.5, pant 9.50 è 9
     "KIT_CALCIO": {
         // Prezzi unitari netti (€) basati sulla fascia di quantità TOTALE
         "PREZZI_FASCIA": {
             "1_5": { COMPLETINO: 25.00, MAGLIA_SOLA: 14.50, PANTALONCINO_SOLO: 13.00 },
-            "6_20": { COMPLETINO: 22.50, MAGLIA_SOLA: 13.50, PANTALONCINO_SOLO: 11.50 },
-            "21_50": { COMPLETINO: 19.50, MAGLIA_SOLA: 11.50, PANTALONCINO_SOLO: 9.50 },
+            "6_20": { COMPLETINO: 22.50, MAGLIA_SOLA: 12.50, PANTALONCINO_SOLO: 11.50 },
+            "21_50": { COMPLETINO: 19.00, MAGLIA_SOLA: 10.50, PANTALONCINO_SOLO: 9.50 },
             "51_70": { COMPLETINO: 18.00, MAGLIA_SOLA: 9.50, PANTALONCINO_SOLO: 9.00 },
             "71_100": { COMPLETINO: 17.00, MAGLIA_SOLA: 9.00, PANTALONCINO_SOLO: 8.50 },
             "101_150": { COMPLETINO: 16.00, MAGLIA_SOLA: 8.50, PANTALONCINO_SOLO: 8.00 },
