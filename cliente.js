@@ -1164,11 +1164,15 @@ function mostraDettagliOrdine(ordineId, dettagliProdottiString, numeroOrdineProg
     const modalTitle = document.getElementById('modalOrderId');
     modalBody.style.whiteSpace = 'normal'; // <--- FONDAMENTALE: Ripristina lo stile corretto
     
-    // --- Titolo Modale ---
+    // --- MODIFICA: Fix spazi e Definizione Logo ---
+    modalBody.style.whiteSpace = 'normal'; 
+    const logoHtml = `<img src="icon-192.png" alt="Logo" style="height: 45px; vertical-align: middle; margin-right: 15px;">`;
+
+    // --- Titolo Modale con Logo ---
     if (numeroOrdineProg && numeroOrdineProg !== 'null') {
-        document.querySelector('#orderDetailsModal h2').innerHTML = `Numero Preventivo : <span style="color: #007bff;">${numeroOrdineProg}</span>`;
+        document.querySelector('#orderDetailsModal h2').innerHTML = `${logoHtml}Numero Preventivo : <span style="color: #007bff;">${numeroOrdineProg}</span>`;
     } else {
-        document.querySelector('#orderDetailsModal h2').innerHTML = `Dettaglio Preventivo ID: <span style="color: #6c757d; font-size: 0.9em;">${ordineId.substring(0, 8)}</span>`;
+        document.querySelector('#orderDetailsModal h2').innerHTML = `${logoHtml}Dettaglio Preventivo ID: <span style="color: #6c757d; font-size: 0.9em;">${ordineId.substring(0, 8)}</span>`;
     }
     
     let dettagliHtml = "";
