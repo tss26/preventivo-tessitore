@@ -319,164 +319,11 @@ async function aggiornaStatoOrdine(ordineId, nuovoStato) {
 }
 
 
-/**
- * 4. Mostra i dettagli dell'ordine in un modale.
- 
-function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, totaleImponibile) {
-    const dettagli = JSON.parse(dettagliProdottiString); 
-    const modal = document.getElementById('orderDetailsModal');
-    const modalBody = document.getElementById('modalOrderDetails');
 
-    if (!modal || !modalBody) {
-        console.error("Elementi modale non trovati!");
-        return; 
-    }
-
-    // --- 1. GESTIONE TITOLO ---
-    const h2Element = document.querySelector('#orderDetailsModal h2');
-    if (numeroOrdineVisibile && numeroOrdineVisibile.includes('/')) {
-        h2Element.innerHTML = `Numero Preventivo : <span style="color: #007bff;">${numeroOrdineVisibile}</span>`;
-    } else {
-        const label = numeroOrdineVisibile || ordineId.substring(0, 8).toUpperCase();
-        h2Element.innerHTML = `Dettaglio Preventivo ID: <span style="color: #6c757d; font-size: 0.9em;">${label}</span>`;
-    }
-
-    let dettagliHtml = "";
-
-    // --- 2. BOX BLU DATI CLIENTE ---
-    const infoCliente = dettagli.find(d => d.tipo === 'INFO_CLIENTE');
-    
-    // Riferimento ID Database
-    dettagliHtml += `<div style="font-size: 0.85em; color: #999; margin-bottom: 5px;">Rif. Database: ${ordineId}</div>`;
-
-    if (infoCliente) {
-        dettagliHtml += `<div style="background: #f1f8ff; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #cce5ff;">`;
-        dettagliHtml += `<strong>Cliente / Rag. Soc.:</strong> ${infoCliente.cliente || '---'}<br>`;
-        dettagliHtml += `<strong>Contatti:</strong> ${infoCliente.contatti || '---'}`;
-        dettagliHtml += `</div>`;
-        dettagliHtml += `----------------------------------------------------------\n\n`;
-    }
-
-    dettagliHtml += `DETTAGLI ARTICOLI:\n`;
-
-    // --- 3. LISTA PRODOTTI ---
-    dettagli.forEach(item => {
-        if (item.tipo === 'INFO_CLIENTE') return;
-
-        dettagliHtml += `\n--- ${item.prodotto} (${item.quantita} pz) ---\n`;
-        
-        if (item.componenti && Array.isArray(item.componenti) && item.componenti.length > 0) {
-            dettagliHtml += `Componenti: ${item.componenti.join(', ')}\n`;
-        }
-        
-        let pUnit = parseFloat(item.prezzo_unitario);
-        if (isNaN(pUnit)) pUnit = 0;
-        dettagliHtml += `Prezzo netto cad.: € ${pUnit.toFixed(2)}\n`;
-  
-        if (item.dettagli_taglie && Object.keys(item.dettagli_taglie).length > 0) {
-            dettagliHtml += `Dettagli Taglie:\n`;
-            for (const genere in item.dettagli_taglie) {
-                const taglie = Object.entries(item.dettagli_taglie[genere])
-                    .map(([taglia, qty]) => `${taglia}: ${qty}`)
-                    .join(', ');
-                dettagliHtml += `  - ${genere}: ${taglie}\n`;
-            }
-        }
-        
-        if (item.note && item.note.trim() !== '') {
-            dettagliHtml += `Note: ${item.note}\n`;
-        }
-
-        if (item.personalizzazione_url && item.personalizzazione_url !== 'Nessun file collegato direttamente.') {
-           dettagliHtml += `File: COPIA E APRI L'URL:\n${item.personalizzazione_url}\n`;
-        }
-    });
-
-    // --- 4. FOOTER E TOTALI ---
-    dettagliHtml += '\n-----------------------------------------------------------------------------------------\n'; 
-    dettagliHtml += '\n Per procedere con l\'ordine effettuare Bonifico intestato a : Tessitore s.r.l.  \n';
-    dettagliHtml += ' BANCA : SELLA  IBAN : IT56 O032 6804 6070 5227 9191 820 \n';
-
-    const ivaRate = 0.22; 
-    let totaleImponibileNumerico = parseFloat(totaleImponibile) || 0; 
-    
-    if (totaleImponibileNumerico > 0) {
-        const ivaDovuta = totaleImponibileNumerico * ivaRate;
-        const totaleFinale = totaleImponibileNumerico + ivaDovuta;
-        
-        dettagliHtml += `\n-------------------------------------------------------------------------\n`;
-        dettagliHtml += `TOTALE IMPONIBILE (Netto): € ${totaleImponibileNumerico.toFixed(2)}`;
-        dettagliHtml += `\nIVA (22%): € ${ivaDovuta.toFixed(2)}`;
-        dettagliHtml += `\nTOTALE DOVUTO (IVA Incl.): € ${totaleFinale.toFixed(2)}\n`;
-        dettagliHtml += `-------------------------------------------------------------------------\n`;
-    }
-
-    modalBody.innerHTML = dettagliHtml.replace(/\n/g, '<br>');
-
-    // --- 5. TASTO STAMPA ---
-    let btnStampa = document.getElementById('btnStampaOrdine');
-    if (!btnStampa) {
-        btnStampa = document.createElement('button');
-        btnStampa.id = 'btnStampaOrdine'; 
-        btnStampa.textContent = '🖨️ Stampa Ordine';
-        
-        btnStampa.style.marginTop = '15px';
-        btnStampa.style.padding = '10px 20px';
-        btnStampa.style.backgroundColor = '#6c757d'; 
-        btnStampa.style.color = 'white';
-        btnStampa.style.border = 'none';
-        btnStampa.style.borderRadius = '5px';
-        btnStampa.style.cursor = 'pointer';
-        btnStampa.style.fontSize = '1rem';
-        btnStampa.style.float = 'right'; 
-        
-        btnStampa.onclick = function() {
-            window.print();
-        };
-        modalBody.parentNode.insertBefore(btnStampa, modalBody.nextSibling);
-    }
-
-    modal.style.display = 'block';
-}
-
-
- // --- 2. SEZIONE COPIA E INCOLLA PER EXCEL (NOVITÀ) ---
-    dettagliHtml += `<div style="background: #e9ecef; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ced4da;">`;
-    dettagliHtml += `<p style="margin:0 0 10px 0; font-weight:bold; color:#495057;">📊 Tabella Rapida per Excel (Colonne B, H, I):</p>`;
-    dettagliHtml += `<div style="overflow-x:auto;">
-        <table id="tableToCopy" style="width:100%; border-collapse:collapse; background:white; font-size:0.9em;">
-            <thead>
-                <tr style="background:#f8f9fa;">
-                    <th style="border:1px solid #dee2e6; padding:8px; text-align:left;">Descrizione</th>
-                    <th style="border:1px solid #dee2e6; padding:8px; text-align:center;">Quantità</th>
-                    <th style="border:1px solid #dee2e6; padding:8px; text-align:right;">Prezzo Netto</th>
-                </tr>
-            </thead>
-            <tbody>`;
-
-    dettagli.forEach(item => {
-        if (item.tipo === 'INFO_CLIENTE') return;
-        const qta = parseFloat(item.quantita) || 0;
-        const pUnit = parseFloat(item.prezzo_unitario) || 0;
-        dettagliHtml += `
-            <tr>
-                <td style="border:1px solid #dee2e6; padding:8px;">${item.prodotto}</td>
-                <td style="border:1px solid #dee2e6; padding:8px; text-align:center;">${qta}</td>
-                <td style="border:1px solid #dee2e6; padding:8px; text-align:right;">${pUnit.toFixed(2).replace('.', ',')}</td>
-            </tr>`;
-    });
-
-    dettagliHtml += `</tbody></table></div>`;
-    dettagliHtml += `<button onclick="copyTableToClipboard()" style="margin-top:10px; padding:10px 15px; background:#28a745; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">
-        📋 Copia Dati per Excel
-    </button>
-    </div><hr style="border: 0; border-top: 2px solid #eee; margin: 20px 0;">`;
-
-----------------QUESTA è LA VERSONE STABILE MA COMMENTATA PERCHE LA VOGLIO RENDERE PIU USER FRIENDLY------*/
 /**
  * Mostra i dettagli dell'ordine in un modale includendo la tabella per Excel,
  * i file allegati, i totali e la funzione di stampa.
- */
+ 
 function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, totaleImponibile) {
     const dettagli = JSON.parse(dettagliProdottiString); 
     const modal = document.getElementById('orderDetailsModal');
@@ -590,7 +437,161 @@ function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, 
     }
 
     modal.style.display = 'block';
+}--------------------------------------------------------------------------------------------------------*/
+
+
+/**
+ * Mostra i dettagli dell'ordine in un modale (Versione Aggiornata: Tabella + Fix Layout + Bottone Blu)
+ */
+function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, totaleImponibile) {
+    const dettagli = JSON.parse(dettagliProdottiString); 
+    const modal = document.getElementById('orderDetailsModal');
+    const modalBody = document.getElementById('modalOrderDetails');
+
+    if (!modal || !modalBody) {
+        console.error("Elementi modale non trovati!");
+        return; 
+    }
+
+    // --- 0. FIX IMPORTANTE PER IL LAYOUT ---
+    // Ripristina lo stile normale per evitare che la tabella si rompa o crei spazi vuoti
+    modalBody.style.whiteSpace = 'normal'; 
+
+    // --- 1. GESTIONE TITOLO ---
+    const h2Element = document.querySelector('#orderDetailsModal h2');
+    if (numeroOrdineVisibile && numeroOrdineVisibile.includes('/')) {
+        h2Element.innerHTML = `Numero Preventivo : <span style="color: #007bff;">${numeroOrdineVisibile}</span>`;
+    } else {
+        const label = numeroOrdineVisibile || ordineId.substring(0, 8).toUpperCase();
+        h2Element.innerHTML = `Dettaglio Preventivo ID: <span style="color: #6c757d; font-size: 0.9em;">${label}</span>`;
+    }
+
+    let dettagliHtml = "";
+
+    // --- 2. BOX BLU DATI CLIENTE ---
+    // Riferimento ID Database
+    dettagliHtml += `<div style="font-size: 0.85em; color: #999; margin-bottom: 5px;">Rif. Database: ${ordineId}</div>`;
+
+    const infoCliente = dettagli.find(d => d.tipo === 'INFO_CLIENTE');
+    if (infoCliente) {
+        dettagliHtml += `<div style="background: #f1f8ff; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #cce5ff;">`;
+        dettagliHtml += `<strong>Cliente / Rag. Soc.:</strong> ${infoCliente.cliente || '---'}<br>`;
+        dettagliHtml += `<strong>Contatti:</strong> ${infoCliente.contatti || '---'}`;
+        dettagliHtml += `</div>`;
+    }
+
+    // --- 3. TABELLA PRODOTTI (NUOVO LAYOUT) ---
+    dettagliHtml += `<h4 style="margin:0 0 10px 0; color:#007bff; text-align:left;">📋 Dettaglio Articoli Ordine</h4>`;
+    
+    dettagliHtml += `<div style="overflow-x:auto;">
+    <table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-family:inherit; table-layout: fixed;">
+        <thead>
+            <tr style="background-color:#e9ecef; color:#495057;">
+                <th style="padding:10px; text-align:left; border:1px solid #dee2e6; width: 50%;">Articolo & Specifiche</th>
+                <th style="padding:10px; text-align:center; border:1px solid #dee2e6; width: 10%;">Qtà</th>
+                <th style="padding:10px; text-align:right; border:1px solid #dee2e6; width: 20%;">Prezzo</th>
+                <th style="padding:10px; text-align:center; border:1px solid #dee2e6; width: 20%;">Allegato</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+    dettagli.forEach(item => {
+        if (item.tipo === 'INFO_CLIENTE') return;
+
+        // Costruzione dettagli (Componenti, Taglie, Note)
+        let specs = '';
+        if (item.componenti && item.componenti.length > 0) specs += `<div style="font-size:0.85em; margin-top:3px; color:#555; text-align:left;">🔹 ${item.componenti.join('<br>🔹 ')}</div>`;
+        
+        if (item.dettagli_taglie && Object.keys(item.dettagli_taglie).length > 0) {
+            specs += `<div style="font-size:0.85em; margin-top:3px; color:#007bff; text-align:left;"><strong>Taglie:</strong> `;
+            for (const g in item.dettagli_taglie) {
+                const t = Object.entries(item.dettagli_taglie[g]).map(([k,v])=>`${k}:${v}`).join(' ');
+                specs += `${g} [${t}] `;
+            }
+            specs += `</div>`;
+        }
+
+        if (item.note) specs += `<div style="font-size:0.85em; margin-top:3px; color:#dc3545; text-align:left;"><em>Note: ${item.note}</em></div>`;
+
+        // Bottone File Admin (COLORE CELESTE #007bff)
+        let fileCell = '<span style="color:#ccc;">-</span>';
+        if (item.personalizzazione_url && item.personalizzazione_url.includes('http')) {
+            fileCell = `<a href="${item.personalizzazione_url}" target="_blank" style="display:inline-block; padding:5px 10px; background:#007bff; color:white; border-radius:4px; text-decoration:none; font-weight:bold; font-size:0.8em; white-space:nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">📥 </a>`;
+        }
+
+        let pUnit = parseFloat(item.prezzo_unitario) || 0;
+
+        dettagliHtml += `
+            <tr>
+                <td style="padding:10px; border:1px solid #dee2e6; vertical-align:top; text-align:left; word-wrap: break-word;">
+                    <div style="font-weight:bold; color:#333;">${item.prodotto}</div>
+                    ${specs}
+                </td>
+                <td style="padding:10px; border:1px solid #dee2e6; text-align:center; vertical-align:top; font-weight:bold;">${item.quantita}</td>
+                <td style="padding:10px; border:1px solid #dee2e6; text-align:right; vertical-align:top; white-space: nowrap;">€ ${pUnit.toFixed(2)}</td>
+                <td style="padding:10px; border:1px solid #dee2e6; text-align:center; vertical-align:top;">${fileCell}</td>
+            </tr>`;
+    });
+
+    dettagliHtml += `</tbody></table></div>`;
+
+    // --- 4. FOOTER E TOTALI ---
+    dettagliHtml += '<br><div style="border-top:1px dashed #ccc; margin-top:10px; padding-top:10px;">'; 
+    dettagliHtml += 'Per procedere con l\'ordine effettuare Bonifico intestato a : Tessitore s.r.l.<br>';
+    dettagliHtml += 'BANCA : SELLA  IBAN : IT56 O032 6804 6070 5227 9191 820</div>';
+
+    const ivaRate = 0.22; 
+    let totaleImponibileNumerico = parseFloat(totaleImponibile) || 0; 
+    
+    if (totaleImponibileNumerico > 0) {
+        const ivaDovuta = totaleImponibileNumerico * ivaRate;
+        const totaleFinale = totaleImponibileNumerico + ivaDovuta;
+        
+        dettagliHtml += `<div style="border-top:2px solid #333; margin-top:10px; padding-top:10px; text-align:right;">`;
+        dettagliHtml += `<strong>TOTALE IMPONIBILE (Netto):</strong> € ${totaleImponibileNumerico.toFixed(2)}<br>`;
+        dettagliHtml += `<strong>IVA (22%):</strong> € ${ivaDovuta.toFixed(2)}<br>`;
+        dettagliHtml += `<strong style="font-size:1.2em; color:#28a745;">TOTALE DOVUTO (IVA Incl.): € ${totaleFinale.toFixed(2)}</strong>`;
+        dettagliHtml += `</div>`;
+    }
+
+    // Assegnazione HTML (Senza .replace)
+    modalBody.innerHTML = dettagliHtml;
+
+    // --- 5. TASTO STAMPA ---
+    let btnStampa = document.getElementById('btnStampaOrdine');
+    if (!btnStampa) {
+        btnStampa = document.createElement('button');
+        btnStampa.id = 'btnStampaOrdine'; 
+        btnStampa.textContent = '🖨️ Stampa Ordine';
+        
+        btnStampa.style.marginTop = '15px';
+        btnStampa.style.padding = '10px 20px';
+        btnStampa.style.backgroundColor = '#6c757d'; 
+        btnStampa.style.color = 'white';
+        btnStampa.style.border = 'none';
+        btnStampa.style.borderRadius = '5px';
+        btnStampa.style.cursor = 'pointer';
+        btnStampa.style.fontSize = '1rem';
+        btnStampa.style.float = 'right'; 
+        
+        btnStampa.onclick = function() {
+            window.print();
+        };
+        modalBody.parentNode.insertBefore(btnStampa, modalBody.nextSibling);
+    }
+
+    modal.style.display = 'block';
 }
+
+
+
+
+
+
+
+
+
+
 
 /**
  * Funzione helper per copiare la tabella negli appunti
