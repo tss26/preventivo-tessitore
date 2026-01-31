@@ -147,6 +147,17 @@ const MINIMO_METRI_DTF = 0.1; // 10 cm
     
 
 // ===========================================
+// ===========================================
+// CONFIGURAZIONE BONUS / LIVELLI
+// ===========================================
+const PREMI_TIERS = [
+    { soglia: 500,   sconto: 1,   desc: "1% Sconto", emoji: "🎁" },
+    { soglia: 750,   sconto: 1.5, desc: "1,5% Sconto", emoji: "🎁" },
+    { soglia: 1500,  sconto: 3,   desc: "3% Sconto", emoji: "🎁" },
+    { soglia: 2500,  sconto: 3.5, desc: "3,5% Sconto", emoji: "🎁" },
+    { soglia: 5000,  sconto: 5,   desc: "5% Sconto", emoji: "🎁" },
+    { soglia: 10000, sconto: 5,   desc: "250€ Bonus + 5% Sconto", emoji: "🏆" }
+];
 
 
 // ===========================================
@@ -1754,6 +1765,11 @@ function mostraVistaPreventivo() {
 
    // const quickOrder = document.getElementById('quick-order-section');  --- se voglio far in modo che quick order rimanga sempre attivo all'avvio 
    // if (quickOrder) quickOrder.style.display = 'block';-------------------- della pagina cliente basta che tolgo i commenti su queste  2 righe
+	
+    // --- NOVITÀ: Nascondi vista Bonus ---
+    const vistaBonus = document.getElementById('vistaBonus');
+    if (vistaBonus) vistaBonus.style.display = 'none';
+
 }
 
 function mostraVistaOrdini() {
@@ -1779,10 +1795,44 @@ function mostraVistaOrdini() {
 
     const quickOrder = document.getElementById('quick-order-section');
     if (quickOrder) quickOrder.style.display = 'none';
+    
+    
+     // --- NOVITÀ: Nascondi vista Bonus ---
+    const vistaBonus = document.getElementById('vistaBonus');
+    if (vistaBonus) vistaBonus.style.display = 'none';
 
     // Carica i dati
     caricaMieiOrdini();
 }
+
+// --- FUNZIONE CHE PERMETTE LA VISTA PER I BONUS E PREMI DELL UTENTE ---
+function mostraVistaBonus() {
+    document.querySelector('.container').style.gridTemplateColumns = '1fr';
+
+    // Nascondi TUTTO il resto
+    document.getElementById('galleriaView').style.display = 'none';
+    document.getElementById('sezioneCarrello').style.display = 'none';
+    document.getElementById('ordiniCliente').style.display = 'none';
+    
+    const bannerNav = document.querySelector('.banner-iniziale-nav');
+    if (bannerNav) bannerNav.style.display = 'none';
+    const quickOrder = document.getElementById('quick-order-section');
+    if (quickOrder) quickOrder.style.display = 'none';
+    
+    document.querySelectorAll('.sezione-prodotto').forEach(s => s.style.display = 'none');
+
+    // Mostra solo la pagina Bonus
+    const vistaBonus = document.getElementById('vistaBonus');
+    if (vistaBonus) {
+        vistaBonus.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Carica i calcoli
+    caricaDatiVantaggi();
+}
+
+
 
 
 //------------------------------
@@ -2735,6 +2785,149 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         // **********************************************
 
+		
+
+		// ===========================================
+		// LOGICA BONUS & CORIANDOLI
+		// ===========================================
+
+async function caricaDatiVantaggi() {
+    if (!utenteCorrenteId) return;
+
+    // 1. Date del mese corrente
+    const dataOggi = new Date();
+    const primoDelMese = new Date(dataOggi.getFullYear(), dataOggi.getMonth(), 1).toISOString();
+    const primoMeseProx = new Date(dataOggi.getFullYear(), dataOggi.getMonth() + 1, 1).toISOString();
+
+    // 2. Query Supabase: Somma solo ordini COMPLETATI o SPEDITI
+    // (Modifica 'Completato' se nel tuo DB usi un altro termine es. 'Consegnato')
+    const { data: ordini, error } = await supabase
+        .from('ordini')
+        .select('totale')
+        .eq('user_id', utenteCorrenteId)
+        .gte('data_ordine', primoDelMese)
+        .lt('data_ordine', primoMeseProx)
+        .or('stato.eq.Completato,stato.eq.Spedito,stato.eq.Consegnato'); 
+
+    if (error) {
+        console.error("Errore Bonus:", error);
+        return;
+    }
+
+    // 3. Somma Totale
+    let totaleMese = 0;
+    if (ordini) {
+        ordini.forEach(o => totaleMese += parseFloat(o.totale) || 0);
+    }
+
+    aggiornaUIBonus(totaleMese);
+}
+
+function aggiornaUIBonus(totale) {
+    // A. Aggiorna Testi
+    document.getElementById('lvTotaleMese').textContent = `€ ${totale.toFixed(2)}`;
+    
+    let livelloAttuale = { soglia: 0, sconto: 0, desc: "Base" };
+    let prossimoStep = PREMI_TIERS[0];
+    let stepIndex = -1;
+
+    for (let i = 0; i < PREMI_TIERS.length; i++) {
+        if (totale >= PREMI_TIERS[i].soglia) {
+            livelloAttuale = PREMI_TIERS[i];
+            stepIndex = i;
+            prossimoStep = PREMI_TIERS[i + 1] || null;
+        }
+    }
+
+    document.getElementById('lvLivelloAttuale').textContent = livelloAttuale.desc;
+    document.getElementById('lvScontoSbloccato').textContent = livelloAttuale.sconto + "%";
+
+    // B. Calcolo Barra (6 segmenti uguali)
+    const SEGMENT_WIDTH = 100 / 6; // 16.66%
+    let percentualeVisiva = 0;
+
+    if (stepIndex === -1) {
+        // Sotto il primo step
+        percentualeVisiva = (totale / PREMI_TIERS[0].soglia) * SEGMENT_WIDTH;
+    } else if (prossimoStep) {
+        // Tra due step
+        let base = (stepIndex + 1) * SEGMENT_WIDTH;
+        let range = prossimoStep.soglia - livelloAttuale.soglia;
+        let avanzamento = totale - livelloAttuale.soglia;
+        percentualeVisiva = base + ((avanzamento / range) * SEGMENT_WIDTH);
+    } else {
+        // Finito (oltre 10k)
+        percentualeVisiva = 100;
+    }
+    
+    if (percentualeVisiva > 100) percentualeVisiva = 100;
+
+    // Aggiorna CSS Barra
+    const barFill = document.getElementById('progressBarFill');
+    const emoji = document.getElementById('userEmoji');
+    if(barFill) barFill.style.width = `${percentualeVisiva}%`;
+    if(emoji) emoji.style.left = `${percentualeVisiva}%`;
+
+    // C. Messaggio e Lista
+    const msgBox = document.getElementById('lvNextGoalMsg');
+    if (prossimoStep) {
+        msgBox.innerHTML = `Mancano <strong>€ ${(prossimoStep.soglia - totale).toFixed(2)}</strong> al prossimo premio!`;
+    } else {
+        msgBox.innerHTML = `🎉 <strong>Livello Massimo Raggiunto!</strong> Sei un Top Client!`;
+    }
+
+    const ul = document.getElementById('rewardsListUl');
+    if (ul) {
+        ul.innerHTML = '';
+        PREMI_TIERS.forEach(tier => {
+            const unlocked = totale >= tier.soglia;
+            const styleClass = unlocked ? 'unlocked' : 'locked';
+            const icon = unlocked ? '✅' : '🔒';
+            ul.innerHTML += `<li class="${styleClass}">
+                <span class="reward-desc">${tier.desc} (sopra €${tier.soglia})</span>
+                <span class="reward-status">${icon}</span>
+            </li>`;
+        });
+    }
+
+    // D. Coriandoli (Se livello aumentato dall'ultima volta)
+    const storedLevel = parseInt(localStorage.getItem(`bonus_level_${utenteCorrenteId}`)) || -1;
+    if (stepIndex > storedLevel) {
+        localStorage.setItem(`bonus_level_${utenteCorrenteId}`, stepIndex);
+        lanciaCoriandoli();
+    }
+}
+
+function lanciaCoriandoli() {
+    // Richiede script canvas-confetti nell'HTML
+    if (typeof confetti === 'function') {
+        confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 }
+        });
+    }
+}
+
+
+
+		//---------fine logica bonus------------
+
+    // --- LISTENER MENU BONUS ---
+    const btnMenuBonus = document.getElementById('btnMenuBonus');
+    if (btnMenuBonus) {
+        btnMenuBonus.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Aggiunge #bonus all'URL per gestire il tasto indietro
+            history.pushState(null, null, '#bonus');
+            mostraVistaBonus();
+        });
+    }
+
+    // Controllo se l'utente ricarica la pagina mentre è su #bonus
+    if (window.location.hash === '#bonus') {
+        mostraVistaBonus();
+    }
 
 
         // *** NUOVO LISTENER PER IL KIT CALCIO ***
