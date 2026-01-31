@@ -2078,9 +2078,11 @@ function calcolaPrezzoScaldacollo() {
         // Se l'utente ha messo un numero non valido mentre cambiava tessuto, lo correggiamo visivamente (o lo lasciamo gestire alla validazione)
         if (inputQta.value < 25) inputQta.value = 25;
     } else {
-        inputQta.min = 1;
-        inputQta.step = 1;
-        hint.textContent = "Minimo 1 pz";
+        inputQta.min = 10;
+        inputQta.step = 10;
+        hint.textContent = "Minimo 10 pz";
+        // Se l'utente ha un valore inferiore a 10 (es. era su Interlock e torna a Pile), correggiamo
+        if (inputQta.value < 10) inputQta.value = 10;
     }
 
     const qta = parseInt(inputQta.value) || 0;
@@ -2141,8 +2143,8 @@ async function gestisciAggiuntaScaldacollo() {
             return;
         }
     } else {
-        if (qta < 1) {
-            alert("Inserisci una quantità valida.");
+        if (qta < 10) {
+            alert("Il minimo ordinabile per gli Scaldacollo in PILE è di 10 pezzi.");
             return;
         }
     }
