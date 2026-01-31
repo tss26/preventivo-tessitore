@@ -1884,7 +1884,24 @@ function calcolaPrezzoDinamicoDTF() {
     }
     
     // Il costo finale è il costo base (o il minimo imposto)
-    prezzoDinamicoSpan.textContent = `€ ${costoFinaleBase.toFixed(2)}`;
+    //prezzoDinamicoSpan.textContent = `€ ${costoFinaleBase.toFixed(2)}`;------- togli il commento e funziona senza sconto, e cancella da inizio a fine sconto
+    
+    // --- INIZIO GESTIONE VISIVA SCONTO -----------------------------------------------------------------------------------------
+    const totaleScontato = applicaSconto(costoFinaleBase);
+
+    if (scontoUtente > 0) {
+        prezzoDinamicoSpan.innerHTML = `
+            <span style="text-decoration: line-through; color: #999; font-size: 0.8em;">€ ${costoFinaleBase.toFixed(2)}</span> 
+            <span style="color: #28a745; font-weight: bold;">€ ${totaleScontato.toFixed(2)}</span>
+            <small style="color: #28a745;">(-${scontoUtente}%)</small>`;
+    } else {
+        prezzoDinamicoSpan.textContent = `€ ${costoFinaleBase.toFixed(2)}`;
+    }//----------------------------FINE SCONTO DTF------------------------------------------------------------------
+    // *** FONDAMENTALE ***: Salviamo il prezzo LORDO in un attributo nascosto
+    // Così la funzione di aggiunta al carrello legge questo numero pulito e non si confonde con l'HTML
+    prezzoDinamicoSpan.dataset.valore = costoFinaleBase.toFixed(2);
+
+    
 }
 
 // --- FUNZIONE DI AGGIUNTA DTF AL CARRELLO (con upload) ---
@@ -1905,7 +1922,9 @@ async function gestisciAggiuntaDTF() {
 
     // Recupero del prezzo calcolato dinamicamente (totale finale)
     const prezzoDinamicoSpan = document.getElementById('dtfPrezzoDinamico');
-    const totaleCalcolato = parseFloat(prezzoDinamicoSpan.textContent.replace('€', '').trim()) || 0;
+    //const totaleCalcolato = parseFloat(prezzoDinamicoSpan.textContent.replace('€', '').trim()) || 0;----------senza calcolo sconto funzionava
+    // Leggiamo il valore lordo salvato nel dataset, così aggiungiAlCarrello applicherà lo sconto correttamente
+    const totaleCalcolato = parseFloat(prezzoDinamicoSpan.dataset.valore) || 0;
 
     // --- 2. CONTROLLI DI VALIDAZIONE ---
     if (!fileToUpload) {
