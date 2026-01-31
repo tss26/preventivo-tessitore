@@ -845,6 +845,58 @@ body {
 
 
 
+/* --- STILI PER LA SEZIONE BONUS --- */
+.stats-box {
+    display: flex; justify-content: space-around; flex-wrap: wrap; gap: 10px;
+    background: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 40px; border: 1px solid #e9ecef;
+}
+.stat-item { text-align: center; min-width: 100px; }
+.stat-label { font-size: 0.8em; color: #6c757d; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 5px;}
+.stat-value { font-size: 1.4em; font-weight: 700; color: #2c3e50; }
+.stat-value.highlight { color: #28a745; font-size: 1.6em; }
+
+/* Barra di Progresso */
+.progress-container { position: relative; margin: 50px 0 60px 0; padding: 0 10px; }
+.progress-track {
+    height: 14px; background: #e9ecef; border-radius: 7px; position: relative; width: 100%;
+}
+.progress-fill {
+    height: 100%; background: linear-gradient(90deg, #ffd700, #ff8c00);
+    border-radius: 7px; width: 0%; transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 10px rgba(255, 140, 0, 0.4);
+}
+.user-emoji {
+    position: absolute; top: -12px; margin-left: -15px;
+    font-size: 2.2rem; transition: left 1.5s cubic-bezier(0.4, 0, 0.2, 1); z-index: 5;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+}
+
+/* Step (Pacchi Regalo) */
+.milestones { position: relative; height: 0; top: -20px; }
+.milestone {
+    position: absolute; transform: translateX(-50%); text-align: center; cursor: pointer; z-index: 2;
+}
+.milestone .icon { font-size: 1.5rem; transition: transform 0.2s; display: block; }
+.milestone:hover .icon { transform: scale(1.2); }
+.milestone .label {
+    display: block; font-size: 0.75rem; color: #6c757d; font-weight: 600; 
+    background: white; padding: 2px 4px; border-radius: 4px; border: 1px solid #eee; margin-top: 5px;
+}
+
+/* Lista Premi */
+.rewards-list { list-style: none; padding: 0; margin-top: 30px; }
+.rewards-list li {
+    padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;
+}
+.rewards-list li:last-child { border-bottom: none; }
+.rewards-list li.unlocked { background-color: #f0fff4; border-left: 4px solid #28a745; }
+.rewards-list li.locked { opacity: 0.6; grayscale: 100%; }
+.reward-desc { font-weight: 500; font-size: 1.1em; }
+.reward-status { font-size: 1.2em; }
+
+
+
+
 
 
 
