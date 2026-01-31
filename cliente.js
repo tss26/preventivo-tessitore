@@ -791,17 +791,18 @@ function calcolaPrezzoDinamicoKit() {
             <span style="text-decoration: line-through; color: #999; font-size: 0.8em;">€ ${prezzoUnitarioBase.toFixed(2)}</span> 
             <span style="color: #28a745; font-weight: bold;">€ ${baseScontato.toFixed(2)}</span>
             <small style="color: #28a745;">(-${scontoUtente}%)</small>`;
-        `;
+        
         // Mostra il totale complessivo già scontato
         prezzoDinamicoSpan.textContent = `€ ${applicaSconto(prezzoMedioUnitario).toFixed(2)}`;
     } else {
         prezzoBaseSpan.textContent = `€ ${prezzoUnitarioBase.toFixed(2)}`;
         prezzoDinamicoSpan.textContent = `€ ${prezzoMedioUnitario.toFixed(2)}`;
     }//------------FINE GESTIONE SCONTO-----------------------------------------------------------------------------------------------------------
-    qtaTotaleSpan.textContent = qtaTotale;
+    
+    qtaTotaleSpan.textContent = qtaTotale;
 }
 
-//-----------
+
 //Questa funzione deve usare il prezzo medio e deve includere il costo grafico nei componenti per tracciarlo nell'ordine.
 async function gestisciAggiuntaKitCalcio() {
     const taglieTables = document.querySelectorAll('#taglieInputContainer .taglie-table');
@@ -1515,12 +1516,22 @@ function calcolaPrezzoBanner() {
     dettagliCalcolo.push(`<strong>Costo Base Produzione:</strong> €${costoBase.toFixed(2)}`);
     dettagliCalcolo.push(`<strong>Margine Qta (${qta}pz):</strong> +${percentualeAumento}%`);
 
-    // OUTPUT
-    if(prezzoOutput) {
+    // OUTPUT PREZZI SENZA GESTIONE SCONTO
+    /*if(prezzoOutput) {
         prezzoOutput.textContent = `€ ${prezzoFinaleUnitario.toFixed(2)}`;
         // Salva valore in un attributo data per il recupero facile nella funzione di aggiunta
         prezzoOutput.dataset.valore = prezzoFinaleUnitario.toFixed(2);
-    }
+    }*/
+    //------INIZIO GESTIONE SCONTO-------------------------------------------------------------
+    if(prezzoOutput) {
+        const finaleScontato = applicaSconto(prezzoFinaleUnitario);
+        if (scontoUtente > 0) {
+            prezzoOutput.innerHTML = `<span style="text-decoration: line-through; color: #999; font-size: 0.8em;">€ ${prezzoFinaleUnitario.toFixed(2)}</span> <span style="color: #28a745;">€ ${finaleScontato.toFixed(2)}</span> <small style="color: #28a745;">(-${scontoUtente}%)</small>`;
+        } else {
+            prezzoOutput.textContent = `€ ${prezzoFinaleUnitario.toFixed(2)}`;
+        }
+        prezzoOutput.dataset.valore = prezzoFinaleUnitario.toFixed(2);
+    }//------FINE GESTIONE SCONTO-------------------------------------------------------------
     if(infoExtraDiv) infoExtraDiv.innerHTML = dettagliCalcolo.join('<br>');
 }
 
@@ -2075,10 +2086,20 @@ function calcolaPrezzoScaldacollo() {
     const totaleNetto = qta * prezzoUnitario;
     const totaleIvato = totaleNetto * 1.22; // IVA 22%
 
-    elUnitario.textContent = `€ ${prezzoUnitario.toFixed(2)}`;
-    elTotNetto.textContent = `€ ${totaleNetto.toFixed(2)}`;
+    //elUnitario.textContent = `€ ${prezzoUnitario.toFixed(2)}`;
+   // elTotNetto.textContent = `€ ${totaleNetto.toFixed(2)}`;
+     //-----------INIZIO GESTIONE SCONTO------------------------------------------------------------- 
+    const unitarioScontato = applicaSconto(prezzoUnitario);
+    if (scontoUtente > 0) {
+        elUnitario.innerHTML = `<span style="text-decoration: line-through; color: #999; font-size: 0.8em;">€ ${prezzoUnitario.toFixed(2)}</span> <span style="color: #28a745;">€ ${unitarioScontato.toFixed(2)}</span> <small style="color: #28a745;">(-${scontoUtente}%)</small>`;
+        elTotNetto.textContent = `€ ${applicaSconto(totaleNetto).toFixed(2)}`;
+    } else {
+        elUnitario.textContent = `€ ${prezzoUnitario.toFixed(2)}`;
+        elTotNetto.textContent = `€ ${totaleNetto.toFixed(2)}`;
+    } //-----------FINE GESTIONE SCONTO------------------------------------------------------------- 
+
     elTotIvato.textContent = `€ ${totaleIvato.toFixed(2)}`;
-}
+   }
 
 async function gestisciAggiuntaScaldacollo() {
     const tessuto = document.querySelector('input[name="scaldacolloTessuto"]:checked').value;
@@ -2265,8 +2286,18 @@ function calcolaPrezzoShopper() {
     const totaleIvato = totaleNetto * 1.22; // IVA 22%
 
     // 6. Aggiorna UI
-    elUnitario.textContent = `€ ${prezzoUnitario.toFixed(2)}`;
-    elTotNetto.textContent = `€ ${totaleNetto.toFixed(2)}`;
+    //elUnitario.textContent = `€ ${prezzoUnitario.toFixed(2)}`;
+    //elTotNetto.textContent = `€ ${totaleNetto.toFixed(2)}`;
+    //-----------INIZIO GESTIONE SCONTO SHOPPER------------------------
+    const unitarioScontato = applicaSconto(prezzoUnitario);
+    if (scontoUtente > 0) {
+        elUnitario.innerHTML = `<span style="text-decoration: line-through; color: #999; font-size: 0.8em;">€ ${prezzoUnitario.toFixed(2)}</span> <span style="color: #28a745;">€ ${unitarioScontato.toFixed(2)}</span> <small style="color: #28a745;">(-${scontoUtente}%)</small>`;
+        elTotNetto.textContent = `€ ${applicaSconto(totaleNetto).toFixed(2)}`;
+    } else {
+        elUnitario.textContent = `€ ${prezzoUnitario.toFixed(2)}`;
+        elTotNetto.textContent = `€ ${totaleNetto.toFixed(2)}`;
+    }
+    //-----------FINE GESTIONE SCONTO SHOPPER--------------------------
     elTotIvato.textContent = `€ ${totaleIvato.toFixed(2)}`;
 }
 
@@ -2429,8 +2460,18 @@ function calcolaPrezzoLanyard() {
     const totaleIvato = totaleImponibile * 1.22;
 
     // Aggiornamento UI
-    elUnitarioBase.textContent = `€ ${prezzoUnitario.toFixed(2)}`;
-    elTotNetto.textContent = `€ ${totaleImponibile.toFixed(2)}`;
+    // elUnitarioBase.textContent = `€ ${prezzoUnitario.toFixed(2)}`;
+    //elTotNetto.textContent = `€ ${totaleImponibile.toFixed(2)}`;
+    //-------INIZIO GESTIONE SCONTO ------------------------------------------
+    const unitarioScontato = applicaSconto(prezzoUnitario);
+    if (scontoUtente > 0) {
+        elUnitarioBase.innerHTML = `<span style="text-decoration: line-through; color: #999; font-size: 0.8em;">€ ${prezzoUnitario.toFixed(2)}</span> <span style="color: #28a745;">€ ${unitarioScontato.toFixed(2)}</span> <small style="color: #28a745;">(-${scontoUtente}%)</small>`;
+        elTotNetto.textContent = `€ ${applicaSconto(totaleImponibile).toFixed(2)}`;
+    } else {
+        elUnitarioBase.textContent = `€ ${prezzoUnitario.toFixed(2)}`;
+        elTotNetto.textContent = `€ ${totaleImponibile.toFixed(2)}`;
+    }
+    //-------FINE GESTIONE SCONTO---------------------------------------------
     elTotIvato.textContent = `€ ${totaleIvato.toFixed(2)}`;
 }
 
@@ -3080,7 +3121,7 @@ function aggiungiAlCarrello(param1, param2, param3) {
 
     // --- AGGIUNTA SCONTO AUTOMATICO ---
     // Applichiamo lo sconto al prezzo finale prima di salvarlo nel carrello
-    item.prezzo_unitario = applicaSconto(item.prezzo_unitario);
+    //item.prezzo_unitario = applicaSconto(item.prezzo_unitario);
 
     // Controllo finale anti-blocco
     if (isNaN(item.prezzo_unitario)) item.prezzo_unitario = 0;
@@ -3136,8 +3177,17 @@ function ricalcolaPrezzoRiga(riga) {
     
     // 5. Aggiorno lo span visibile (prezzo suggerito) con due decimali
     const spanSugg = riga.querySelector('.price-suggested');
+    /*GESTINO PREZZO SENZA SCONTO
     if (spanSugg) {
         spanSugg.innerText = prezzoBase.toFixed(2);
+    }*/
+    if (spanSugg) {
+        const baseScontata = applicaSconto(prezzoBase);
+        if (scontoUtente > 0) {
+            spanSugg.innerHTML = `<del style="color:#999; font-size:0.8em;">${prezzoBase.toFixed(2)}</del> <span style="color:#28a745;">${baseScontata.toFixed(2)}</span>`;
+        } else {
+            spanSugg.innerText = prezzoBase.toFixed(2);
+        }
     }
 }
 
@@ -3433,12 +3483,25 @@ function calcolaPrezzoDinamicoBasket() {
         if(labelDouble) labelDouble.style.display = 'none';
     }
 
-    // 4. Aggiorna UI e Input Nascosti
-    prezzoBaseSpan.textContent = `€ ${prezzoUnitarioFinale.toFixed(2)}`;
+    // 4. Aggiorna UI e Input Nascosti--------------------------PREZZO SENZA SCONTO----------------------
+    //prezzoBaseSpan.textContent = `€ ${prezzoUnitarioFinale.toFixed(2)}`;
     
     const costoTotale = qtaTotale * prezzoUnitarioFinale;
     
-    prezzoDinamicoSpan.textContent = `€ ${costoTotale.toFixed(2)}`;
+    // 4. Aggiorna UI e Input Nascosti--------------------------PREZZO SENZA SCONTO----------------------
+    //prezzoDinamicoSpan.textContent = `€ ${costoTotale.toFixed(2)}`;
+
+    
+    //-------------INIZIO GESTIONE SCONTO--------------------------------
+    const basketScontato = applicaSconto(prezzoUnitarioFinale);
+    if (scontoUtente > 0) {
+        prezzoBaseSpan.innerHTML = `<span style="text-decoration: line-through; color: #999; font-size: 0.8em;">€ ${prezzoUnitarioFinale.toFixed(2)}</span> <span style="color: #28a745;">€ ${basketScontato.toFixed(2)}</span> <small style="color: #28a745;">(-${scontoUtente}%)</small>`;
+        prezzoDinamicoSpan.textContent = `€ ${applicaSconto(costoTotale).toFixed(2)}`;
+    } else {
+        prezzoBaseSpan.textContent = `€ ${prezzoUnitarioFinale.toFixed(2)}`;
+        prezzoDinamicoSpan.textContent = `€ ${costoTotale.toFixed(2)}`;
+    }
+    //-------------FINE GESTIONE SCONTO-----------------------------------
     qtaTotaleSpan.textContent = qtaTotale;
     
     // Salva i valori nei campi nascosti per inviarli al carrello
