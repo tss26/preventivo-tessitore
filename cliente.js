@@ -3121,7 +3121,7 @@ function aggiungiAlCarrello(param1, param2, param3) {
 
     // --- AGGIUNTA SCONTO AUTOMATICO ---
     // Applichiamo lo sconto al prezzo finale prima di salvarlo nel carrello
-    //item.prezzo_unitario = applicaSconto(item.prezzo_unitario);
+    item.prezzo_unitario = applicaSconto(item.prezzo_unitario);
 
     // Controllo finale anti-blocco
     if (isNaN(item.prezzo_unitario)) item.prezzo_unitario = 0;
