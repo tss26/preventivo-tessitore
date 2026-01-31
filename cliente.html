@@ -1129,6 +1129,80 @@
         <button class="btn-secondary" id="richiediPreventivo">Richiedi preventivo ufficiale</button>
       </aside>
     
+    
+    
+    
+    
+    <section id="vistaBonus" class="galleria-blocco" style="display: none; max-width: 900px; margin: 0 auto;">
+    
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #2c3e50; margin-bottom: 10px;">🏆 Il Tuo Club Vantaggi</h1>
+        <p style="color: #666; font-size: 1.1em;">
+            Accumula ordini completati questo mese.<br>
+            Sblocca sconti esclusivi per il mese successivo!
+        </p>
+    </div>
+
+    <div class="stats-box">
+        <div class="stat-item">
+            <span class="stat-label">Fatturato Mese</span>
+            <span class="stat-value" id="lvTotaleMese">€ 0.00</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Livello Attuale</span>
+            <span class="stat-value" id="lvLivelloAttuale">Base</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Sconto Sbloccato</span>
+            <span class="stat-value highlight" id="lvScontoSbloccato">0%</span>
+        </div>
+    </div>
+
+    <div class="progress-container">
+        <div id="userEmoji" class="user-emoji" style="left: 0%;">🚀</div>
+        <div class="progress-track">
+            <div id="progressBarFill" class="progress-fill" style="width: 0%;"></div>
+        </div>
+        
+        <div class="milestones">
+            <div class="milestone" style="left: 16.66%;">
+                <span class="icon">🎁</span><span class="label">500€</span>
+            </div>
+            <div class="milestone" style="left: 33.33%;">
+                <span class="icon">🎁</span><span class="label">750€</span>
+            </div>
+            <div class="milestone" style="left: 50%;">
+                <span class="icon">🎁</span><span class="label">1.5k</span>
+            </div>
+            <div class="milestone" style="left: 66.66%;">
+                <span class="icon">🎁</span><span class="label">2.5k</span>
+            </div>
+            <div class="milestone" style="left: 83.33%;">
+                <span class="icon">🎁</span><span class="label">5k</span>
+            </div>
+            <div class="milestone" style="left: 100%;">
+                <span class="icon">🏆</span><span class="label">10k</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="lvNextGoalMsg" style="text-align: center; background: #e3f2fd; color: #0d47a1; padding: 15px; border-radius: 8px; margin: 30px 0; font-weight: 500;">
+        Calcolo obbiettivi in corso...
+    </div>
+
+    <h3 style="border-bottom: 2px solid #eee; padding-bottom: 10px;">📋 Tabella Premi</h3>
+    <ul id="rewardsListUl" class="rewards-list">
+        </ul>
+
+    <div style="text-align: center; margin-top: 40px;">
+        <button onclick="mostraVistaPreventivo()" class="btn-primary" style="background: #6c757d;">⬅ Torna al Preventivo</button>
+    </div>
+
+</section>
+
+    
+    
+    
     <section id="ordiniCliente" class="galleria-blocco" style="display: none;">
     <h2>I Miei Preventivi Recenti</h2>
 
