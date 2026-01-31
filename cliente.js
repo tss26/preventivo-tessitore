@@ -23,6 +23,7 @@ if (!supabase) {
 
 
 let utenteCorrenteId = null; 
+let scontoUtente = 0; // Percentuale di sconto (es. 10 per 10%)
 let carrello = JSON.parse(localStorage.getItem('carrello')) || [];
 
 // Fasce di quantità per il listino Kit Calcio (Totale Pezzi)
@@ -163,9 +164,15 @@ async function verificaCliente() {
     // Recupera il profilo e i permessi
     const { data: profilo, error } = await supabase
         .from('utenti')
-        .select('ragione_sociale, permessi')
+        .select('ragione_sociale, permessi, percentuale_sconto')
         .eq('id', user.id)
         .single();
+    
+    //aggiunto if per mostrare lo sconto
+    if (profilo) {
+        scontoUtente = parseFloat(profilo.percentuale_sconto) || 0;
+        console.log("Sconto applicato per questo utente:", scontoUtente + "%");
+    }
     
     if (error || !profilo) {
         alert('Accesso negato. Impossibile caricare il profilo utente. Riprova il login.');
@@ -294,7 +301,13 @@ function aggiungiAlCarrello(param1, param2, param3) {
 }*/
 
 
-
+// ===========================================
+// UTILITY SCONTO CLIENTE
+// ===========================================
+function applicaSconto(prezzoLordo) {
+    if (scontoUtente <= 0) return prezzoLordo;
+    return prezzoLordo * (1 - (scontoUtente / 100));
+}
 
 function calcolaTotaleParziale() {
     return carrello.reduce((totale, item) => {
@@ -1745,7 +1758,7 @@ function calcolaPrezzoDinamico() {
     const misuraElement = document.querySelector('.misure input:checked'); 
     const componentiSelezionati = Array.from(document.querySelectorAll('.componenti input:checked'));
     const prezzoDinamicoSpan = document.getElementById('prezzoDinamico');
-
+    
     // Controlli minimi
     if (!formaElement || !misuraElement || !prezzoDinamicoSpan) {
         return; // Non ci sono elementi da aggiornare
@@ -1773,7 +1786,22 @@ function calcolaPrezzoDinamico() {
     });
 
     prezzoDinamicoSpan.textContent = `€ ${prezzoUnitarioFinale.toFixed(2)}`;
+    
+    const prezzoScontato = applicaSconto(prezzoUnitarioFinale);
+
+    if (scontoUtente > 0) {
+        prezzoDinamicoSpan.innerHTML = `
+            <span style="text-decoration: line-through; color: #999; font-size: 0.8em;">€ ${prezzoUnitarioFinale.toFixed(2)}</span> 
+            <span style="color: #28a745;">€ ${prezzoScontato.toFixed(2)}</span> 
+            <small style="color: #28a745;">(-${scontoUtente}%)</small>`;
+    } else {
+        prezzoDinamicoSpan.textContent = `€ ${prezzoUnitarioFinale.toFixed(2)}`;
+    }
+
+    
 }
+
+
 
 
 // ===========================================
@@ -3033,6 +3061,10 @@ function aggiungiAlCarrello(param1, param2, param3) {
             personalizzazione_url: ""
         };
     }
+
+    // --- AGGIUNTA SCONTO AUTOMATICO ---
+    // Applichiamo lo sconto al prezzo finale prima di salvarlo nel carrello
+    item.prezzo_unitario = applicaSconto(item.prezzo_unitario);
 
     // Controllo finale anti-blocco
     if (isNaN(item.prezzo_unitario)) item.prezzo_unitario = 0;
