@@ -790,6 +790,7 @@ function calcolaPrezzoDinamicoKit() {
         prezzoBaseSpan.innerHTML = `
             <span style="text-decoration: line-through; color: #999; font-size: 0.8em;">€ ${prezzoUnitarioBase.toFixed(2)}</span> 
             <span style="color: #28a745; font-weight: bold;">€ ${baseScontato.toFixed(2)}</span>
+            <small style="color: #28a745;">(-${scontoUtente}%)</small>`;
         `;
         // Mostra il totale complessivo già scontato
         prezzoDinamicoSpan.textContent = `€ ${applicaSconto(prezzoMedioUnitario).toFixed(2)}`;
