@@ -2774,6 +2774,16 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
         // 3. Listener per il pulsante Aggiungi Kit
         document.getElementById('aggiungiKitCalcioBtn').addEventListener('click', gestisciAggiuntaKitCalcio);
         
+        // 4. Listener per il bottone INFO Kit Calcio (NUOVO)
+        const infoKitBtn = document.getElementById('kitCalcioInfoIcon');
+        if (infoKitBtn) {
+            infoKitBtn.addEventListener('click', () => {
+                const content = document.getElementById('kitCalcioInfoContent');
+                // Se è nascosto o non ha stile definito, mostralo, altrimenti nascondilo
+                content.style.display = (content.style.display === 'none' || content.style.display === '') ? 'block' : 'none';
+            });
+        }
+
 
         // LISTENER PER IL PREZZO DINAMICO E AGGIORNAMENTO (Bandiere)
         // Funzione globale per gestire il click sui bottoni delle forme
