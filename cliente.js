@@ -2706,86 +2706,9 @@ calcolaPrezzoBanner();
 
 
 
-// ===========================================
-// INIZIALIZZAZIONE & EVENT LISTENERS
-// ===========================================
 
-document.addEventListener('DOMContentLoaded', async () => {
-    const isLogged = await verificaCliente();
-    if (isLogged) {
-        // --- 1. PULIZIA INIZIALE DELLA VISTA ---
-        // Nascondiamo tutte le sezioni prodotto all'avvio
-        const sezioni = document.querySelectorAll('.sezione-prodotto');
-        sezioni.forEach(s => s.style.display = 'none');
+//---------------
 
-
-        
-        document.getElementById('logoutBtn').addEventListener('click', handleLogout);
-        document.getElementById('aggiungiBandiera').addEventListener('click', gestisciAggiuntaAlCarrello);
-        document.getElementById('richiediPreventivo').addEventListener('click', gestisciCheckout);
-
-// --- LISTENER FILTRI CLIENTE ---
-        const btnCerca = document.getElementById('cliBtnCerca');
-        if(btnCerca) btnCerca.addEventListener('click', applicaFiltriCliente);
-        
-        const btnReset = document.getElementById('cliBtnReset');
-        if(btnReset) btnReset.addEventListener('click', () => {
-            // Resetta i campi
-            if(document.getElementById('cliRicerca')) document.getElementById('cliRicerca').value = '';
-            if(document.getElementById('cliDataInizio')) document.getElementById('cliDataInizio').value = '';
-            if(document.getElementById('cliDataFine')) document.getElementById('cliDataFine').value = '';
-            if(document.getElementById('cliStato')) document.getElementById('cliStato').value = '';
-            // Ricarica la lista completa
-            applicaFiltriCliente();
-        });
-        
-       
-// === FIX NAVIGAZIONE: Controllo URL iniziale ===
-        // Se l'URL finisce con #ordini, apre subito la vista ordini
-        if (window.location.hash === '#ordini') {
-            mostraVistaOrdini();
-        } else {
-            mostraVistaPreventivo();
-        }
-        
-        // Listener MENU "I Miei Ordini"
-        document.getElementById('mieiOrdiniBtn').addEventListener('click', (e) => {
-            e.preventDefault();
-            // Aggiunge #ordini all'URL
-            history.pushState(null, null, '#ordini');
-            mostraVistaOrdini();
-        });
-
-        // Listener MENU "Nuovo Preventivo"
-        document.querySelector('.nav a[href="cliente.html"]').addEventListener('click', (e) => {
-             // Rimuove #ordini dall'URL tornando a cliente.html pulito
-             history.pushState(null, null, 'cliente.html');
-             
-             // Se non siamo già nel preventivo, mostriamolo
-             if (document.getElementById('galleriaView').style.display === 'none') {
-                 e.preventDefault();
-                 mostraVistaPreventivo();
-             }
-        });
-
-        
-
-
-// *** LOGICA DI FORZATURA STATI (PER TIMING JS) ***
-        // 1. Forza la forma attiva (per l'elemento che ha .active nell'HTML)
-        const defaultForma = document.querySelector('.forme .forma.active');
-        if (defaultForma) {
-            defaultForma.classList.add('active'); 
-        }
-        
-        // 2. Forza la misura checkata (per l'elemento che ha checked nell'HTML)
-        const defaultMisura = document.querySelector('.misure input:checked'); 
-        if (defaultMisura) {
-             defaultMisura.checked = true;
-        }
-        // **********************************************
-
-		
 
 		// ===========================================
 		// LOGICA BONUS & CORIANDOLI
@@ -2913,6 +2836,93 @@ function lanciaCoriandoli() {
 
 		//---------fine logica bonus------------
 
+//---------------
+
+
+
+
+
+
+// ===========================================
+// INIZIALIZZAZIONE & EVENT LISTENERS
+// ===========================================
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const isLogged = await verificaCliente();
+    if (isLogged) {
+        // --- 1. PULIZIA INIZIALE DELLA VISTA ---
+        // Nascondiamo tutte le sezioni prodotto all'avvio
+        const sezioni = document.querySelectorAll('.sezione-prodotto');
+        sezioni.forEach(s => s.style.display = 'none');
+
+
+        
+        document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+        document.getElementById('aggiungiBandiera').addEventListener('click', gestisciAggiuntaAlCarrello);
+        document.getElementById('richiediPreventivo').addEventListener('click', gestisciCheckout);
+
+// --- LISTENER FILTRI CLIENTE ---
+        const btnCerca = document.getElementById('cliBtnCerca');
+        if(btnCerca) btnCerca.addEventListener('click', applicaFiltriCliente);
+        
+        const btnReset = document.getElementById('cliBtnReset');
+        if(btnReset) btnReset.addEventListener('click', () => {
+            // Resetta i campi
+            if(document.getElementById('cliRicerca')) document.getElementById('cliRicerca').value = '';
+            if(document.getElementById('cliDataInizio')) document.getElementById('cliDataInizio').value = '';
+            if(document.getElementById('cliDataFine')) document.getElementById('cliDataFine').value = '';
+            if(document.getElementById('cliStato')) document.getElementById('cliStato').value = '';
+            // Ricarica la lista completa
+            applicaFiltriCliente();
+        });
+        
+       
+// === FIX NAVIGAZIONE: Controllo URL iniziale ===
+        // Se l'URL finisce con #ordini, apre subito la vista ordini
+        if (window.location.hash === '#ordini') {
+            mostraVistaOrdini();
+        } else {
+            mostraVistaPreventivo();
+        }
+        
+        // Listener MENU "I Miei Ordini"
+        document.getElementById('mieiOrdiniBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            // Aggiunge #ordini all'URL
+            history.pushState(null, null, '#ordini');
+            mostraVistaOrdini();
+        });
+
+        // Listener MENU "Nuovo Preventivo"
+        document.querySelector('.nav a[href="cliente.html"]').addEventListener('click', (e) => {
+             // Rimuove #ordini dall'URL tornando a cliente.html pulito
+             history.pushState(null, null, 'cliente.html');
+             
+             // Se non siamo già nel preventivo, mostriamolo
+             if (document.getElementById('galleriaView').style.display === 'none') {
+                 e.preventDefault();
+                 mostraVistaPreventivo();
+             }
+        });
+
+        
+
+
+// *** LOGICA DI FORZATURA STATI (PER TIMING JS) ***
+        // 1. Forza la forma attiva (per l'elemento che ha .active nell'HTML)
+        const defaultForma = document.querySelector('.forme .forma.active');
+        if (defaultForma) {
+            defaultForma.classList.add('active'); 
+        }
+        
+        // 2. Forza la misura checkata (per l'elemento che ha checked nell'HTML)
+        const defaultMisura = document.querySelector('.misure input:checked'); 
+        if (defaultMisura) {
+             defaultMisura.checked = true;
+        }
+        // **********************************************
+
+		
     // --- LISTENER MENU BONUS ---
     const btnMenuBonus = document.getElementById('btnMenuBonus');
     if (btnMenuBonus) {
