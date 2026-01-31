@@ -747,8 +747,8 @@ function calcolaPrezzoDinamicoKit() {
     }
 
     //  Visualizzazione del Prezzo Base ***
-    prezzoBaseSpan.textContent = `€ ${prezzoUnitarioBase.toFixed(2)}`;
-
+   // prezzoBaseSpan.textContent = `€ ${prezzoUnitarioBase.toFixed(2)}`;-------- TOLTO PERCHE è STATO INSERITO NELLA GESTIONE DELLO SCONTO
+    
     // 4. Calcola il costo totale e applica l'impianto grafico
     const costoTotaleBase = qtaTotale * prezzoUnitarioBase;
     
@@ -762,17 +762,17 @@ function calcolaPrezzoDinamicoKit() {
     const prezzoMedioUnitario = costoTotaleFinale ;
 
     //---const prezzoMedioUnitario = prezzoUnitarioBase; 
-// Oppure, se vuoi includere l'ammortamento del costo impianto (20€) nel prezzo unitario:
-// const prezzoMedioUnitario = (costoTotaleBase + costoImpianto) / qtaTotale;
+    // Oppure, se vuoi includere l'ammortamento del costo impianto (20€) nel prezzo unitario:
+    // const prezzoMedioUnitario = (costoTotaleBase + costoImpianto) / qtaTotale;
 
     // Visualizzazione del Prezzo Base
-prezzoBaseSpan.textContent = `€ ${prezzoUnitarioBase.toFixed(2)}`;
+    prezzoBaseSpan.textContent = `€ ${prezzoUnitarioBase.toFixed(2)}`;
 
-// --- SALVA IL PREZZO UNITARIO BASE NEL CAMPO NASCOSTO ---
-const prezzoUnitarioInput = document.getElementById('kitPrezzoUnitarioBase');
-if (prezzoUnitarioInput) {
-    prezzoUnitarioInput.value = prezzoUnitarioBase.toFixed(2);
-}
+    // --- SALVA IL PREZZO UNITARIO BASE NEL CAMPO NASCOSTO ---
+    const prezzoUnitarioInput = document.getElementById('kitPrezzoUnitarioBase');
+    if (prezzoUnitarioInput) {
+        prezzoUnitarioInput.value = prezzoUnitarioBase.toFixed(2);
+    }
 
     
     // 6. SALVA IL COSTO TOTALE IN UN CAMPO NASCOSTO ***
@@ -780,8 +780,23 @@ if (prezzoUnitarioInput) {
     if (costoTotaleInput) {
         costoTotaleInput.value = costoTotaleFinale.toFixed(2);
     }
-    //prezzoUnitarioBase     prezzoDinamicoSpan.textContent = `€ ${prezzoMedioUnitario.toFixed(2)}`;
-    prezzoDinamicoSpan.textContent = `€ ${prezzoMedioUnitario.toFixed(2)}`;
+    
+    //prezzoDinamicoSpan.textContent = `€ ${prezzoMedioUnitario.toFixed(2)}`;
+    // --- GESTIONE VISIVA SCONTO (PULITA) ----------------------------------------------------------------------
+    const baseScontato = applicaSconto(prezzoUnitarioBase);
+    
+    if (scontoUtente > 0) {
+        // Mostra il prezzo base barrato + quello scontato in verde
+        prezzoBaseSpan.innerHTML = `
+            <span style="text-decoration: line-through; color: #999; font-size: 0.8em;">€ ${prezzoUnitarioBase.toFixed(2)}</span> 
+            <span style="color: #28a745; font-weight: bold;">€ ${baseScontato.toFixed(2)}</span>
+        `;
+        // Mostra il totale complessivo già scontato
+        prezzoDinamicoSpan.textContent = `€ ${applicaSconto(prezzoMedioUnitario).toFixed(2)}`;
+    } else {
+        prezzoBaseSpan.textContent = `€ ${prezzoUnitarioBase.toFixed(2)}`;
+        prezzoDinamicoSpan.textContent = `€ ${prezzoMedioUnitario.toFixed(2)}`;
+    }//------------FINE GESTIONE SCONTO-----------------------------------------------------------------------------------------------------------
     qtaTotaleSpan.textContent = qtaTotale;
 }
 
