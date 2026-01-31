@@ -142,6 +142,13 @@ async function loadUserProfile() {
  */
 async function saveUserProfile(event) {
     event.preventDefault();
+    // --- MODIFICA CONTROLLO PRIVACY ---
+    const checkPrivacy = document.getElementById('accettazionePrivacy');
+    if (!checkPrivacy || !checkPrivacy.checked) {
+        alert("ERRORE: Per salvare il profilo è OBBLIGATORIO accettare Privacy Policy e Termini e Condizioni.");
+        return; // Blocca il salvataggio
+    }
+    // ----------------------------------
 
     const userId = document.getElementById('userId').value;
     const telefono = document.getElementById('telefono').value.trim();
