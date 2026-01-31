@@ -2783,6 +2783,25 @@ document.querySelectorAll('#kitSelectionContainer .kit-item').forEach(button => 
                 content.style.display = (content.style.display === 'none' || content.style.display === '') ? 'block' : 'none';
             });
         }
+        
+        // 5. Listener per il bottone INFO Basket (NUOVO)
+        const infoBasketBtn = document.getElementById('basketInfoIcon');
+        if (infoBasketBtn) {
+            infoBasketBtn.addEventListener('click', () => {
+                const content = document.getElementById('basketInfoContent');
+                content.style.display = (content.style.display === 'none' || content.style.display === '') ? 'block' : 'none';
+            });
+        }
+
+        // 6. Listener per il bottone INFO Bandiere (NUOVO)
+        const infoBandiereBtn = document.getElementById('bandiereInfoIcon');
+        if (infoBandiereBtn) {
+            infoBandiereBtn.addEventListener('click', () => {
+                const content = document.getElementById('bandiereInfoContent');
+                content.style.display = (content.style.display === 'none' || content.style.display === '') ? 'block' : 'none';
+            });
+        }
+
 
 
         // LISTENER PER IL PREZZO DINAMICO E AGGIORNAMENTO (Bandiere)
