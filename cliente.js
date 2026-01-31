@@ -618,6 +618,15 @@ async function gestisciAggiuntaAlCarrello() {
  */
 async function gestisciCheckout() {
     if (!supabase) { alert("ERRORE: Supabase non è inizializzato."); return; }
+    // --- MODIFICA CONTROLLO COPYRIGHT ---
+    const checkCopyright = document.getElementById('checkCopyright');
+        if (!checkCopyright || !checkCopyright.checked) {
+            alert("ATTENZIONE: Per inviare la Richiesta di Preventivo Ufficiale devi accettare la clausola di responsabilità sui file (Copyright/Manleva).");
+            // Scrolliamo verso il carrello per fargli vedere cosa manca
+            document.getElementById('sezioneCarrello').scrollIntoView({ behavior: 'smooth' });
+            return;
+        }
+        // ------------------------------------
     
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { alert("Devi effettuare il login per richiedere un preventivo ufficiale."); return; }
