@@ -2474,6 +2474,210 @@ async function gestisciAggiuntaShopper() {
 }
 //------- FINE SHOPPER-------------------------
 
+
+//-------INIZIO SACCHE -------------------------------------------------
+
+// ===========================================
+// FUNZIONI PER LE SACCHE (ZAINETTI)
+// ===========================================
+
+const LISTINO_SACCHE = {
+    "POLIESTERE": [
+        { max: 10, price: 4.70 },
+        { max: 30, price: 4.10 },
+        { max: 50, price: 3.40 },
+        { max: 71, price: 3.10 },
+        { max: 100, price: 2.75 },
+        { max: 300, price: 2.50 },
+        { max: 500, price: 2.30 },
+        { max: 750, price: 2.15 },
+        { max: 3000, price: 1.99 },
+        { max: 999999, price: 1.95 }
+    ],
+    "TNT": [
+        { max: 10, price: 4.30 },
+        { max: 30, price: 3.40 },
+        { max: 50, price: 3.00 },
+        { max: 71, price: 2.80 },
+        { max: 100, price: 2.60 },
+        { max: 300, price: 2.40 },
+        { max: 500, price: 2.25 },
+        { max: 750, price: 2 },
+        { max: 1000, price: 1.95 },
+        { max: 999999, price: 1.85 }
+    ],
+    "GABARDINA": [
+        { max: 10, price: 5.50 },
+        { max: 30, price: 4.50 },
+        { max: 50, price: 3.70 },
+        { max: 71, price: 3.55 },
+        { max: 100, price: 3.30 },
+        { max: 300, price: 3.05 },
+        { max: 500, price: 2.80 },
+        { max: 750, price: 2.45 },
+        { max: 3000, price: 2.25 },
+        { max: 999999, price: 2.05 }
+    ]
+};
+
+function calcolaPrezzoSacche() {
+    const tessuto = document.querySelector('input[name="saccheTessuto"]:checked').value;
+    const inputQta = document.getElementById('saccheQta');
+    const qta = parseInt(inputQta.value) || 0;
+    
+    // Elementi UI
+    const elUnitario = document.getElementById('sacchePrezzoUnitario');
+    const elTotNetto = document.getElementById('saccheTotaleNetto');
+    const elTotIvato = document.getElementById('saccheTotaleIvato');
+
+    if (qta < 10) { 
+        elUnitario.textContent = "€ 0.00";
+        elTotNetto.textContent = "€ 0.00";
+        elTotIvato.textContent = "€ 0.00";
+        return;
+    }
+
+    // 1. Trova il listino corretto
+    const listinoSelezionato = LISTINO_SACCHE[tessuto];
+    
+    // 2. Trova la fascia di prezzo
+    let prezzoUnitario = 0;
+    const fascia = listinoSelezionato.find(f => qta <= f.max);
+    
+    if (fascia) {
+        prezzoUnitario = fascia.price;
+    } else {
+        prezzoUnitario = listinoSelezionato[listinoSelezionato.length - 1].price;
+    }
+
+    const totaleNetto = qta * prezzoUnitario;
+
+    // =============================================================
+    // GESTIONE SCONTO
+    // =============================================================
+    const unitarioScontato = (typeof applicaSconto === 'function') ? applicaSconto(prezzoUnitario) : prezzoUnitario;
+    const totaleNettoScontato = (typeof applicaSconto === 'function') ? applicaSconto(totaleNetto) : totaleNetto;
+
+    if (typeof scontoUtente !== 'undefined' && scontoUtente > 0) {
+        elUnitario.innerHTML = `<span style="text-decoration: line-through; color: #999; font-size: 0.8em;">€ ${prezzoUnitario.toFixed(2)}</span> <span style="color: #28a745;">€ ${unitarioScontato.toFixed(2)}</span> <small style="color: #28a745;">(-${scontoUtente}%)</small>`;
+        elTotNetto.textContent = `€ ${totaleNettoScontato.toFixed(2)}`;
+    } else {
+        elUnitario.textContent = `€ ${prezzoUnitario.toFixed(2)}`;
+        elTotNetto.textContent = `€ ${totaleNetto.toFixed(2)}`;
+    }
+    // =============================================================
+
+    // Calcolo IVA sul totale (che sia scontato o pieno)
+    const baseImponibile = (typeof scontoUtente !== 'undefined' && scontoUtente > 0) ? totaleNettoScontato : totaleNetto;
+    const totaleIvato = baseImponibile * 1.22;
+
+    elTotIvato.textContent = `€ ${totaleIvato.toFixed(2)}`;
+}
+
+async function gestisciAggiuntaSacche() {
+    const tessuto = document.querySelector('input[name="saccheTessuto"]:checked').value;
+    const qta = parseInt(document.getElementById('saccheQta').value) || 0;
+    const note = document.getElementById('saccheNote').value;
+
+    if (qta < 10) {
+        alert("Il minimo ordinabile per le Sacche è di 10 pezzi.");
+        return;
+    }
+
+    if (!utenteCorrenteId) {
+        alert("Sessione scaduta. Effettua il login.");
+        return;
+    }
+
+    // Gestione Upload
+    const fileInput = document.getElementById('saccheFileUpload');
+    const fileToUpload = fileInput.files[0];
+    const uploadStatusBox = document.getElementById('saccheUploadStatusBox');
+    const uploadMessage = document.getElementById('saccheUploadMessage');
+    const uploadProgressBar = document.getElementById('saccheUploadProgressBar');
+    let fileUrl = 'Nessun file caricato';
+
+    if (fileToUpload && fileToUpload.size > 5 * 1024 * 1024) {
+        alert("File troppo grande (Max 5MB).");
+        return;
+    }
+
+    if (fileToUpload) {
+        const BUCKET_NAME = 'personalizzazioni';
+        if (uploadStatusBox) {
+            uploadStatusBox.style.display = 'block';
+            uploadProgressBar.style.width = '0%';
+        }
+
+        try {
+            const extension = fileToUpload.name.split('.').pop();
+            const filePath = `${utenteCorrenteId}/SACCA-${Date.now()}.${extension}`;
+            
+            const { error: uploadError } = await supabase.storage
+                .from(BUCKET_NAME)
+                .upload(filePath, fileToUpload, { cacheControl: '3600', upsert: false });
+
+            if (uploadError) throw uploadError;
+
+            if (uploadProgressBar) uploadProgressBar.style.width = '100%';
+            if (uploadMessage) uploadMessage.textContent = '✅ File caricato.';
+
+            fileUrl = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath).data.publicUrl;
+            
+            const expirationTime = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
+            await supabase.from('temp_files').insert([{ storage_path: `${BUCKET_NAME}/${filePath}`, expires_at: expirationTime }]);
+
+        } catch (e) {
+            console.error(e);
+            alert("Errore upload: " + e.message);
+            if (uploadStatusBox) uploadStatusBox.style.display = 'none';
+            return;
+        }
+    }
+
+    // Calcolo Prezzo Unitario da salvare (Scontato o Pieno)
+    const listinoSelezionato = LISTINO_SACCHE[tessuto];
+    let prezzoUnitarioBase = 0;
+    const fascia = listinoSelezionato.find(f => qta <= f.max);
+    prezzoUnitarioBase = fascia ? fascia.price : listinoSelezionato[listinoSelezionato.length - 1].price;
+
+    let prezzoFinaleSalvataggio = prezzoUnitarioBase;
+    if (typeof applicaSconto === 'function' && typeof scontoUtente !== 'undefined' && scontoUtente > 0) {
+        prezzoFinaleSalvataggio = applicaSconto(prezzoUnitarioBase);
+    }
+
+    const nuovoArticolo = {
+        id_unico: Date.now(),
+        prodotto: `SACCA PERSONALIZZATA - ${tessuto}`,
+        quantita: qta,
+        prezzo_unitario: parseFloat(prezzoFinaleSalvataggio.toFixed(2)), 
+        note: note,
+        componenti: [
+            `Materiale: ${tessuto}`,
+            `Modello: Zainetto con cordini`,
+            `Stampa Sublimatica`
+        ],
+        personalizzazione_url: fileUrl,
+        dettagli_taglie: {} 
+    };
+
+    aggiungiAlCarrello(nuovoArticolo);
+    alert(`Aggiunte ${qta} Sacche (${tessuto}) al carrello!`);
+
+    // Reset
+    document.getElementById('saccheNote').value = '';
+    if (fileInput) fileInput.value = '';
+    if (uploadStatusBox) setTimeout(() => { uploadStatusBox.style.display = 'none'; }, 2000);
+}
+
+//-------- FINE SACCHE --------------------------------------
+
+
+
+
+
+
+
 //------- INIZIO LANYARD-------------------------
 
 // ===========================================
@@ -3198,8 +3402,27 @@ document.getElementById('aggiungiBasketBtn').addEventListener('click', gestisciA
         calcolaPrezzoShopper();
 
 
+		//------------------LISTENER SACCHE INIZIO ------------------
+		// --- LISTENER SACCHE ---
+        document.querySelectorAll('input[name="saccheTessuto"]').forEach(radio => {
+            radio.addEventListener('change', calcolaPrezzoSacche);
+        });
+
+        document.getElementById('saccheQta').addEventListener('input', calcolaPrezzoSacche);
+        document.getElementById('aggiungiSaccheBtn').addEventListener('click', gestisciAggiuntaSacche);
+
+        document.getElementById('saccheInfoIcon').addEventListener('click', () => {
+            const content = document.getElementById('saccheInfoContent');
+            content.style.display = (content.style.display === 'none' || content.style.display === '') ? 'block' : 'none';
+        });
+
+        calcolaPrezzoSacche();
+
+		//---------- FINE LISTENER SACCHE-----------
+
+
         // --- LISTENER LANYARD --------------------------------------------------------------------------------------------------
-        // --- LISTENER LANYARD ---
+        
         // 1. Checkbox Doppio Lato
         document.getElementById('lanyardDoubleSide').addEventListener('change', calcolaPrezzoLanyard);
 
