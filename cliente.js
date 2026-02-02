@@ -2820,6 +2820,208 @@ async function gestisciAggiuntaPortachiavi() {
 //---------- FINE PORTACHIAVI----------------
 
 
+//----------- inizio GREMBIULI-----------------
+// ===========================================
+// FUNZIONI PER I GREMBIULI
+// ===========================================
+
+const LISTINO_GREMBIULI = {
+    "POLIESTERE": [
+        { max: 12, price: 8.50 },
+        { max: 25, price: 6.00 },
+        { max: 50, price: 4.90 },
+        { max: 100, price: 4.35 },
+        { max: 250, price: 4.15 },
+        { max: 500, price: 3.90 },
+        { max: 1000, price: 3.70 },
+        { max: 999999, price: 3.58 }
+    ],
+    "GABARDINA": [
+        { max: 12, price: 8.50 },
+        { max: 25, price: 6.80 },
+        { max: 50, price: 5.40 },
+        { max: 100, price: 4.85 },
+        { max: 250, price: 4.45 },
+        { max: 500, price: 4.10 },
+        { max: 1000, price: 3.88 },
+        { max: 999999, price: 3.68 }
+    ],
+    "TNT": [
+        { max: 12, price: 7.50 },
+        { max: 25, price: 5.30 },
+        { max: 50, price: 4.30 },
+        { max: 100, price: 3.90 },
+        { max: 250, price: 4.15 }, // Nota: Valore come da tua indicazione (attenzione: è più alto della fascia precedente)
+        { max: 500, price: 3.50 },
+        { max: 1000, price: 3.15 },
+        { max: 999999, price: 2.99 }
+    ]
+};
+
+function calcolaPrezzoGrembiuli() {
+    const tessuto = document.querySelector('input[name="grembiuliTessuto"]:checked').value;
+    const inputQta = document.getElementById('grembiuliQta');
+    const qta = parseInt(inputQta.value) || 0;
+    
+    // Elementi UI
+    const elUnitario = document.getElementById('grembiuliPrezzoUnitario');
+    const elTotNetto = document.getElementById('grembiuliTotaleNetto');
+    const elTotIvato = document.getElementById('grembiuliTotaleIvato');
+
+    if (qta < 6) { 
+        elUnitario.textContent = "€ 0.00";
+        elTotNetto.textContent = "€ 0.00";
+        elTotIvato.textContent = "€ 0.00";
+        return;
+    }
+
+    // 1. Trova Prezzo Base Materiale
+    let prezzoBase = 0;
+    const listino = LISTINO_GREMBIULI[tessuto];
+    const fascia = listino.find(f => qta <= f.max);
+    
+    if (fascia) {
+        prezzoBase = fascia.price;
+    } else {
+        prezzoBase = listino[listino.length - 1].price;
+    }
+
+    // 2. Calcola Extra (Fibbie e Tasche)
+    let costoExtra = 0;
+    document.querySelectorAll('.grembiuli-extra:checked').forEach(chk => {
+        costoExtra += parseFloat(chk.dataset.costo);
+    });
+
+    // 3. Prezzo Unitario Totale
+    let prezzoUnitarioTotale = prezzoBase + costoExtra;
+
+    // 4. Totale Netto
+    const totaleNetto = qta * prezzoUnitarioTotale;
+
+    // =============================================================
+    // GESTIONE SCONTO
+    // =============================================================
+    const unitarioScontato = (typeof applicaSconto === 'function') ? applicaSconto(prezzoUnitarioTotale) : prezzoUnitarioTotale;
+    const totaleNettoScontato = (typeof applicaSconto === 'function') ? applicaSconto(totaleNetto) : totaleNetto;
+
+    if (typeof scontoUtente !== 'undefined' && scontoUtente > 0) {
+        elUnitario.innerHTML = `<span style="text-decoration: line-through; color: #999; font-size: 0.8em;">€ ${prezzoUnitarioTotale.toFixed(2)}</span> <span style="color: #28a745;">€ ${unitarioScontato.toFixed(2)}</span> <small style="color: #28a745;">(-${scontoUtente}%)</small>`;
+        elTotNetto.textContent = `€ ${totaleNettoScontato.toFixed(2)}`;
+    } else {
+        elUnitario.textContent = `€ ${prezzoUnitarioTotale.toFixed(2)}`;
+        elTotNetto.textContent = `€ ${totaleNetto.toFixed(2)}`;
+    }
+
+    // Calcolo IVA
+    const baseImponibile = (typeof scontoUtente !== 'undefined' && scontoUtente > 0) ? totaleNettoScontato : totaleNetto;
+    const totaleIvato = baseImponibile * 1.22;
+
+    elTotIvato.textContent = `€ ${totaleIvato.toFixed(2)}`;
+}
+
+async function gestisciAggiuntaGrembiuli() {
+    const tessuto = document.querySelector('input[name="grembiuliTessuto"]:checked').value;
+    const qta = parseInt(document.getElementById('grembiuliQta').value) || 0;
+    const note = document.getElementById('grembiuliNote').value;
+
+    if (qta < 6) {
+        alert("Il minimo ordinabile per i Grembiuli è di 6 pezzi.");
+        return;
+    }
+
+    if (!utenteCorrenteId) {
+        alert("Sessione scaduta. Login necessario.");
+        return;
+    }
+
+    // Raccolta componenti extra selezionati
+    let extraDesc = [];
+    let costoExtraTotale = 0;
+    document.querySelectorAll('.grembiuli-extra:checked').forEach(chk => {
+        const label = chk.parentNode.textContent.trim().split('(+')[0]; // Prende il nome pulito
+        extraDesc.push(label);
+        costoExtraTotale += parseFloat(chk.dataset.costo);
+    });
+
+    // Gestione Upload
+    const fileInput = document.getElementById('grembiuliFileUpload');
+    const fileToUpload = fileInput.files[0];
+    const uploadStatusBox = document.getElementById('grembiuliUploadStatusBox');
+    const uploadMessage = document.getElementById('grembiuliUploadMessage');
+    const uploadProgressBar = document.getElementById('grembiuliUploadProgressBar');
+    let fileUrl = 'Nessun file caricato';
+
+    if (fileToUpload && fileToUpload.size > 5 * 1024 * 1024) {
+        alert("File troppo grande (Max 5MB)."); return;
+    }
+
+    if (fileToUpload) {
+        const BUCKET_NAME = 'personalizzazioni';
+        if (uploadStatusBox) {
+            uploadStatusBox.style.display = 'block';
+            uploadProgressBar.style.width = '0%';
+        }
+        try {
+            const extension = fileToUpload.name.split('.').pop();
+            const filePath = `${utenteCorrenteId}/GREMBIULE-${Date.now()}.${extension}`;
+            const { error: uploadError } = await supabase.storage.from(BUCKET_NAME).upload(filePath, fileToUpload, { cacheControl: '3600', upsert: false });
+            if (uploadError) throw uploadError;
+            if (uploadProgressBar) uploadProgressBar.style.width = '100%';
+            if (uploadMessage) uploadMessage.textContent = '✅ File caricato.';
+            fileUrl = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath).data.publicUrl;
+            
+            const expirationTime = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
+            await supabase.from('temp_files').insert([{ storage_path: `${BUCKET_NAME}/${filePath}`, expires_at: expirationTime }]);
+        } catch (e) {
+            console.error(e); alert("Errore upload: " + e.message);
+            if (uploadStatusBox) uploadStatusBox.style.display = 'none'; return;
+        }
+    }
+
+    // Calcolo Prezzo Finale per Carrello
+    const listino = LISTINO_GREMBIULI[tessuto];
+    const fascia = listino.find(f => qta <= f.max);
+    const prezzoBase = fascia ? fascia.price : listino[listino.length - 1].price;
+    const prezzoPienoUnitario = prezzoBase + costoExtraTotale;
+
+    let prezzoFinaleSalvataggio = prezzoPienoUnitario;
+    if (typeof applicaSconto === 'function' && typeof scontoUtente !== 'undefined' && scontoUtente > 0) {
+        prezzoFinaleSalvataggio = applicaSconto(prezzoPienoUnitario);
+    }
+
+    // Costruzione lista componenti
+    const listaComponenti = [
+        `Materiale: ${tessuto}`,
+        `Stampa Sublimatica Full Print`
+    ];
+    if (extraDesc.length > 0) {
+        listaComponenti.push(`Extra: ${extraDesc.join(', ')}`);
+    }
+
+    const nuovoArticolo = {
+        id_unico: Date.now(),
+        prodotto: `GREMBIULE PERSONALIZZATO`,
+        quantita: qta,
+        prezzo_unitario: parseFloat(prezzoFinaleSalvataggio.toFixed(2)),
+        note: note,
+        componenti: listaComponenti,
+        personalizzazione_url: fileUrl,
+        dettagli_taglie: {} 
+    };
+
+    aggiungiAlCarrello(nuovoArticolo);
+    alert(`Aggiunti ${qta} Grembiuli (${tessuto}) al carrello!`);
+
+    // Reset
+    document.getElementById('grembiuliNote').value = '';
+    document.querySelectorAll('.grembiuli-extra').forEach(c => c.checked = false);
+    if (fileInput) fileInput.value = '';
+    if (uploadStatusBox) setTimeout(() => { uploadStatusBox.style.display = 'none'; }, 2000);
+    calcolaPrezzoGrembiuli(); // Reset prezzi UI
+}
+
+//--------- FINE GREMBIULI------------------
+
 
 
 
@@ -3583,6 +3785,30 @@ document.getElementById('aggiungiBasketBtn').addEventListener('click', gestisciA
         calcolaPrezzoPortachiavi();
 
 		//---------- fine listener portachiavi----------------
+
+		//----------INZIO GREMBIULI-----------------------
+		// --- LISTENER GREMBIULI ---
+        document.querySelectorAll('input[name="grembiuliTessuto"]').forEach(radio => {
+            radio.addEventListener('change', calcolaPrezzoGrembiuli);
+        });
+
+        document.getElementById('grembiuliQta').addEventListener('input', calcolaPrezzoGrembiuli);
+        
+        // Listener per tutti i checkbox extra
+        document.querySelectorAll('.grembiuli-extra').forEach(chk => {
+            chk.addEventListener('change', calcolaPrezzoGrembiuli);
+        });
+
+        document.getElementById('aggiungiGrembiuliBtn').addEventListener('click', gestisciAggiuntaGrembiuli);
+
+        document.getElementById('grembiuliInfoIcon').addEventListener('click', () => {
+            const content = document.getElementById('grembiuliInfoContent');
+            content.style.display = (content.style.display === 'none' || content.style.display === '') ? 'block' : 'none';
+        });
+
+        calcolaPrezzoGrembiuli();
+
+		//----------FINE GREMBIULI-----------------------
 
 
         // --- LISTENER LANYARD --------------------------------------------------------------------------------------------------
