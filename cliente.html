@@ -147,6 +147,11 @@
             <img src="img/lanyard.jpeg" alt="Lanyard Portabadge" onerror="this.src='https://placehold.co/400x300?text=Lanyard'"/>
         </a>
 
+		<a href="javascript:void(0)" onclick="mostraSezione('portachiaviSection')" class="banner-item" 
+           data-keywords="portachiavi keychain anello ottomano gadget personalizzato stampa sublimazione gadget">
+            <img src="img/portachiavi.jpeg" alt="Portachiavi Personalizzati" onerror="this.src='https://placehold.co/400x300?text=Portachiavi'"/>
+        </a>
+
     </div>
 
     <div id="menuNoResults" style="display: none; text-align: center; padding: 20px; color: #888;">
@@ -974,6 +979,62 @@
 
             <button class="btn-add" id="aggiungiLanyardBtn" style="margin-top: 20px; width: 100%; font-size: 1.1em;">AGGIUNGI LANYARD AL PREVENTIVO</button>
 
+        </div>
+    </section>
+
+
+
+
+	  <section class="galleria-blocco sezione-prodotto" id="portachiaviSection">
+        <h1>Portachiavi Personalizzati (Doppio Strato)</h1>
+        
+        <div style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            
+            <div style="margin-bottom: 20px;">
+                <span id="portachiaviInfoIcon" class="info-icon" style="cursor: pointer; background: #17a2b8; color: white; padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 0.9em;">
+                    ℹ️ INFO PRODOTTO
+                </span>
+                <div id="portachiaviInfoContent" class="info-content" style="display: none; margin-top: 10px; background: #e3f2fd; padding: 15px; border-radius: 5px; border: 1px solid #b6d4fe; font-size: 0.9em;">
+                    <p><strong>Struttura:</strong> 2 Strati.</p>
+                    <ul style="margin: 5px 0 10px 20px;">
+                        <li><strong>Strato 1:</strong> Stampabile (Fronte/Retro).</li>
+                        <li><strong>Strato 2:</strong> Sfondo in Ottomano.</li>
+                    </ul>
+                    <p><strong>Accessori:</strong> Anello metallico incluso (Diametro 30mm).</p>
+                </div>
+            </div>
+
+            <div class="input-group" style="margin-bottom: 20px;">
+                <label for="portachiaviQta" style="font-weight: 600;">Quantità:</label>
+                <input type="number" id="portachiaviQta" value="10" min="1" style="width: 100%; max-width: 200px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1.1em;">
+                <small style="color: #666; display: block; margin-top: 5px;">Minimo consigliato: 10 pz</small>
+            </div>
+
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; border: 1px solid #ddd; margin-bottom: 20px;">
+                <p style="margin: 5px 0;">Prezzo Netto Cadauno: <strong id="portachiaviPrezzoUnitario" style="font-size: 1.2em;">€ 0.00</strong></p>
+                <p style="margin: 5px 0;">Totale Imponibile: <strong id="portachiaviTotaleNetto" style="color: #007bff; font-size: 1.3em;">€ 0.00</strong></p>
+                <p style="margin: 5px 0; border-top: 1px solid #ccc; padding-top: 5px;">
+                    Totale Ivato (22%): <strong id="portachiaviTotaleIvato" style="color: #28a745; font-size: 1.4em;">€ 0.00</strong>
+                </p>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label for="portachiaviNote" style="font-weight: 600;">Note:</label>
+                <textarea id="portachiaviNote" rows="2" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" placeholder="Es: Colore sfondo ottomano..."></textarea>
+            </div>
+
+            <div class="upload">
+                <div class="upload-box">
+                    <p>Carica file (.JPG / .PNG / .PDF)</p>
+                    <input type="file" id="portachiaviFileUpload" />
+                </div>
+                <div id="portachiaviUploadStatusBox" style="display: none; margin-top: 10px; padding: 10px; background: #e9ecef; border-radius: 5px;">
+                    <div id="portachiaviUploadMessage">Caricamento...</div>
+                    <div style="height: 5px; background: #ccc; margin-top: 5px;"><div id="portachiaviUploadProgressBar" style="height: 100%; width: 0%; background: blue;"></div></div>
+                </div>
+            </div>
+
+            <button class="btn-add" id="aggiungiPortachiaviBtn" style="margin-top: 20px; width: 100%; font-size: 1.1em;">AGGIUNGI AL PREVENTIVO</button>
         </div>
     </section>
 
