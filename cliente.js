@@ -2674,6 +2674,153 @@ async function gestisciAggiuntaSacche() {
 
 
 
+//------- inizio portachiavi------------------
+
+// ===========================================
+// FUNZIONI PER I PORTACHIAVI
+// ===========================================
+
+const LISTINO_PORTACHIAVI = [
+    { max: 50, price: 1.50 },
+    { max: 100, price: 1.10 },
+    { max: 200, price: 1.00 },
+    { max: 300, price: 0.90 },
+    { max: 999999, price: 0.80 }
+];
+
+function calcolaPrezzoPortachiavi() {
+    const inputQta = document.getElementById('portachiaviQta');
+    const qta = parseInt(inputQta.value) || 0;
+
+    // Elementi UI
+    const elUnitario = document.getElementById('portachiaviPrezzoUnitario');
+    const elTotNetto = document.getElementById('portachiaviTotaleNetto');
+    const elTotIvato = document.getElementById('portachiaviTotaleIvato');
+
+    if (qta < 1) {
+        elUnitario.textContent = "€ 0.00";
+        elTotNetto.textContent = "€ 0.00";
+        elTotIvato.textContent = "€ 0.00";
+        return;
+    }
+
+    // 1. Trova Prezzo Base
+    let prezzoUnitario = 0;
+    const fascia = LISTINO_PORTACHIAVI.find(f => qta <= f.max);
+    if (fascia) {
+        prezzoUnitario = fascia.price;
+    } else {
+        prezzoUnitario = LISTINO_PORTACHIAVI[LISTINO_PORTACHIAVI.length - 1].price;
+    }
+
+    const totaleNetto = qta * prezzoUnitario;
+
+    // Gestione Sconto (Se presente la funzione globale)
+    const unitarioScontato = (typeof applicaSconto === 'function') ? applicaSconto(prezzoUnitario) : prezzoUnitario;
+    const totaleNettoScontato = (typeof applicaSconto === 'function') ? applicaSconto(totaleNetto) : totaleNetto;
+
+    if (typeof scontoUtente !== 'undefined' && scontoUtente > 0) {
+        elUnitario.innerHTML = `<span style="text-decoration: line-through; color: #999; font-size: 0.8em;">€ ${prezzoUnitario.toFixed(2)}</span> <span style="color: #28a745;">€ ${unitarioScontato.toFixed(2)}</span> <small style="color: #28a745;">(-${scontoUtente}%)</small>`;
+        elTotNetto.textContent = `€ ${totaleNettoScontato.toFixed(2)}`;
+    } else {
+        elUnitario.textContent = `€ ${prezzoUnitario.toFixed(2)}`;
+        elTotNetto.textContent = `€ ${totaleNetto.toFixed(2)}`;
+    }
+
+    // Calcolo IVA
+    const baseImponibile = (typeof scontoUtente !== 'undefined' && scontoUtente > 0) ? totaleNettoScontato : totaleNetto;
+    const totaleIvato = baseImponibile * 1.22;
+
+    elTotIvato.textContent = `€ ${totaleIvato.toFixed(2)}`;
+}
+
+async function gestisciAggiuntaPortachiavi() {
+    const qta = parseInt(document.getElementById('portachiaviQta').value) || 0;
+    const note = document.getElementById('portachiaviNote').value;
+
+    if (qta < 1) {
+        alert("Inserisci una quantità valida.");
+        return;
+    }
+    if (!utenteCorrenteId) {
+        alert("Sessione scaduta. Login necessario.");
+        return;
+    }
+
+    // Gestione Upload
+    const fileInput = document.getElementById('portachiaviFileUpload');
+    const fileToUpload = fileInput.files[0];
+    const uploadStatusBox = document.getElementById('portachiaviUploadStatusBox');
+    const uploadMessage = document.getElementById('portachiaviUploadMessage');
+    const uploadProgressBar = document.getElementById('portachiaviUploadProgressBar');
+    let fileUrl = 'Nessun file caricato';
+
+    if (fileToUpload && fileToUpload.size > 5 * 1024 * 1024) {
+        alert("File troppo grande (Max 5MB)."); return;
+    }
+
+    if (fileToUpload) {
+        const BUCKET_NAME = 'personalizzazioni';
+        if (uploadStatusBox) {
+            uploadStatusBox.style.display = 'block';
+            uploadProgressBar.style.width = '0%';
+        }
+        try {
+            const extension = fileToUpload.name.split('.').pop();
+            const filePath = `${utenteCorrenteId}/PORTACHIAVI-${Date.now()}.${extension}`;
+            const { error: uploadError } = await supabase.storage.from(BUCKET_NAME).upload(filePath, fileToUpload, { cacheControl: '3600', upsert: false });
+            if (uploadError) throw uploadError;
+            if (uploadProgressBar) uploadProgressBar.style.width = '100%';
+            if (uploadMessage) uploadMessage.textContent = '✅ File caricato.';
+            fileUrl = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath).data.publicUrl;
+            
+            const expirationTime = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
+            await supabase.from('temp_files').insert([{ storage_path: `${BUCKET_NAME}/${filePath}`, expires_at: expirationTime }]);
+        } catch (e) {
+            console.error(e); alert("Errore upload: " + e.message);
+            if (uploadStatusBox) uploadStatusBox.style.display = 'none'; return;
+        }
+    }
+
+    // Calcolo Prezzo Finale da salvare
+    let prezzoUnitarioBase = 0;
+    const fascia = LISTINO_PORTACHIAVI.find(f => qta <= f.max);
+    prezzoUnitarioBase = fascia ? fascia.price : LISTINO_PORTACHIAVI[LISTINO_PORTACHIAVI.length - 1].price;
+
+    let prezzoFinaleSalvataggio = prezzoUnitarioBase;
+    if (typeof applicaSconto === 'function' && typeof scontoUtente !== 'undefined' && scontoUtente > 0) {
+        prezzoFinaleSalvataggio = applicaSconto(prezzoUnitarioBase);
+    }
+
+    const nuovoArticolo = {
+        id_unico: Date.now(),
+        prodotto: `PORTACHIAVI PERSONALIZZATO`,
+        quantita: qta,
+        prezzo_unitario: parseFloat(prezzoFinaleSalvataggio.toFixed(2)),
+        note: note,
+        componenti: [
+            `2 Strati (Stampa + Ottomano)`,
+            `Anello 30mm incluso`,
+            `Stampa Sublimatica`
+        ],
+        personalizzazione_url: fileUrl,
+        dettagli_taglie: {} 
+    };
+
+    aggiungiAlCarrello(nuovoArticolo);
+    alert(`Aggiunti ${qta} Portachiavi al carrello!`);
+
+    // Reset
+    document.getElementById('portachiaviNote').value = '';
+    if (fileInput) fileInput.value = '';
+    if (uploadStatusBox) setTimeout(() => { uploadStatusBox.style.display = 'none'; }, 2000);
+}
+
+
+//---------- FINE PORTACHIAVI----------------
+
+
+
 
 
 
@@ -3419,6 +3566,23 @@ document.getElementById('aggiungiBasketBtn').addEventListener('click', gestisciA
         calcolaPrezzoSacche();
 
 		//---------- FINE LISTENER SACCHE-----------
+
+
+		//--------- inizio listener portachiavii--------------
+
+		// --- LISTENER PORTACHIAVI ---
+        document.getElementById('portachiaviQta').addEventListener('input', calcolaPrezzoPortachiavi);
+        document.getElementById('aggiungiPortachiaviBtn').addEventListener('click', gestisciAggiuntaPortachiavi);
+        
+        document.getElementById('portachiaviInfoIcon').addEventListener('click', () => {
+            const content = document.getElementById('portachiaviInfoContent');
+            content.style.display = (content.style.display === 'none' || content.style.display === '') ? 'block' : 'none';
+        });
+
+        // Inizializza
+        calcolaPrezzoPortachiavi();
+
+		//---------- fine listener portachiavi----------------
 
 
         // --- LISTENER LANYARD --------------------------------------------------------------------------------------------------
