@@ -2697,7 +2697,7 @@ function calcolaPrezzoPortachiavi() {
     const elTotNetto = document.getElementById('portachiaviTotaleNetto');
     const elTotIvato = document.getElementById('portachiaviTotaleIvato');
 
-    if (qta < 1) {
+    if (qta < 50) {
         elUnitario.textContent = "€ 0.00";
         elTotNetto.textContent = "€ 0.00";
         elTotIvato.textContent = "€ 0.00";
@@ -2738,8 +2738,8 @@ async function gestisciAggiuntaPortachiavi() {
     const qta = parseInt(document.getElementById('portachiaviQta').value) || 0;
     const note = document.getElementById('portachiaviNote').value;
 
-    if (qta < 1) {
-        alert("Inserisci una quantità valida.");
+    if (qta < 50) {
+        alert("Il minimo ordinabile per i Portachiavi è di 50 pezzi.");
         return;
     }
     if (!utenteCorrenteId) {
