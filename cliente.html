@@ -157,6 +157,11 @@
             <img src="img/grembiule.jpeg" alt="Grembiuli Personalizzati" onerror="this.src='https://placehold.co/400x300?text=Grembiuli'"/>
         </a>
 
+		<a href="javascript:void(0)" onclick="mostraSezione('teliSection')" class="banner-item" 
+           data-keywords="telo mare palestra asciugamano spugna microfibra custom personalizzato sublimazione tovaglia spiaggia stampa asciugamano">
+            <img src="Telo.jpeg" alt="Teli Mare e Palestra" onerror="this.src='https://placehold.co/400x300?text=Teli+Mare+Palestra'"/>
+        </a>
+
     </div>
 
     <div id="menuNoResults" style="display: none; text-align: center; padding: 20px; color: #888;">
@@ -1287,7 +1292,125 @@
 
 
 
+<section class="galleria-blocco sezione-prodotto" id="teliSection">
+        <h1>Teli Mare & Palestra Personalizzati</h1>
+        
+        <div style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            
+            <div style="margin-bottom: 20px;">
+                <span id="teliInfoIcon" class="info-icon" style="cursor: pointer; background: #17a2b8; color: white; padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 0.9em;">
+                    ℹ️ INFO TESSUTI, LIMITI & DIME
+                </span>
+                <div id="teliInfoContent" class="info-content" style="display: none; margin-top: 10px; background: #e3f2fd; padding: 15px; border-radius: 5px; border: 1px solid #b6d4fe; font-size: 0.9em;">
+                    <p><strong>Spugna:</strong> Lato stampa con riccio, retro riccio 100% poliestere, al tatto sembra Cotone. Alta assorbenza.</p>
+                    <p><strong>Microfibra:</strong> Sottile, leggera, asciugatura rapida. Ideale per sport/viaggi. Soprattuto personalizzabile con loghi per palestre</p>
+                    <hr>
+                    <p>⚠️ <strong>Limiti dimensionali (Custom):</strong> Almeno un lato deve essere inferiore a 159 cm.</p>
+                    <p>📦 <strong>Minimo d'ordine:</strong> 10 pezzi.</p>
+					<p>📦 <strong>Stampa: </strong> stampa in sublimazione MOLTO resistente ai lavaggi, stampa solo su un lato, se si vuole la stampa bifacciale bisogna richiedere tramite email.</p>
+                </div>
+            </div>
 
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: 600; display: block; margin-bottom: 10px;">1. Seleziona Tessuto:</label>
+                <div style="display: flex; gap: 20px;">
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        <input type="radio" name="teliTessuto" value="SPUGNA" checked style="transform: scale(1.2);">
+                        SPUGNA
+                    </label>
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        <input type="radio" name="teliTessuto" value="MICROFIBRA" style="transform: scale(1.2);">
+                        MICROFIBRA
+                    </label>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+                <label style="font-weight: 600; display: block; margin-bottom: 10px;">2. Scegli Tipologia Misure:</label>
+                <div style="display: flex; gap: 20px;">
+                    <label style="cursor: pointer; font-weight: 500;">
+                        <input type="radio" name="teliModo" value="STANDARD" checked> Misure Standard (Listino Fisso)
+                    </label>
+                    <label style="cursor: pointer; font-weight: 500;">
+                        <input type="radio" name="teliModo" value="CUSTOM"> Misure Personalizzate (Al MQ)
+                    </label>
+                </div>
+            </div>
+
+            <div id="teliContainerStandard">
+                <label style="font-weight: 600; display: block; margin-bottom: 10px;">Seleziona Formato Standard:</label>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px;">
+                    <label class="radio-box">
+                        <input type="radio" name="teliMisuraStd" value="75x158" checked> 75x158 cm
+                    </label>
+                    <label class="radio-box">
+                        <input type="radio" name="teliMisuraStd" value="100x158"> 100x158 cm
+                    </label>
+                    <label class="radio-box">
+                        <input type="radio" name="teliMisuraStd" value="80x180"> 80x180 cm
+                    </label>
+                    <label class="radio-box">
+                        <input type="radio" name="teliMisuraStd" value="100x180"> 100x180 cm
+                    </label>
+                    <label class="radio-box">
+                        <input type="radio" name="teliMisuraStd" value="30x50"> 30x50 cm
+                    </label>
+                    <label class="radio-box">
+                        <input type="radio" name="teliMisuraStd" value="50x90"> 50x90 cm
+                    </label>
+                    <label class="radio-box">
+                        <input type="radio" name="teliMisuraStd" value="50x120"> 50x120 cm
+                    </label>
+                </div>
+            </div>
+
+            <div id="teliContainerCustom" style="display: none; background: #fff8e1; padding: 15px; border-radius: 5px; border: 1px solid #ffe0b2;">
+                <p style="font-size: 0.9em; color: #f57c00; margin-top: 0;">⚠️ <strong>Nota:</strong> Max larghezza bobina 159cm. (Es: puoi fare 150x200, ma non 160x200).</p>
+                <div style="display: flex; gap: 15px; align-items: flex-end;">
+                    <div>
+                        <label>Base (cm):</label>
+                        <input type="number" id="teliBase" value="100" style="padding: 5px; width: 80px;">
+                    </div>
+                    <div>
+                        <label>Altezza (cm):</label>
+                        <input type="number" id="teliAltezza" value="150" style="padding: 5px; width: 80px;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group" style="margin-top: 20px; max-width: 200px;">
+                <label for="teliQta" style="font-weight: 600;">Quantità:</label>
+                <input type="number" id="teliQta" value="10" min="10" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1.1em;">
+                <small style="color: #dc3545; font-weight: 600;">Minimo: 10 pezzi</small>
+            </div>
+
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; border: 1px solid #ddd; margin-top: 20px; margin-bottom: 20px;">
+                <p style="margin: 5px 0;">Prezzo Netto Cadauno: <strong id="teliPrezzoUnitario" style="font-size: 1.2em;">€ 0.00</strong></p>
+                <p style="margin: 5px 0;">Totale Imponibile: <strong id="teliTotaleNetto" style="color: #007bff; font-size: 1.2em;">€ 0.00</strong></p>
+                <p style="margin: 5px 0; border-top: 1px solid #ccc; padding-top: 5px;">
+                    Totale Ivato (22%): <strong id="teliTotaleIvato" style="color: #28a745; font-size: 1.4em;">€ 0.00</strong>
+                </p>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label for="teliNote" style="font-weight: 600;">Note:</label>
+                <textarea id="teliNote" rows="2" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" placeholder="Es: Finitura bordi..."></textarea>
+            </div>
+
+            <div class="upload">
+                <div class="upload-box">
+                    <p>Carica grafica Telo (.PDF / .TIFF / .JPG alta ris.)</p>
+                    <input type="file" id="teliFileUpload" />
+                </div>
+                <div id="teliUploadStatusBox" style="display: none; margin-top: 10px; padding: 10px; background: #e9ecef; border-radius: 5px;">
+                    <div id="teliUploadMessage">Caricamento...</div>
+                    <div style="height: 5px; background: #ccc; margin-top: 5px;"><div id="teliUploadProgressBar" style="height: 100%; width: 0%; background: blue;"></div></div>
+                </div>
+            </div>
+
+            <button class="btn-add" id="aggiungiTeliBtn" style="width: 100%; font-size: 1.1em;">AGGIUNGI TELI AL PREVENTIVO</button>
+        </div>
+    </section>
 
 
 
