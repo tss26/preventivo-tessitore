@@ -2681,8 +2681,8 @@ async function gestisciAggiuntaSacche() {
 // ===========================================
 
 const LISTINO_PORTACHIAVI = [
-    { max: 50, price: 1.50 },
-    { max: 100, price: 1.10 },
+    { max: 75, price: 1.50 },
+    { max: 100, price: 1.20 },
     { max: 200, price: 1.00 },
     { max: 300, price: 0.90 },
     { max: 999999, price: 0.80 }
