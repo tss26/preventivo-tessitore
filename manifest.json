@@ -1,7 +1,7 @@
 {
   "name": "Tessitore Preventivo",
   "short_name": "Tessitore",
-  "version": "3", 
+  "version": "5", 
   "description": "App per la gestione preventivi e ordini Tessitore SRL",
   "start_url": "login.html",
   "display": "standalone",
