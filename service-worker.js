@@ -1,5 +1,5 @@
 // AGGIORNATO: Cambia la versione per forzare l'aggiornamento della cache
-const CACHE_NAME = "preventivo-app-cache-v4"; 
+const CACHE_NAME = "preventivo-app-cache-v5"; 
 
 const urlsToCache = [
   "index.html",     // serve ancora
