@@ -2105,11 +2105,11 @@ async function gestisciAggiuntaDTF() {
 // LISTINO PREZZI (Definito in base alla tua richiesta)
 const LISTINO_SCALDACOLLO = {
     "PILE": [
-        { max: 8, price: 6.00 },
-        { max: 30, price: 4.50 },
-        { max: 50, price: 3.90 },
-        { max: 100, price: 3.50 },
-        { max: 200, price: 3.00 },
+        { max: 20, price: 4.50 },
+        { max: 30, price: 3.90 },
+        { max: 50, price: 3.50 },
+        { max: 100, price: 3.20 },
+        { max: 200, price: 2.95 },
         { max: 300, price: 2.70 },
         { max: 550, price: 2.50 },
         { max: 999999, price: 2.50 }
