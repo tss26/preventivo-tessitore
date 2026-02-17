@@ -24,6 +24,9 @@ let allOrders = [];
 let paginaCorrenteAdmin = 1;
 let ordiniFiltratiCache = [];
 
+
+
+
 // ===========================================
 // FUNZIONI DI BASE ADMIN (Corrette con 'permessi')
 // ===========================================
@@ -745,39 +748,133 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// ===========================================
-// FUNZIONALITÀ UTENTI E PERMESSI
-// ===========================================
 
-/*let allUsers = []; 
-
-function showSection(sectionId) {
-    document.querySelectorAll('.content-section').forEach(section => {
-        section.style.display = 'none';
-    });
-
-    const targetSection = document.getElementById(sectionId + '-section');
-    if (targetSection) targetSection.style.display = 'block';
-
-    document.querySelectorAll('.tab-nav a').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    const activeTab = document.getElementById(sectionId + '-tab');
-    if (activeTab) activeTab.classList.add('active');
-
-    if (sectionId === 'orders') {
-        caricaOrdini();
-    } else if (sectionId === 'users') {
-        caricaUtenti();
-    }
-}
-*/
 
 // ===========================================
 // FUNZIONALITÀ UTENTI E PERMESSI
 // ===========================================
 
 let allUsers = []; 
+
+//---------------inizio gestione per aggiunzione sconto --------------------
+// CONFIGURAZIONE SOGLIE SCONTI
+const PREMI_TIERS = [
+    { soglia: 500,   sconto: 1 },
+    { soglia: 750,   sconto: 1.5 },
+    { soglia: 1500,  sconto: 3 },
+    { soglia: 2500,  sconto: 3.5 },
+    { soglia: 5000,  sconto: 5 },
+    { soglia: 10000, sconto: 5 } 
+];
+
+/**
+ * CALCOLO SCONTI MENSILI (Versione "Reset Totale")
+ * 1. Analizza il fatturato del mese scorso.
+ * 2. Assegna lo sconto a chi lo merita.
+ * 3. RIMUOVE lo sconto (imposta a 0) a chi non ha raggiunto soglie.
+ */
+async function elaboraScontiMeseScorso() {
+    // --- A. GESTIONE DATE (Mese Scorso) ---
+    const oggi = new Date();
+    // Primo giorno del mese corrente (es. 1 Febbraio)
+    const primoQuestoMese = new Date(oggi.getFullYear(), oggi.getMonth(), 1);
+    // Primo giorno del mese scorso (es. 1 Gennaio)
+    const primoMeseScorso = new Date(oggi.getFullYear(), oggi.getMonth() - 1, 1);
+    
+    // Stringhe ISO per Supabase
+    const dataInizio = primoMeseScorso.toISOString();
+    const dataFine = primoQuestoMese.toISOString();
+    
+    // Nome leggibile (es. "gennaio 2025")
+    const nomeMeseScorso = primoMeseScorso.toLocaleString('it-IT', { month: 'long', year: 'numeric' });
+
+    if (!confirm(`⚠️ ATTENZIONE ⚠️\n\nStai per ricalcolare gli sconti basandoti sugli ordini di ${nomeMeseScorso.toUpperCase()}.\n\nQuesta operazione:\n1. Assegnerà nuovi sconti a chi ha raggiunto le soglie.\n2. AZZERERÀ lo sconto a chi non ha raggiunto il budget minimo.\n\nVuoi procedere?`)) {
+        return;
+    }
+
+    const btn = document.getElementById('btnCalcolaSconti');
+    if(btn) { btn.disabled = true; btn.textContent = "⏳ Elaborazione in corso..."; }
+
+    try {
+        console.log(`Inizio elaborazione sconti per: ${nomeMeseScorso}`);
+
+        // --- B. RECUPERA TUTTI GLI UTENTI ATTIVI ---
+        // Ci serve la lista completa per poter azzerare chi non ha comprato nulla
+        const { data: tuttiUtenti, error: errUtenti } = await supabase
+            .from('utenti')
+            .select('id, ragione_sociale')
+            .neq('permessi', 'admin'); // Escludiamo gli admin se vuoi, o rimuovi questa riga
+
+        if (errUtenti) throw new Error("Errore recupero utenti: " + errUtenti.message);
+
+        // --- C. RECUPERA GLI ORDINI DEL MESE SCORSO ---
+        const { data: ordini, error: errOrdini } = await supabase
+            .from('ordini')
+            .select('user_id, totale')
+            .gte('data_ordine', dataInizio)
+            .lt('data_ordine', dataFine)
+            // Consideriamo validi solo ordini confermati/pagati (modifica gli stati se necessario)
+            .or('stato.eq.Completato,stato.eq.Spedito,stato.eq.Consegnato,stato.eq.In lavorazione,stato.eq.Stampato');
+
+        if (errOrdini) throw new Error("Errore recupero ordini: " + errOrdini.message);
+
+        // --- D. CALCOLA TOTALE PER OGNI UTENTE ---
+        // Mappa: { "id_utente": 1500.00, "altro_id": 200.00 }
+        const mappaFatturato = {};
+        if (ordini) {
+            ordini.forEach(o => {
+                if (!mappaFatturato[o.user_id]) mappaFatturato[o.user_id] = 0;
+                mappaFatturato[o.user_id] += (o.totale || 0);
+            });
+        }
+
+        // --- E. CICLO SU TUTTI GLI UTENTI E UPDATE ---
+        let contatoreAggiornati = 0;
+        let contatoreAzzerati = 0;
+
+        for (const utente of tuttiUtenti) {
+            const fatturato = mappaFatturato[utente.id] || 0; // Se non c'è in mappa, è 0
+            
+            // Calcola il tier
+            let nuovoSconto = 0;
+            PREMI_TIERS.forEach(tier => {
+                if (fatturato >= tier.soglia) {
+                    nuovoSconto = tier.sconto;
+                }
+            });
+
+            // Esegui l'update nel DB per OGNI utente
+            const { error: errUpdate } = await supabase
+                .from('utenti')
+                .update({ percentuale_sconto: nuovoSconto })
+                .eq('id', utente.id);
+
+            if (errUpdate) {
+                console.error(`Errore update utente ${utente.ragione_sociale}:`, errUpdate);
+            } else {
+                if (nuovoSconto > 0) contatoreAggiornati++;
+                else contatoreAzzerati++;
+            }
+        }
+
+        alert(`✅ Operazione Completata per ${nomeMeseScorso}!\n\n` +
+              `💰 Utenti con sconto attivo: ${contatoreAggiornati}\n` +
+              `⭕ Utenti resettati a 0%: ${contatoreAzzerati}\n\n` +
+              `La lista utenti verrà ora ricaricata.`);
+        
+        caricaUtenti(); // Aggiorna la tabella a video
+
+    } catch (error) {
+        console.error(error);
+        alert("Errore critico: " + error.message);
+    } finally {
+        if(btn) { btn.disabled = false; btn.textContent = "📅 Calcola e Assegna Sconti (Mese Scorso)"; }
+    }
+}
+
+//---------------fine gestione per aggiunzione sconto --------------------
+
+
 
 function showSection(sectionId) {
     // 1. Nascondi TUTTE le sezioni
@@ -840,8 +937,28 @@ function renderUserList(users) {
     const container = document.getElementById('utentiLista');
     if (!container) return;
 
+
+    // --- PULSANTE AUTOMAZIONE (INSERISCI QUESTO PEZZO) ---
+    let html = `
+    <div style="margin-bottom: 20px; padding: 15px; background: #e8f5e9; border-left: 5px solid #4caf50; border-radius: 4px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+            <h3 style="margin-top:0; color:#2e7d32;">⚡ Gestione Mensile Sconti</h3>
+            <p style="margin:0; font-size:0.9em;">Clicca per analizzare il mese scorso. Chi ha raggiunto il budget avrà lo sconto, <strong>chi no verrà portato a 0%.</strong></p>
+        </div>
+        <button id="btnCalcolaSconti" class="btn-primary" style="background-color: #2e7d32; padding: 10px 20px;">
+           📅 Calcola e Assegna Sconti (Mese Scorso)
+        </button>
+    </div>
+    `;
+    // -----------------------------------------------------
+
+    
+
     if (users.length === 0) {
         container.innerHTML = '<h2>Nessun utente trovato.</h2>';
+        // Listener anche qui per sicurezza
+        const btn = document.getElementById('btnCalcolaSconti');
+        if(btn) btn.addEventListener('click', elaboraScontiMeseScorso);
         return;
     }
 
@@ -882,6 +999,13 @@ function renderUserList(users) {
     
     html += '</tbody></table></div>';
     container.innerHTML = html;
+
+    // Aggancia l'evento click al nuovo bottone ---------------------------inizio gestisce il bottone per aggiunta sconto automatico ---------
+    const btnCalcola = document.getElementById('btnCalcolaSconti');
+    if (btnCalcola) {
+        btnCalcola.addEventListener('click', elaboraScontiMeseScorso);
+    }
+    // ---------------------------fine gestisce il bottone per aggiunta sconto automatico ---------
     
     document.querySelectorAll('.permessi-select').forEach(select => {
         select.addEventListener('change', (e) => aggiornaPermessiUtente(e.target.dataset.id, e.target.value));
