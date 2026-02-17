@@ -955,7 +955,9 @@ function renderUserList(users) {
     
 
     if (users.length === 0) {
-        container.innerHTML = '<h2>Nessun utente trovato.</h2>';
+        // AGGIUNGI "html +" QUI SOTTO:
+        container.innerHTML = html + '<h2>Nessun utente trovato.</h2>'; 
+        
         // Listener anche qui per sicurezza
         const btn = document.getElementById('btnCalcolaSconti');
         if(btn) btn.addEventListener('click', elaboraScontiMeseScorso);
