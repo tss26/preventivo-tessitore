@@ -962,7 +962,7 @@ function renderUserList(users) {
         return;
     }
 
-    let html = `
+    html += `
     <div class="admin-table">
         <table>
             <thead>
