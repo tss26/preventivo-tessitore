@@ -90,10 +90,24 @@ async function caricaOrdini() {
 
     // Salva i dati originali
     allOrders = ordini || []; 
-    
+    aggiornaConteggioDaEvadereAdmin();
     // Visualizza la lista completa applicando eventuali filtri già presenti
     applyFilters(); 
 }
+
+//inizio funzione che conta ordini da evadere sulla pagina admin--------------------------------------------
+function aggiornaConteggioDaEvadereAdmin() {
+    const countSpan = document.getElementById('countOrdiniDaEvadereAdmin');
+    if (!countSpan) return;
+
+    // Se in futuro vorrai escludere anche i completati, cambia in: 
+    // o.stato !== 'Annullato' && o.stato !== 'Completato' && o.stato !== 'Spedito'
+    const daEvadere = allOrders.filter(o => o.stato !== 'Annullato').length;
+    countSpan.textContent = daEvadere;
+}
+
+//----------------fine funzione che conta ordini da evadere ------------------------------------------------
+
 
 /**
  * Funzione di utilità per disegnare la tabella degli ordini
