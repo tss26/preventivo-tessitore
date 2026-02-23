@@ -100,12 +100,20 @@ function aggiornaConteggioDaEvadereAdmin() {
     const countSpan = document.getElementById('countOrdiniDaEvadereAdmin');
     if (!countSpan) return;
 
-    // Se in futuro vorrai escludere anche i completati, cambia in: 
-    // o.stato !== 'Annullato' && o.stato !== 'Completato' && o.stato !== 'Spedito'
-    const daEvadere = allOrders.filter(o => o.stato !== 'Annullato').length;
+    // Array con gli stati specifici da conteggiare
+    const statiDaEvadere = [
+        'Richiesta Inviata', 
+        'In attesa di lavorazione', 
+        'In lavorazione', 
+        'Attesa Pagamento', 
+        'Convalida Commerciale'
+    ];
+
+    // Filtriamo e contiamo solo gli ordini che hanno uno degli stati elencati
+    const daEvadere = allOrders.filter(o => statiDaEvadere.includes(o.stato)).length;
+    
     countSpan.textContent = daEvadere;
 }
-
 //----------------fine funzione che conta ordini da evadere ------------------------------------------------
 
 
