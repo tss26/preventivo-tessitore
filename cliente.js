@@ -3250,9 +3250,9 @@ const LISTINO_TELI_STANDARD = {
         { max: 25, price: 18.50 }, { max: 50, price: 17.00 }, { max: 100, price: 15.50 }, { max: 99999, price: 13.50 }
     ],
     // Misure Palestra (Prezzi stimati su base MQ ~13€, modificabili)
-    "30x50":  [{ max: 99999, price: 2.50 }],
-    "50x90":  [{ max: 99999, price: 6.50 }],
-    "50x120": [{ max: 99999, price: 8.50 }]
+    "30x50":  [{ max: 25, price: 3.90 }, { max: 50, price: 3.20 }, { max: 100, price: 2.90 }, { max: 99999, price: 2.50 }],
+    "50x90":  [{ max: 25, price: 6.00 }, { max: 50, price: 5.50 }, { max: 100, price: 4.90 }, { max: 99999, price: 4.30 }],
+    "50x120": [{ max: 25, price: 6.50 }, { max: 50, price: 5.90 }, { max: 100, price: 5.20 }, { max: 99999, price: 4.60 }]
 };
 
 // 2. CONFIGURAZIONE CUSTOM (Prezzo al MQ)
