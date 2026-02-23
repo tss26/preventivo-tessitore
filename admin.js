@@ -331,6 +331,7 @@ async function aggiornaStatoOrdine(ordineId, nuovoStato) {
             order.id === ordineId ? { ...order, stato: nuovoStato } : order
         );
         allOrders = updatedOrders;
+        aggiornaConteggioDaEvadereAdmin();
         applyFilters(); 
     }
 }
