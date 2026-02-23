@@ -1,0 +1,109 @@
+//edge fuction telegram con dettagli per la notifica telegram
+
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
+
+const BOT_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN');
+// Ho sostituito l'array con la costante singola del gruppo
+const GROUP_CHAT_ID = "-1003127391372"; 
+
+serve(async (req) => {
+  try {
+    const { record } = await req.json();
+
+    // 1. Inizializziamo il client Supabase per recuperare i dati dell'utente
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
+
+    // 2. Recuperiamo la 'ragione_sociale' dalla tabella 'utenti' usando lo user_id dell'ordine
+    const { data: profilo, error: userError } = await supabase
+      .from('utenti')
+      .select('ragione_sociale')
+      .eq('id', record.user_id)
+      .single();
+
+    const nomeMittente = profilo?.ragione_sociale || "Utente non identificato";
+
+    const idOrdine = record.id;
+    const numOrdine = record.num_ordine_prog || 'N/D';
+    const totale = record.totale ? record.totale.toFixed(2) : '0.00';
+    const dettagli = record.dettagli_prodotti || [];
+    
+    const infoCliente = dettagli.find(d => d.tipo === 'INFO_CLIENTE') || {};
+    const nomeRiferimentoCliente = infoCliente.cliente || "Non specificato";
+    
+    const prodottiText = dettagli
+      .filter(d => d.tipo !== 'INFO_CLIENTE')
+      .map(p => {
+        let riga = `• <b>${p.quantita}x ${p.prodotto}</b>`;
+        
+        if (p.componenti && p.componenti.length > 0) {
+          riga += `\n   ⚙️ <i>Accessori: ${p.componenti.join(', ')}</i>`;
+        }
+
+        if (p.dettagli_taglie && Object.keys(p.dettagli_taglie).length > 0) {
+          const taglieInfo = Object.entries(p.dettagli_taglie)
+            .map(([genere, taglie]) => {
+              const dettagliTaglia = Object.entries(taglie)
+                .map(([t, q]) => `${t}(${q})`)
+                .join(', ');
+              return `${genere}: ${dettagliTaglia}`;
+            })
+            .join(' | ');
+          riga += `\n   📏 <i>Taglie: ${taglieInfo}</i>`;
+        }
+
+        if (p.personalizzazione_url && p.personalizzazione_url.includes('http')) {
+          riga += `\n   📎 <a href="${p.personalizzazione_url}">Visualizza Grafica</a>`;
+        }
+        
+        return riga;
+      })
+      .join('\n\n');
+
+    // 3. Costruzione del messaggio
+    const messaggio = `🚀 <b>NUOVO PREVENTIVO: ${numOrdine}</b>\n` +
+                      `📩 <b>Inviato da:</b> ${nomeMittente}\n` +
+                      `--------------------------\n` +
+                      `👤 <b>Rif. Cliente:</b> ${nomeRiferimentoCliente}\n` +
+                      `💰 <b>Totale Imponibile:</b> € ${totale}\n\n` +
+                      `📦 <b>Articoli:</b>\n${prodottiText}`;
+
+    const adminLink = `https://supabase.com/dashboard/project/jukyggaoiekenvekoicv/editor/ordini?filter=id%3Deq.${idOrdine}`;
+
+    // Modificato l'invio: puntiamo direttamente a GROUP_CHAT_ID senza map
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: GROUP_CHAT_ID,
+        text: messaggio,
+        parse_mode: 'HTML',
+        disable_web_page_preview: false,
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: "🖥️ Vedi su Pannello Admin",
+                url: adminLink
+              }
+            ]
+          ]
+        }
+      })
+    });
+
+    return new Response(JSON.stringify({ ok: true }), { 
+      status: 200,
+      headers: { "Content-Type": "application/json" } 
+    });
+
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.message }), { 
+      status: 500,
+      headers: { "Content-Type": "application/json" } 
+    });
+  }
+})
