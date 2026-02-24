@@ -198,7 +198,7 @@ function renderOrdini(lista) {
         tbody.appendChild(tr);
     });
 }
-
+/*
 // ===========================================
 // 3. FUNZIONE: APRI DETTAGLI + TASTO STAMPA
 // ===========================================
@@ -289,7 +289,131 @@ window.apriDettagliPreventivo = function(id) {
     container.parentNode.insertBefore(btnStampa, container.nextSibling);
 
     document.getElementById('modalDettagli').style.display = 'flex';
+}*/
+// ===========================================
+// 3. FUNZIONE: APRI DETTAGLI + TASTO STAMPA
+// ===========================================
+window.apriDettagliPreventivo = function(id) {
+    const ordine = ordiniGlobali.find(o => o.id === id);
+    if (!ordine) return;
+
+    const dettagli = ordine.dettagli_prodotti;
+    const container = document.getElementById('contenutoDettagli');
+    let html = "";
+
+    // --- 1. BOX BLU DATI CLIENTE ---
+    const infoCliente = dettagli.find(d => d.tipo === 'INFO_CLIENTE');
+    if (infoCliente) {
+        html += `<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #007bff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">`;
+        html += `<h4 style="margin-top: 0; margin-bottom: 10px; color: #333;">👤 Riferimento Cliente</h4>`;
+        html += `<strong>Nome / Rag. Soc.:</strong> ${infoCliente.cliente || '---'}<br>`;
+        html += `<strong>Contatti:</strong> ${infoCliente.contatti || '---'}`;
+        html += `</div>`;
+    }
+
+    // --- 2. TABELLA PRODOTTI ---
+    html += `<h4 style="margin:0 0 10px 0; color:#007bff; text-align:left;">📋 Distinta Articoli da Produrre</h4>`;
+    
+    html += `<div style="overflow-x:auto;">
+    <table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-family:inherit; table-layout: fixed;">
+        <thead>
+            <tr style="background-color:#e9ecef; color:#495057;">
+                <th style="padding:10px; text-align:left; border:1px solid #dee2e6; width: 60%;">Articolo & Specifiche</th>
+                <th style="padding:10px; text-align:center; border:1px solid #dee2e6; width: 15%;">Qtà</th>
+                <th style="padding:10px; text-align:center; border:1px solid #dee2e6; width: 25%;">File Allegato</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+    dettagli.forEach(item => {
+        // Saltiamo le info cliente
+        if (item.tipo === 'INFO_CLIENTE') return;
+
+        let specs = '';
+        
+        // Componenti
+        if (item.componenti && item.componenti.length > 0) {
+            specs += `<div style="font-size:0.85em; margin-top:5px; color:#555; text-align:left;">🔹 ${item.componenti.join('<br>🔹 ')}</div>`;
+        }
+        
+        // Taglie
+        if (item.dettagli_taglie && Object.keys(item.dettagli_taglie).length > 0) {
+            specs += `<div style="font-size:0.85em; margin-top:5px; color:#007bff; text-align:left;"><strong>Taglie:</strong> `;
+            for (const genere in item.dettagli_taglie) {
+                const t = Object.entries(item.dettagli_taglie[genere]).map(([k,v])=>`<b>${k}</b>:${v}`).join(' | ');
+                specs += `<div style="margin-top: 2px;">${genere}: [${t}]</div>`;
+            }
+            specs += `</div>`;
+        }
+
+        // Note Articolo
+        if (item.note && item.note.trim() !== '') {
+            specs += `<div style="font-size:0.85em; margin-top:5px; color:#dc3545; text-align:left;"><em>Note: ${item.note}</em></div>`;
+        }
+
+        // Bottone Download File
+        let fileCell = '<span style="color:#ccc;">-</span>';
+        if (item.personalizzazione_url && item.personalizzazione_url !== 'Nessun file collegato direttamente.') {
+            if (item.personalizzazione_url.includes('http')) {
+                fileCell = `<a href="${item.personalizzazione_url}" target="_blank" style="display:inline-block; padding:6px 12px; background:#28a745; color:white; border-radius:4px; text-decoration:none; font-weight:bold; font-size:0.85em; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.3s;">📥 Apri File</a>`;
+            } else {
+                fileCell = `<span style="font-size: 0.85em; color: #555;">${item.personalizzazione_url}</span>`;
+            }
+        }
+
+        // Creazione Riga
+        html += `
+            <tr style="border-bottom: 1px solid #dee2e6; background-color: #fff;">
+                <td style="padding:12px 10px; border:1px solid #dee2e6; vertical-align:top; text-align:left; word-wrap: break-word;">
+                    <div style="font-weight:bold; color:#333; font-size: 1.05em;">${item.prodotto}</div>
+                    ${specs}
+                </td>
+                <td style="padding:12px 10px; border:1px solid #dee2e6; text-align:center; vertical-align:top; font-weight:bold; font-size: 1.2em; color: #007bff;">${item.quantita}</td>
+                <td style="padding:12px 10px; border:1px solid #dee2e6; text-align:center; vertical-align:middle;">${fileCell}</td>
+            </tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+
+    container.innerHTML = html;
+
+    // --- TASTO STAMPA ---
+    // 1. Rimuoviamo eventuali vecchi bottoni
+    const vecchioBtn = document.getElementById('btnStampaOperatore');
+    if (vecchioBtn) vecchioBtn.remove();
+
+    // 2. Creiamo il bottone
+    const btnStampa = document.createElement('button');
+    btnStampa.id = 'btnStampaOperatore';
+    btnStampa.textContent = '🖨️ Stampa Dettagli';
+    
+    btnStampa.style.marginTop = '15px';
+    btnStampa.style.padding = '10px 20px';
+    btnStampa.style.backgroundColor = '#6c757d'; 
+    btnStampa.style.color = 'white';
+    btnStampa.style.border = 'none';
+    btnStampa.style.borderRadius = '5px';
+    btnStampa.style.cursor = 'pointer';
+    btnStampa.style.fontSize = '1rem';
+    btnStampa.style.float = 'right'; 
+    
+    btnStampa.onclick = function() { window.print(); };
+
+    // 3. Inseriamo il bottone
+    container.parentNode.insertBefore(btnStampa, container.nextSibling);
+
+    document.getElementById('modalDettagli').style.display = 'flex';
 }
+
+
+
+
+
+
+
+
+
+
 
 // ===========================================
 // 4. GESTIONE MODALE STATO
