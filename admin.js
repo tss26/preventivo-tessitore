@@ -621,6 +621,29 @@ function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, 
         dettagliHtml += `</div>`;
     }
 
+
+    // ==========================================
+    // INIZIO NUOVO BLOCCO: BOX NOTE CONDIVISE IN FONDO (ADMIN)
+    // ==========================================
+    // Cerchiamo l'ordine completo dall'array globale degli ordini usando l'ID
+    const ordine = allOrders.find(o => o.id === ordineId);
+    
+    if (ordine && ordine.note_condivise && ordine.note_condivise.trim() !== '') {
+        const noteFormattate = ordine.note_condivise.replace(/\n/g, '<br>');
+        
+        dettagliHtml += `
+        <div style="background-color: #fff3cd !important; border: 1px solid #ffe69c !important; color: #664d03; padding: 15px; border-radius: 5px; margin-top: 15px; margin-bottom: 20px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+            <strong style="font-size: 1.1em; display:block; margin-bottom: 5px;">📌 Note Operative Condivise:</strong>
+            <div style="font-size: 1.05em;">${noteFormattate}</div>
+        </div>`;
+    }
+    // ==========================================
+    // FINE NUOVO BLOCCO
+    // ==========================================
+
+
+    
+
     modalBody.innerHTML = dettagliHtml;
 
     // --- 5. TASTO STAMPA ---
