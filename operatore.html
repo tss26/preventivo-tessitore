@@ -163,6 +163,14 @@
         #modalDettagli { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; background: white; box-shadow: none; }
         .close-button, #btnStampaOperatore { display: none !important; }
     }
+    /* Allarga il modale dei dettagli per l'operatore */
+#modalDettagli .modal-content {
+    width: 95% !important;       /* Occupa quasi tutto lo schermo */
+    max-width: 1400px !important; /* Limite massimo per schermi giganti */
+    margin: 2% auto !important;   /* Lo spinge un po' più in alto per sfruttare lo spazio verticale */
+}
+
+
   </style>
 </head>
 <body>
