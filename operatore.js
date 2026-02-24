@@ -424,6 +424,15 @@ window.apriDettagliPreventivo = function(id) {
 // --- INIEZIONE STILE STAMPA FULL WIDTH A4 (CON FIX SCROLLBAR E PAGINAZIONE) ---
     html += `
     <style>
+        /* --- 1. ALLARGA IL MODALE SULLO SCHERMO --- */
+        @media screen {
+            #modalDettagli .modal-content {
+                max-width: 1000px !important; /* Allarga il modale rispetto al default */
+                width: 85% !important;
+            }
+        }
+
+        /* --- 2. STILE STAMPA FULL WIDTH A4 (CON FIX SCROLLBAR E PAGINAZIONE) --- */
         @media print {
             @page { 
                 margin: 0.5cm; 
