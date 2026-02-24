@@ -177,10 +177,16 @@
     </div>
 
     <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
-            <h2 style="margin: 0; color: #333;">Gestione Ordini</h2>
-            <button onclick="caricaTuttiGliOrdini()" style="background:none; border:1px solid #ccc; padding:5px 10px; border-radius:4px; cursor:pointer;">🔄 Ricarica Dati</button>
-        </div>
+       
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+          <h2 style="margin: 0; color: #333;">Gestione Ordini</h2>
+            <div style="display: flex; align-items: center; gap: 15px;">
+              <div style="background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 6px 12px; border-radius: 8px; font-weight: bold; font-size: 0.95em; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                📦 Ordini da Evadere: <span id="countOrdiniDaEvadereOperatore">0</span>
+              </div>
+                <button onclick="caricaTuttiGliOrdini()" style="background:none; border:1px solid #ccc; padding:5px 10px; border-radius:4px; cursor:pointer;">🔄 Ricarica Dati</button>
+            </div>
+          </div>
 
         <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;">
             <div style="flex: 1; min-width: 200px;">
