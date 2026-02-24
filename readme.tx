@@ -1,11 +1,11 @@
 //edge fuction telegram con dettagli per la notifica telegram
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
+import { serve } from ""
+import { createClient } from ""
 
 const BOT_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN');
 // Ho sostituito l'array con la costante singola del gruppo
-const GROUP_CHAT_ID = "-1003127391372"; 
+const GROUP_CHAT_ID = ""; 
 
 serve(async (req) => {
   try {
