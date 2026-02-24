@@ -410,6 +410,27 @@ window.apriDettagliPreventivo = function(id) {
         html += `</div>`;
     }
 
+
+    // ==========================================
+    // INIZIO NUOVO BLOCCO: BOX NOTE CONDIVISE
+    // ==========================================
+    if (ordine.note_condivise && ordine.note_condivise.trim() !== '') {
+        // Sostituiamo i ritorni a capo testuali con il tag <br> per l'HTML
+        const noteFormattate = ordine.note_condivise.replace(/\n/g, '<br>');
+        
+        html += `
+        <div style="background-color: #fff3cd !important; border: 1px solid #ffe69c !important; color: #664d03; padding: 15px; border-radius: 5px; margin-bottom: 20px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+            <strong style="font-size: 1.1em; display:block; margin-bottom: 5px;">📌 Note Operative Condivise:</strong>
+            <div style="font-size: 1.05em;">${noteFormattate}</div>
+        </div>`;
+    }
+    // ==========================================
+    // FINE NUOVO BLOCCO
+    // ==========================================
+
+
+    
+
     // --- TABELLA PRODOTTI ---
     html += `<h4 style="margin:0 0 10px 0; color:#007bff; text-align:left;">📋 Dettaglio Articoli da Produrre</h4>`;
     
