@@ -405,9 +405,8 @@ window.apriDettagliPreventivo = function(id) {
     document.getElementById('modalDettagli').style.display = 'flex';
 }
 */
-
 // ===========================================
-// 3. FUNZIONE: APRI DETTAGLI + TASTO STAMPA (Ottimizzata A4)
+// 3. FUNZIONE: APRI DETTAGLI + TASTO STAMPA (Stile ADMIN.JS)
 // ===========================================
 window.apriDettagliPreventivo = function(id) {
     const ordine = ordiniGlobali.find(o => o.id === id);
@@ -416,117 +415,67 @@ window.apriDettagliPreventivo = function(id) {
     const dettagli = ordine.dettagli_prodotti;
     const container = document.getElementById('contenutoDettagli');
     
-    // --- 0. FIX IMPORTANTE PER IL LAYOUT ---
-    container.style.whiteSpace = 'normal'; 
-
     let html = "";
 
-    // --- INIEZIONE STILE STAMPA FULL WIDTH (Risolve i bordi bianchi su A4) ---
-    html += `
-    <style>
-        @media print {
-            @page { 
-                margin: 0.5cm; /* Riduce i margini del foglio */
-            }
-            body * { 
-                visibility: hidden; 
-            }
-            #modalDettagli, #modalDettagli * { 
-                visibility: visible; 
-            }
-            #modalDettagli {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                margin: 0;
-                padding: 0;
-                background: white;
-            }
-            /* FORZA LA LARGHEZZA AL 100% IN STAMPA */
-            .modal-content {
-                width: 100% !important;
-                max-width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                border: none !important;
-                box-shadow: none !important;
-            }
-            #contenutoDettagli {
-                border: none !important;
-            }
-            /* Nasconde bottoni inutili in stampa */
-            .close-button, .close, #btnStampaOperatore, button { 
-                display: none !important; 
-            }
-        }
-    </style>
-    `;
-
-    // --- 1. BOX BLU DATI CLIENTE ---
+    // --- DATI CLIENTE (Stile Admin.js) ---
     const infoCliente = dettagli.find(d => d.tipo === 'INFO_CLIENTE');
     if (infoCliente) {
-        html += `<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #007bff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">`;
-        html += `<h4 style="margin-top: 0; margin-bottom: 10px; color: #333;">👤 Riferimento Cliente</h4>`;
-        html += `<strong>Nome / Rag. Soc.:</strong> ${infoCliente.cliente || '---'}<br>`;
+        html += `<div style="background: #eef2f5; padding: 15px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid #007bff;">`;
+        html += `<h4 style="margin-top: 0; color: #333;">Dati Cliente</h4>`;
+        html += `<strong>Cliente:</strong> ${infoCliente.cliente || '---'}<br>`;
         html += `<strong>Contatti:</strong> ${infoCliente.contatti || '---'}`;
         html += `</div>`;
     }
 
-    // --- 2. TABELLA PRODOTTI ---
-    html += `<h4 style="margin:0 0 10px 0; color:#007bff; text-align:left;">📋 Distinta Articoli da Produrre</h4>`;
-    
-    html += `<div style="overflow-x:auto;">
-    <table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-family:inherit; table-layout: fixed;">
-        <thead>
-            <tr style="background-color:#e9ecef; color:#495057;">
-                <th style="padding:10px; text-align:left; border:1px solid #dee2e6; width: 50%;">Articolo & Specifiche</th>
-                <th style="padding:10px; text-align:center; border:1px solid #dee2e6; width: 15%;">Qtà</th>
-                <th style="padding:10px; text-align:center; border:1px solid #dee2e6; width: 35%;">File Allegato</th>
-            </tr>
-        </thead>
-        <tbody>`;
+    html += `<h4 style="border-bottom: 2px solid #007bff; padding-bottom: 5px; color: #007bff;">Riepilogo Articoli</h4>`;
 
+    // --- SCHEDE ARTICOLI (Stile Admin.js per evitare tagli) ---
     dettagli.forEach(item => {
         if (item.tipo === 'INFO_CLIENTE') return;
 
-        let specs = '';
+        // Il "page-break-inside: avoid" evita che la scheda si spezzi in due pagine diverse stampando
+        html += `<div style="background: white; border: 1px solid #ddd; border-radius: 6px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); page-break-inside: avoid;">`;
+        
+        // Titolo e Quantità
+        html += `<div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">`;
+        html += `<strong style="font-size: 1.1em; color: #333;">${item.prodotto}</strong>`;
+        html += `<span style="background: #007bff; color: white; padding: 3px 8px; border-radius: 12px; font-weight: bold; font-size: 0.9em;">Q.tà: ${item.quantita}</span>`;
+        html += `</div>`;
+
+        // Componenti
         if (item.componenti && item.componenti.length > 0) {
-            specs += `<div style="font-size:0.85em; margin-top:5px; color:#555; text-align:left;">🔹 ${item.componenti.join('<br>🔹 ')}</div>`;
-        }
-        if (item.dettagli_taglie && Object.keys(item.dettagli_taglie).length > 0) {
-            specs += `<div style="font-size:0.85em; margin-top:5px; color:#007bff; text-align:left;"><strong>Taglie:</strong> `;
-            for (const genere in item.dettagli_taglie) {
-                const t = Object.entries(item.dettagli_taglie[genere]).map(([k,v])=>`<b>${k}</b>:${v}`).join(' | ');
-                specs += `<div style="margin-top: 2px;">${genere}: [${t}]</div>`;
-            }
-            specs += `</div>`;
-        }
-        if (item.note && item.note.trim() !== '') {
-            specs += `<div style="font-size:0.85em; margin-top:5px; color:#dc3545; text-align:left;"><em>Note: ${item.note}</em></div>`;
+            html += `<div style="margin-bottom: 8px; font-size: 0.95em;"><strong style="color: #555;">Componenti:</strong> ${item.componenti.join(', ')}</div>`;
         }
 
-        let fileCell = '<span style="color:#ccc;">-</span>';
+        // Taglie (Visualizzate a blocchetti come in admin)
+        if (item.dettagli_taglie && Object.keys(item.dettagli_taglie).length > 0) {
+            html += `<div style="margin-bottom: 8px; background: #f8f9fa; padding: 8px; border-radius: 4px; font-size: 0.9em;">`;
+            html += `<strong style="color: #555; display: block; margin-bottom: 5px;">Dettaglio Taglie:</strong>`;
+            for (const genere in item.dettagli_taglie) {
+                const taglie = Object.entries(item.dettagli_taglie[genere])
+                    .map(([taglia, qty]) => `<span style="display: inline-block; background: white; border: 1px solid #ccc; padding: 2px 6px; border-radius: 3px; margin-right: 5px; margin-bottom: 5px;"><b>${taglia}</b>: ${qty}</span>`)
+                    .join('');
+                html += `<div style="margin-bottom: 3px;"><span style="color:#007bff; font-weight:bold;">${genere}:</span> ${taglie}</div>`;
+            }
+            html += `</div>`;
+        }
+
+        // Note
+        if (item.note && item.note.trim() !== '') {
+            html += `<div style="margin-bottom: 8px; font-size: 0.9em; background: #fff3cd; padding: 8px; border-left: 3px solid #ffc107; color: #856404;"><strong>Note:</strong> ${item.note}</div>`;
+        }
+
+        // File
         if (item.personalizzazione_url && item.personalizzazione_url !== 'Nessun file collegato direttamente.') {
             if (item.personalizzazione_url.includes('http')) {
-                fileCell = `<a href="${item.personalizzazione_url}" target="_blank" style="display:inline-block; padding:6px 12px; background:#28a745; color:white; border-radius:4px; text-decoration:none; font-weight:bold; font-size:0.85em; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space:nowrap;">📥 Apri File</a>`;
+                html += `<div style="margin-top: 10px;"><a href="${item.personalizzazione_url}" target="_blank" style="display: inline-block; background: #28a745; color: white; padding: 6px 12px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 0.9em;">🔗 Scarica / Visualizza File</a></div>`;
             } else {
-                fileCell = `<span style="font-size: 0.85em; color: #555;">${item.personalizzazione_url}</span>`;
+                html += `<div style="margin-top: 10px; font-size: 0.9em; color: #666;"><strong>File:</strong> ${item.personalizzazione_url}</div>`;
             }
         }
 
-        html += `
-            <tr style="border-bottom: 1px solid #dee2e6; background-color: #fff;">
-                <td style="padding:12px 10px; border:1px solid #dee2e6; vertical-align:top; text-align:left; word-wrap: break-word;">
-                    <div style="font-weight:bold; color:#333; font-size: 1.05em;">${item.prodotto}</div>
-                    ${specs}
-                </td>
-                <td style="padding:12px 10px; border:1px solid #dee2e6; text-align:center; vertical-align:top; font-weight:bold; font-size: 1.2em; color: #007bff;">${item.quantita}</td>
-                <td style="padding:12px 10px; border:1px solid #dee2e6; text-align:center; vertical-align:middle; word-wrap: break-word;">${fileCell}</td>
-            </tr>`;
+        html += `</div>`; // Chiude la scheda dell'articolo
     });
-
-    html += `</tbody></table></div>`;
 
     container.innerHTML = html;
 
@@ -547,19 +496,21 @@ window.apriDettagliPreventivo = function(id) {
     btnStampa.style.fontSize = '1rem';
     btnStampa.style.float = 'right'; 
     
-    btnStampa.onclick = function() { window.print(); };
+    // Rimuove la visibilità dei tasti in stampa tramite l'aggiunta di una classe al volo
+    btnStampa.onclick = function() { 
+        this.style.display = 'none'; // nascondi il tasto
+        document.querySelector('.close').style.display = 'none'; // nascondi la x (adatta in base alla tua classe html)
+        window.print(); 
+        setTimeout(() => { // ripristina dopo la stampa
+            this.style.display = 'block'; 
+            document.querySelector('.close').style.display = 'block';
+        }, 500);
+    };
 
     container.parentNode.insertBefore(btnStampa, container.nextSibling);
 
     document.getElementById('modalDettagli').style.display = 'flex';
 }
-
-
-
-
-
-
-
 
 
 
