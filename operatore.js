@@ -289,7 +289,7 @@ window.apriDettagliPreventivo = function(id) {
     container.parentNode.insertBefore(btnStampa, container.nextSibling);
 
     document.getElementById('modalDettagli').style.display = 'flex';
-}-------------------------------
+}*/
 // ===========================================
 // 3. FUNZIONE: APRI DETTAGLI + TASTO STAMPA
 // ===========================================
@@ -404,113 +404,7 @@ window.apriDettagliPreventivo = function(id) {
 
     document.getElementById('modalDettagli').style.display = 'flex';
 }
-*/
-// ===========================================
-// 3. FUNZIONE: APRI DETTAGLI + TASTO STAMPA (Stile ADMIN.JS)
-// ===========================================
-window.apriDettagliPreventivo = function(id) {
-    const ordine = ordiniGlobali.find(o => o.id === id);
-    if (!ordine) return;
 
-    const dettagli = ordine.dettagli_prodotti;
-    const container = document.getElementById('contenutoDettagli');
-    
-    let html = "";
-
-    // --- DATI CLIENTE (Stile Admin.js) ---
-    const infoCliente = dettagli.find(d => d.tipo === 'INFO_CLIENTE');
-    if (infoCliente) {
-        html += `<div style="background: #eef2f5; padding: 15px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid #007bff;">`;
-        html += `<h4 style="margin-top: 0; color: #333;">Dati Cliente</h4>`;
-        html += `<strong>Cliente:</strong> ${infoCliente.cliente || '---'}<br>`;
-        html += `<strong>Contatti:</strong> ${infoCliente.contatti || '---'}`;
-        html += `</div>`;
-    }
-
-    html += `<h4 style="border-bottom: 2px solid #007bff; padding-bottom: 5px; color: #007bff;">Riepilogo Articoli</h4>`;
-
-    // --- SCHEDE ARTICOLI (Stile Admin.js per evitare tagli) ---
-    dettagli.forEach(item => {
-        if (item.tipo === 'INFO_CLIENTE') return;
-
-        // Il "page-break-inside: avoid" evita che la scheda si spezzi in due pagine diverse stampando
-        html += `<div style="background: white; border: 1px solid #ddd; border-radius: 6px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); page-break-inside: avoid;">`;
-        
-        // Titolo e Quantità
-        html += `<div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">`;
-        html += `<strong style="font-size: 1.1em; color: #333;">${item.prodotto}</strong>`;
-        html += `<span style="background: #007bff; color: white; padding: 3px 8px; border-radius: 12px; font-weight: bold; font-size: 0.9em;">Q.tà: ${item.quantita}</span>`;
-        html += `</div>`;
-
-        // Componenti
-        if (item.componenti && item.componenti.length > 0) {
-            html += `<div style="margin-bottom: 8px; font-size: 0.95em;"><strong style="color: #555;">Componenti:</strong> ${item.componenti.join(', ')}</div>`;
-        }
-
-        // Taglie (Visualizzate a blocchetti come in admin)
-        if (item.dettagli_taglie && Object.keys(item.dettagli_taglie).length > 0) {
-            html += `<div style="margin-bottom: 8px; background: #f8f9fa; padding: 8px; border-radius: 4px; font-size: 0.9em;">`;
-            html += `<strong style="color: #555; display: block; margin-bottom: 5px;">Dettaglio Taglie:</strong>`;
-            for (const genere in item.dettagli_taglie) {
-                const taglie = Object.entries(item.dettagli_taglie[genere])
-                    .map(([taglia, qty]) => `<span style="display: inline-block; background: white; border: 1px solid #ccc; padding: 2px 6px; border-radius: 3px; margin-right: 5px; margin-bottom: 5px;"><b>${taglia}</b>: ${qty}</span>`)
-                    .join('');
-                html += `<div style="margin-bottom: 3px;"><span style="color:#007bff; font-weight:bold;">${genere}:</span> ${taglie}</div>`;
-            }
-            html += `</div>`;
-        }
-
-        // Note
-        if (item.note && item.note.trim() !== '') {
-            html += `<div style="margin-bottom: 8px; font-size: 0.9em; background: #fff3cd; padding: 8px; border-left: 3px solid #ffc107; color: #856404;"><strong>Note:</strong> ${item.note}</div>`;
-        }
-
-        // File
-        if (item.personalizzazione_url && item.personalizzazione_url !== 'Nessun file collegato direttamente.') {
-            if (item.personalizzazione_url.includes('http')) {
-                html += `<div style="margin-top: 10px;"><a href="${item.personalizzazione_url}" target="_blank" style="display: inline-block; background: #28a745; color: white; padding: 6px 12px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 0.9em;">🔗 Scarica / Visualizza File</a></div>`;
-            } else {
-                html += `<div style="margin-top: 10px; font-size: 0.9em; color: #666;"><strong>File:</strong> ${item.personalizzazione_url}</div>`;
-            }
-        }
-
-        html += `</div>`; // Chiude la scheda dell'articolo
-    });
-
-    container.innerHTML = html;
-
-    // --- TASTO STAMPA ---
-    let vecchioBtn = document.getElementById('btnStampaOperatore');
-    if (vecchioBtn) vecchioBtn.remove();
-
-    const btnStampa = document.createElement('button');
-    btnStampa.id = 'btnStampaOperatore';
-    btnStampa.textContent = '🖨️ Stampa Dettagli';
-    btnStampa.style.marginTop = '15px';
-    btnStampa.style.padding = '10px 20px';
-    btnStampa.style.backgroundColor = '#6c757d'; 
-    btnStampa.style.color = 'white';
-    btnStampa.style.border = 'none';
-    btnStampa.style.borderRadius = '5px';
-    btnStampa.style.cursor = 'pointer';
-    btnStampa.style.fontSize = '1rem';
-    btnStampa.style.float = 'right'; 
-    
-    // Rimuove la visibilità dei tasti in stampa tramite l'aggiunta di una classe al volo
-    btnStampa.onclick = function() { 
-        this.style.display = 'none'; // nascondi il tasto
-        document.querySelector('.close').style.display = 'none'; // nascondi la x (adatta in base alla tua classe html)
-        window.print(); 
-        setTimeout(() => { // ripristina dopo la stampa
-            this.style.display = 'block'; 
-            document.querySelector('.close').style.display = 'block';
-        }, 500);
-    };
-
-    container.parentNode.insertBefore(btnStampa, container.nextSibling);
-
-    document.getElementById('modalDettagli').style.display = 'flex';
-}
 
 
 
