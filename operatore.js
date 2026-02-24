@@ -421,8 +421,7 @@ window.apriDettagliPreventivo = function(id) {
     const logoHtml = `<img src="icon-192.png" alt="Logo" style="height: 45px; vertical-align: middle; margin-right: 15px;">`;
 
     let html = "";
-
-    // --- INIEZIONE STILE STAMPA FULL WIDTH A4 ---
+// --- INIEZIONE STILE STAMPA FULL WIDTH A4 (CON FIX SCROLLBAR E PAGINAZIONE) ---
     html += `
     <style>
         @media print {
@@ -435,26 +434,40 @@ window.apriDettagliPreventivo = function(id) {
             #modalDettagli, #modalDettagli * { 
                 visibility: visible; 
             }
+            
+            /* Sgancia il modale e lo fa espandere all'infinito */
             #modalDettagli {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                margin: 0;
-                padding: 0;
-                background: white;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: white !important;
+                display: block !important; /* Fondamentale: sovrascrive il display: flex che blocca i fogli multipli */
+                overflow: visible !important;
             }
-            .modal-content {
+            
+            /* Rimuove i blocchi di altezza e le barre di scorrimento interne */
+            .modal-content, #contenutoDettagli {
                 width: 100% !important;
                 max-width: 100% !important;
+                height: auto !important;
+                max-height: none !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 border: none !important;
                 box-shadow: none !important;
+                overflow: visible !important;
             }
-            #contenutoDettagli {
-                border: none !important;
+            
+            /* Evita che una riga della tabella venga segata a metà tra un foglio e l'altro */
+            tr { 
+                page-break-inside: avoid; 
             }
+            
+            /* Nasconde i pulsanti */
             .close-button, #btnStampaOperatore, button { 
                 display: none !important; 
             }
