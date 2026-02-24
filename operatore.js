@@ -60,12 +60,40 @@ async function caricaTuttiGliOrdini() {
     // Salviamo i dati nella variabile globale
     ordiniGlobali = ordini;
 
+    //richiamo la funzone per il calcolo degli ordini rimanenti da evadere
+    aggiornaConteggioDaEvadereOperatore();
+
     // Disegniamo la tabella applicando i filtri (inizialmente vuoti = mostra tutto)
     applicaFiltri(); 
     
     if(loading) loading.style.display = 'none';
     if(table) table.style.display = 'table';
 }
+
+
+
+//----------inizio funzione per contare gli ordini da evadere-------------------
+function aggiornaConteggioDaEvadereOperatore() {
+    const countSpan = document.getElementById('countOrdiniDaEvadereOperatore');
+    if (!countSpan) return;
+
+    // Array con gli stati specifici da conteggiare
+    const statiDaEvadere = [
+        'Richiesta Inviata', 
+        'In attesa di lavorazione', 
+        'In lavorazione', 
+        'Attesa Pagamento', 
+        'Convalida Commerciale'
+    ];
+
+    // Filtriamo e contiamo solo gli ordini che hanno uno degli stati elencati
+    const daEvadere = ordiniGlobali.filter(o => statiDaEvadere.includes(o.stato)).length;
+    
+    countSpan.textContent = daEvadere;
+}
+
+//-----------fine funzione con richiami in ordinidacaricare()--------------
+
 
 // ===========================================
 // 2a. FUNZIONE DI FILTRAGGIO
