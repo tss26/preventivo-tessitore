@@ -289,7 +289,7 @@ window.apriDettagliPreventivo = function(id) {
     container.parentNode.insertBefore(btnStampa, container.nextSibling);
 
     document.getElementById('modalDettagli').style.display = 'flex';
-}*/
+}------------------------------------------------------------------------------
 // ===========================================
 // 3. FUNZIONE: APRI DETTAGLI + TASTO STAMPA
 // ===========================================
@@ -403,7 +403,172 @@ window.apriDettagliPreventivo = function(id) {
     container.parentNode.insertBefore(btnStampa, container.nextSibling);
 
     document.getElementById('modalDettagli').style.display = 'flex';
+}*/
+// ===========================================
+// 3. FUNZIONE: APRI DETTAGLI + TASTO STAMPA (Stile Tabellare A4)
+// ===========================================
+window.apriDettagliPreventivo = function(id) {
+    const ordine = ordiniGlobali.find(o => o.id === id);
+    if (!ordine) return;
+
+    const dettagli = ordine.dettagli_prodotti;
+    const container = document.getElementById('contenutoDettagli');
+    const numOrdineVisibile = ordine.num_ordine_prog || ordine.id.substring(0, 8).toUpperCase();
+    
+    // --- FIX IMPORTANTE PER IL LAYOUT ---
+    container.style.whiteSpace = 'normal'; 
+
+    const logoHtml = `<img src="icon-192.png" alt="Logo" style="height: 45px; vertical-align: middle; margin-right: 15px;">`;
+
+    let html = "";
+
+    // --- INIEZIONE STILE STAMPA FULL WIDTH A4 ---
+    html += `
+    <style>
+        @media print {
+            @page { 
+                margin: 0.5cm; 
+            }
+            body * { 
+                visibility: hidden; 
+            }
+            #modalDettagli, #modalDettagli * { 
+                visibility: visible; 
+            }
+            #modalDettagli {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                background: white;
+            }
+            .modal-content {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            #contenutoDettagli {
+                border: none !important;
+            }
+            .close-button, #btnStampaOperatore, button { 
+                display: none !important; 
+            }
+        }
+    </style>
+    `;
+
+    // --- TITOLO E LOGO ---
+    html += `<h2 style="margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; display: flex; align-items: center;">
+                ${logoHtml} Distinta di Produzione: <span style="color: #007bff; margin-left: 8px;">${numOrdineVisibile}</span>
+             </h2>`;
+
+    // --- BOX BLU DATI CLIENTE E RIFERIMENTO DB ---
+    html += `<div style="font-size: 0.85em; color: #999; margin-bottom: 5px;">Rif. Database: ${ordine.id}</div>`;
+
+    const infoCliente = dettagli.find(d => d.tipo === 'INFO_CLIENTE');
+    if (infoCliente) {
+        html += `<div style="background: #f1f8ff; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #cce5ff;">`;
+        html += `<strong>Cliente / Rag. Soc.:</strong> ${infoCliente.cliente || '---'}<br>`;
+        html += `<strong>Contatti:</strong> ${infoCliente.contatti || '---'}`;
+        html += `</div>`;
+    }
+
+    // --- TABELLA PRODOTTI ---
+    html += `<h4 style="margin:0 0 10px 0; color:#007bff; text-align:left;">📋 Dettaglio Articoli da Produrre</h4>`;
+    
+    html += `<div style="overflow-x:auto;">
+    <table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-family:inherit; table-layout: fixed;">
+        <thead>
+            <tr style="background-color:#e9ecef; color:#495057;">
+                <th style="padding:10px; text-align:left; border:1px solid #dee2e6; width: 65%;">Articolo & Specifiche</th>
+                <th style="padding:10px; text-align:center; border:1px solid #dee2e6; width: 15%;">Qtà</th>
+                <th style="padding:10px; text-align:center; border:1px solid #dee2e6; width: 20%;">Allegato</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+    dettagli.forEach(item => {
+        if (item.tipo === 'INFO_CLIENTE') return;
+
+        let specs = '';
+        
+        // Componenti
+        if (item.componenti && item.componenti.length > 0) {
+            specs += `<div style="font-size:0.85em; margin-top:3px; color:#555; text-align:left;">🔹 ${item.componenti.join('<br>🔹 ')}</div>`;
+        }
+        
+        // Taglie
+        if (item.dettagli_taglie && Object.keys(item.dettagli_taglie).length > 0) {
+            specs += `<div style="font-size:0.85em; margin-top:3px; color:#007bff; text-align:left;"><strong>Taglie:</strong> `;
+            for (const g in item.dettagli_taglie) {
+                const t = Object.entries(item.dettagli_taglie[g]).map(([k,v])=>`${k}:${v}`).join(' | ');
+                specs += `<br>&nbsp;&nbsp;${g} [${t}] `;
+            }
+            specs += `</div>`;
+        }
+
+        // Note Operative
+        if (item.note && item.note.trim() !== '') {
+            specs += `<div style="font-size:0.85em; margin-top:3px; color:#dc3545; text-align:left;"><em>Note: ${item.note}</em></div>`;
+        }
+
+        // Gestione Bottone File
+        let fileCell = '<span style="color:#ccc;">-</span>';
+        if (item.personalizzazione_url && item.personalizzazione_url !== 'Nessun file collegato direttamente.' && item.personalizzazione_url !== 'Nessun file caricato') {
+            if (item.personalizzazione_url.includes('http')) {
+                fileCell = `<a href="${item.personalizzazione_url}" target="_blank" style="display:inline-block; padding:5px 10px; background:#007bff; color:white; border-radius:4px; text-decoration:none; font-weight:bold; font-size:0.8em; white-space:nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">📥 Apri</a>`;
+            } else {
+                fileCell = `<div style="font-size:0.8em; word-wrap:break-word;">${item.personalizzazione_url}</div>`;
+            }
+        }
+
+        html += `
+            <tr>
+                <td style="padding:10px; border:1px solid #dee2e6; vertical-align:top; text-align:left; word-wrap: break-word;">
+                    <div style="font-weight:bold; color:#333; font-size: 1.1em;">${item.prodotto}</div>
+                    ${specs}
+                </td>
+                <td style="padding:10px; border:1px solid #dee2e6; text-align:center; vertical-align:top; font-weight:bold; font-size:1.2em;">${item.quantita}</td>
+                <td style="padding:10px; border:1px solid #dee2e6; text-align:center; vertical-align:top;">${fileCell}</td>
+            </tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+
+    container.innerHTML = html;
+
+    // --- TASTO STAMPA ---
+    const vecchioBtn = document.getElementById('btnStampaOperatore');
+    if (vecchioBtn) vecchioBtn.remove();
+
+    const btnStampa = document.createElement('button');
+    btnStampa.id = 'btnStampaOperatore';
+    btnStampa.textContent = '🖨️ Stampa Distinta Produzione';
+    
+    btnStampa.style.marginTop = '15px';
+    btnStampa.style.padding = '10px 20px';
+    btnStampa.style.backgroundColor = '#6c757d'; 
+    btnStampa.style.color = 'white';
+    btnStampa.style.border = 'none';
+    btnStampa.style.borderRadius = '5px';
+    btnStampa.style.cursor = 'pointer';
+    btnStampa.style.fontSize = '1rem';
+    btnStampa.style.float = 'right'; 
+    
+    btnStampa.onclick = function() { window.print(); };
+
+    container.parentNode.insertBefore(btnStampa, container.nextSibling);
+
+    document.getElementById('modalDettagli').style.display = 'flex';
 }
+
+
+
 
 
 
