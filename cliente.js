@@ -2179,8 +2179,8 @@ async function gestisciAggiuntaDTF() {
 // LISTINO PREZZI (Definito in base alla tua richiesta)
 const LISTINO_SCALDACOLLO = {
     "PILE": [
-        { max: 20, price: 4.50 },
-        { max: 30, price: 3.90 },
+        { max: 10, price: 4.50 },
+        { max: 30, price: 3.95 },
         { max: 50, price: 3.50 },
         { max: 100, price: 3.20 },
         { max: 200, price: 2.95 },
@@ -2190,12 +2190,12 @@ const LISTINO_SCALDACOLLO = {
     ],
     // Per Interlock: Minimo 25, Multipli di 25
     "INTERLOCK": [
-        { max: 25, price: 3.50 },
+        { max: 25, price: 3.30 },
         { max: 50, price: 2.80 },
         { max: 75, price: 2.50 },
         { max: 100, price: 2.30 },
-        { max: 300, price: 2.25 },
-        { max: 999999, price: 2.15 }
+        { max: 300, price: 1.95 },
+        { max: 999999, price: 1.80 }
     ]
 };
 
@@ -2374,11 +2374,11 @@ const LISTINO_SHOPPER = {
     "POLIESTERE": [
         { max: 10, price: 4.50 },
         { max: 30, price: 3.90 },
-        { max: 50, price: 3.20 },
-        { max: 71, price: 2.99 },
-        { max: 100, price: 2.54 },
-        { max: 300, price: 2.34 },
-        { max: 500, price: 2.21 },
+        { max: 50, price: 3.00 },
+        { max: 71, price: 2.80 },
+        { max: 100, price: 2.60 },
+        { max: 300, price: 2.30 },
+        { max: 500, price: 2.20 },
         { max: 750, price: 2.10 },
         { max: 3000, price: 1.95 },
         { max: 999999, price: 1.80 }
@@ -2392,8 +2392,8 @@ const LISTINO_SHOPPER = {
         { max: 300, price: 1.99 },
         { max: 500, price: 1.90 },
         { max: 750, price: 1.80 },
-        { max: 1000, price: 1.75 },
-        { max: 999999, price: 1.70 }
+        { max: 1000, price: 1.70 },
+        { max: 999999, price: 1.60 }
     ],
     "GABARDINA": [
         { max: 10, price: 5.50 },
@@ -2571,22 +2571,22 @@ const LISTINO_SACCHE = {
         { max: 30, price: 4.10 },
         { max: 50, price: 3.40 },
         { max: 71, price: 3.10 },
-        { max: 100, price: 2.75 },
+        { max: 100, price: 2.85 },
         { max: 300, price: 2.50 },
         { max: 500, price: 2.30 },
         { max: 750, price: 2.15 },
-        { max: 3000, price: 1.99 },
+        { max: 3000, price: 2.05 },
         { max: 999999, price: 1.95 }
-    ],
+    ],	
     "TNT": [
-        { max: 10, price: 4.30 },
-        { max: 30, price: 3.40 },
-        { max: 50, price: 3.00 },
+        { max: 10, price: 4.50 },
+        { max: 30, price: 3.70 },
+        { max: 50, price: 3.20 },
         { max: 71, price: 2.80 },
         { max: 100, price: 2.60 },
         { max: 300, price: 2.40 },
-        { max: 500, price: 2.25 },
-        { max: 750, price: 2 },
+        { max: 500, price: 2.20 },
+        { max: 750, price: 2.05 },
         { max: 1000, price: 1.95 },
         { max: 999999, price: 1.85 }
     ],
@@ -3327,17 +3327,17 @@ const LISTINO_TELI_STANDARD = {
 
 // 2. CONFIGURAZIONE CUSTOM (Prezzo al MQ)
 const PREZZI_MQ_TELI = {
-    "SPUGNA": 12.50,
-    "MICROFIBRA": 13.00
+    "SPUGNA": 11,
+    "MICROFIBRA": 11
 };
 
 // Sconti Quantità per il Custom (a scalare)
 // Logica: <25 (5%), <50 (7%), <100 (9%), >=100 (10%)
 function getScontoTeliCustom(qta) {
-    if (qta <= 25) return 0.05; // 5%
-    if (qta <= 50) return 0.07; // 7%
-    if (qta <= 100) return 0.09; // 9%
-    return 0.10; // 10%
+    if (qta <= 25) return 0.08; // 8%
+    if (qta <= 50) return 0.10; // 10%
+    if (qta <= 100) return 0.15; // 15%
+    return 0.20; // 20%
 }
 
 // Funzione per gestire la visibilità dei box
