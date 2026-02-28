@@ -3382,6 +3382,43 @@ function calcolaPrezzoTeli() {
             return;
         }
 
+		// =======================================================
+        // NUOVA LOGICA: Controllo > 77cm per Sconto/Ricarico 20%
+        // =======================================================
+        let warningBox = document.getElementById('teliWarning77');
+        
+        // Se il box di avviso non esiste, lo creiamo dinamicamente in JS
+        if (!warningBox) {
+            const teliBaseInput = document.getElementById('teliBase');
+            if(teliBaseInput) {
+                warningBox = document.createElement('div');
+                warningBox.id = 'teliWarning77';
+                warningBox.style.color = '#856404'; // Colore testo giallo scuro/marrone
+                warningBox.style.backgroundColor = '#fff3cd'; // Sfondo giallo chiaro (stile Bootstrap)
+                warningBox.style.border = '1px solid #ffeeba';
+                warningBox.style.padding = '8px 12px';
+                warningBox.style.marginBottom = '15px';
+                warningBox.style.borderRadius = '5px';
+                warningBox.style.fontSize = '0.9em';
+                warningBox.style.display = 'none'; // Nascosto di default
+                warningBox.innerHTML = '<strong>Attenzione!</strong> Per avere uno sconto del 20% mantieni una delle 2 misure inferiore a 77cm. es. 75x160cm';
+                
+                // Lo inseriamo subito prima del campo 'teliBase'
+                teliBaseInput.parentNode.insertBefore(warningBox, teliBaseInput);
+            }
+        }
+
+        let moltiplicatore77 = 1.0; // Base: nessun aumento
+        
+        // Se ENTRAMBE le misure superano i 77cm
+        if (baseCm > 77 && altCm > 77) {
+            if (warningBox) warningBox.style.display = 'block'; // Mostra l'avviso
+            moltiplicatore77 = 1.20; // Aumenta il prezzo del 20%
+        } else {
+            if (warningBox) warningBox.style.display = 'none'; // Nascondi l'avviso
+        }
+        // =======================================================
+
         const areaMq = (baseCm * altCm) / 10000; // cm² -> m²
         const costoMq = PREZZI_MQ_TELI[tessuto];
         
