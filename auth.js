@@ -62,6 +62,34 @@ async function handleRegister(email, password) {
             console.error("Eccezione durante l'inserimento in utenti:", e);
         }
     }
+
+    // --- INIZIO INVIO EMAIL DI BENVENUTO -------------------------------------------
+const htmlBenvenuto = `
+    <h2 style="color: #007bff;">Benvenuto in Tessitore SRL! 🎉</h2>
+    <p>Ciao,</p>
+    <p>La tua registrazione è andata a buon fine. Il nostro team valuterà il tuo profilo e attiverà il tuo account al più presto (solitamente entro 1-2 ore).</p>
+    <p>Se hai urgenza, contattaci a <a href="mailto:ordini.tessitoresrl@gmail.com">ordini.tessitoresrl@gmail.com</a>.</p>
+    <p>A presto,<br>Il team Tessitore</p>
+`;
+
+try {
+    await fetch('https://www.tessitorestore.com/invia_email.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            email: email,
+            oggetto: "Benvenuto in Tessitore SRL! La tua registrazione è in fase di attivazione.",
+            html: htmlBenvenuto
+        })
+    });
+} catch (e) {
+    console.error("Errore invio email di benvenuto:", e);
+}
+// --- FINE INVIO EMAIL DI BENVENUTO ----------------------------------------------------------------------
+
+
+
+
     
     // 3. Successo: Supabase invia automaticamente l'email di conferma
     alert("Registrazione completata! Controlla la tua email per il link di conferma, poi prova ad accedere.");
