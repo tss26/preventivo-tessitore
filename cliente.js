@@ -124,7 +124,7 @@ const LISTINO_COMPLETO = {
 			"101_200":    { COMPLETINO: 19.00, CANOTTA_SOLA: 9.90, PANTALONCINO_SOLO: 9.00 },
 			"201_300":    { COMPLETINO: 17.00, CANOTTA_SOLA: 8.50, PANTALONCINO_SOLO: 8.50 },
 			"301_500":    { COMPLETINO: 16.00, CANOTTA_SOLA: 7.90, PANTALONCINO_SOLO: 7.50 },
-            "501_OLTRE": { COMPLETINO: 16.00, CANOTTA_SOLA: 7,9, PANTALONCINO_SOLO: 7.50 }
+            "501_OLTRE": { COMPLETINO: 16.00, CANOTTA_SOLA: 7.80, PANTALONCINO_SOLO: 7.50 }
         },
         // Percentuali di aumento SPECIFICHE se si sceglie "Double"------ incrementare le percentuali double : compl : 22, canotta 25, pantaloncino 10 ???
         "EXTRA_DOUBLE": {
