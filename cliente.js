@@ -3335,9 +3335,9 @@ const PREZZI_MQ_TELI = {
 // Logica: <25 (5%), <50 (7%), <100 (9%), >=100 (10%)
 function getScontoTeliCustom(qta) {
     if (qta <= 25) return 0.08; // 8%
-    if (qta <= 50) return 0.10; // 10%
-    if (qta <= 100) return 0.15; // 15%
-    return 0.20; // 20%
+    if (qta <= 50) return 0.13; // 13%
+    if (qta <= 100) return 0.21; // 21%
+    return 0.30; // 30%
 }
 
 // Funzione per gestire la visibilità dei box
