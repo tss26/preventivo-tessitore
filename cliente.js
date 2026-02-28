@@ -3327,8 +3327,8 @@ const LISTINO_TELI_STANDARD = {
 
 // 2. CONFIGURAZIONE CUSTOM (Prezzo al MQ)
 const PREZZI_MQ_TELI = {
-    "SPUGNA": 9,
-    "MICROFIBRA": 9
+    "SPUGNA": 9.20,
+    "MICROFIBRA": 9.80
 };
 
 // Sconti Quantità per il Custom (a scalare)
