@@ -3372,69 +3372,71 @@ function calcolaPrezzoTeli() {
         prezzoUnitarioBase = fascia ? fascia.price : listino[listino.length - 1].price;
     } 
     // --- CALCOLO CUSTOM ---
-    else {
-        const baseCm = parseFloat(document.getElementById('teliBase').value) || 0;
-        const altCm = parseFloat(document.getElementById('teliAltezza').value) || 0;
-
-        // Controllo limiti bobina (159cm)
-        if (baseCm > 159 && altCm > 159) {
-            elUnitario.innerHTML = "<span style='color:red; font-size:0.8em;'>Err: Entrambi lati > 159cm</span>";
-            return;
-        }
-
-		// =======================================================
-        // NUOVA LOGICA: Controllo > 77cm per Sconto/Ricarico 20%
-        // =======================================================
-        let warningBox = document.getElementById('teliWarning77');
-        
-        // Se il box di avviso non esiste, lo creiamo dinamicamente in JS
-        if (!warningBox) {
-            const teliBaseInput = document.getElementById('teliBase');
-            if(teliBaseInput) {
-                warningBox = document.createElement('div');
-                warningBox.id = 'teliWarning77';
-                warningBox.style.color = '#856404'; // Colore testo giallo scuro/marrone
-                warningBox.style.backgroundColor = '#fff3cd'; // Sfondo giallo chiaro (stile Bootstrap)
-                warningBox.style.border = '1px solid #ffeeba';
-                warningBox.style.padding = '8px 12px';
-                warningBox.style.marginBottom = '15px';
-                warningBox.style.borderRadius = '5px';
-                warningBox.style.fontSize = '0.9em';
-                warningBox.style.display = 'none'; // Nascosto di default
-                warningBox.innerHTML = '<strong>Attenzione!</strong> Per avere uno sconto del 20% mantieni una delle 2 misure inferiore a 77cm. es. 75x160cm';
-                
-                // Lo inseriamo subito prima del campo 'teliBase'
-                teliBaseInput.parentNode.insertBefore(warningBox, teliBaseInput);
-            }
-        }
-
-        let moltiplicatore77 = 1.0; // Base: nessun aumento
-        
-        // Se ENTRAMBE le misure superano i 77cm
-        if (baseCm > 77 && altCm > 77) {
-            if (warningBox) warningBox.style.display = 'block'; // Mostra l'avviso
-            moltiplicatore77 = 1.20; // Aumenta il prezzo del 20%
-        } else {
-            if (warningBox) warningBox.style.display = 'none'; // Nascondi l'avviso
-        }
-        // =======================================================
-
-        const areaMq = (baseCm * altCm) / 10000; // cm² -> m²
-        const costoMq = PREZZI_MQ_TELI[tessuto];
-        
-        // Prezzo base grezzo
-        //const prezzoGrezzo = areaMq * costoMq;
-		
-		// Prezzo base grezzo con applicato l'eventuale aumento del 20%
-        const prezzoGrezzo = areaMq * costoMq * moltiplicatore77;
-        
-        // Applicazione sconto quantità custom
-        const scontoPerc = getScontoTeliCustom(qta);
-        prezzoUnitarioBase = prezzoGrezzo * (1 - scontoPerc);
-        
-        // Minimo tecnico per pezzo (es. 2€) per evitare prezzi ridicoli su fazzoletti
-        if(prezzoUnitarioBase < 2.00) prezzoUnitarioBase = 2.00; 
-    }
+	else {
+	        const baseCm = parseFloat(document.getElementById('teliBase').value) || 0;
+	        const altCm = parseFloat(document.getElementById('teliAltezza').value) || 0;
+	
+	        // Controllo limiti bobina (159cm) - Non possono essere ENTRAMBI > 159
+	        if (baseCm > 159 && altCm > 159) {
+	            elUnitario.innerHTML = "<span style='color:red; font-size:0.8em;'>Err: Entrambi lati > 159cm</span>";
+	            return;
+	        }
+	
+	        // =======================================================
+	        // NUOVA LOGICA: Controllo Sfrido (Doppia Condizione)
+	        // =======================================================
+	        let warningBox = document.getElementById('teliWarningSfrido');
+	        
+	        // Creazione dinamica del box se non esiste
+	        if (!warningBox) {
+	            const teliBaseInput = document.getElementById('teliBase');
+	            if(teliBaseInput) {
+	                warningBox = document.createElement('div');
+	                warningBox.id = 'teliWarningSfrido';
+	                warningBox.style.color = '#856404';
+	                warningBox.style.backgroundColor = '#fff3cd';
+	                warningBox.style.border = '1px solid #ffeeba';
+	                warningBox.style.padding = '8px 12px';
+	                warningBox.style.marginBottom = '15px';
+	                warningBox.style.borderRadius = '5px';
+	                warningBox.style.fontSize = '0.9em';
+	                warningBox.style.display = 'none'; // Nascosto di default
+	                
+	                teliBaseInput.parentNode.insertBefore(warningBox, teliBaseInput);
+	            }
+	        }
+	
+	        let moltiplicatore = 1.0; 
+	        
+	        // Troviamo quale lato è il più lungo e quale il più corto
+	        const latoMaggiore = Math.max(baseCm, altCm);
+	        const latoMinore = Math.min(baseCm, altCm);
+	        
+	        // DOPPIA CONDIZIONE: Se il lato maggiore non entra nei 159 E il lato minore non permette di affiancarne due ( > 77)
+	        if (latoMaggiore > 159 && latoMinore > 77) {
+	            if (warningBox) {
+	                warningBox.innerHTML = '<strong>Attenzione!</strong> Il formato scelto genera molto scarto di tessuto. Per risparmiare il 20%, mantieni il lato minore entro i <strong>77cm</strong> (es. 75x160) oppure il lato maggiore entro i <strong>159cm</strong> (es. 100x150).';
+	                warningBox.style.display = 'block';
+	            }
+	            moltiplicatore = 1.20; // Applica il ricarico del 20%
+	        } else {
+	            if (warningBox) warningBox.style.display = 'none';
+	        }
+	        // =======================================================
+	
+	        const areaMq = (baseCm * altCm) / 10000; // cm² -> m²
+	        const costoMq = PREZZI_MQ_TELI[tessuto];
+	        
+	        // Prezzo base grezzo con applicato l'eventuale aumento
+	        const prezzoGrezzo = areaMq * costoMq * moltiplicatore;
+	        
+	        // Applicazione sconto quantità custom
+	        const scontoPerc = getScontoTeliCustom(qta);
+	        prezzoUnitarioBase = prezzoGrezzo * (1 - scontoPerc);
+	        
+	        // Minimo tecnico per pezzo
+	        if(prezzoUnitarioBase < 2.00) prezzoUnitarioBase = 2.00; 
+	    }
 
     // Calcolo totali
     const totaleNetto = qta * prezzoUnitarioBase;
