@@ -30,15 +30,18 @@ let carrello = JSON.parse(localStorage.getItem('carrello')) || [];
 // --- NUOVE FASCE SPECIFICHE PER IL BASKET ---
 const FASCE_QUANTITA_BASKET = [
     { max: 5, key: "1_5" },
-    { max: 9, key: "6_9" },
-    { max: 40, key: "10_40" },
-    { max: 70, key: "41_70" },
+    { max: 20, key: "6_20" },
+    { max: 50, key: "21_50" },
+    { max: 70, key: "51_70" },
 	{ max: 100, key: "71_100" },
-	{ max: 200, key: "101_200" },
+	{ max: 150, key: "101_150" },
+	{ max: 200, key: "151_200" },
 	{ max: 300, key: "201_300" },
 	{ max: 500, key: "301_500" },
     { max: 999999, key: "501_OLTRE" }
 ];
+
+
 
 
 // Fasce di quantità per il listino Kit Calcio
@@ -117,27 +120,38 @@ const LISTINO_COMPLETO = {
         // Prezzi BASE unitari (dalla tabella foto) per la versione NORMALE (Single)
         "PREZZI_FASCIA": {
             "1_5":       { COMPLETINO: 29.00, CANOTTA_SOLA: 17.00, PANTALONCINO_SOLO: 14.00 },
-            "6_9":       { COMPLETINO: 27.00, CANOTTA_SOLA: 16.00, PANTALONCINO_SOLO: 12.50 },
-            "10_40":     { COMPLETINO: 24.00, CANOTTA_SOLA: 15.00, PANTALONCINO_SOLO: 11.50 },
-            "41_70":     { COMPLETINO: 22.00, CANOTTA_SOLA: 13.50, PANTALONCINO_SOLO: 10.50 },
-			"71_100":    { COMPLETINO: 21.00, CANOTTA_SOLA: 11.50, PANTALONCINO_SOLO: 9.50 },
-			"101_200":    { COMPLETINO: 19.00, CANOTTA_SOLA: 9.90, PANTALONCINO_SOLO: 9.00 },
-			"201_300":    { COMPLETINO: 17.00, CANOTTA_SOLA: 8.50, PANTALONCINO_SOLO: 8.50 },
-			"301_500":    { COMPLETINO: 16.00, CANOTTA_SOLA: 7.90, PANTALONCINO_SOLO: 7.50 },
-            "501_OLTRE": { COMPLETINO: 16.00, CANOTTA_SOLA: 7.80, PANTALONCINO_SOLO: 7.50 }
+            "6_20":       { COMPLETINO: 27.00, CANOTTA_SOLA: 14.00, PANTALONCINO_SOLO: 12.50 },
+            "21_50":     { COMPLETINO: 19.00, CANOTTA_SOLA: 10.50, PANTALONCINO_SOLO: 9.50 },
+            "51_70":     { COMPLETINO: 18.00, CANOTTA_SOLA: 9.50, PANTALONCINO_SOLO: 9.00 },
+			"71_100":    { COMPLETINO: 17.00, CANOTTA_SOLA: 9.00, PANTALONCINO_SOLO: 8.50 },
+			"101_150":    { COMPLETINO: 16.00, CANOTTA_SOLA: 8.50, PANTALONCINO_SOLO: 8.00 },
+			"151_200":    { COMPLETINO: 15.00, CANOTTA_SOLA: 8.00, PANTALONCINO_SOLO: 7.50 },
+			"201_300":    { COMPLETINO: 14.00, CANOTTA_SOLA: 7.50, PANTALONCINO_SOLO: 7.00 },
+			"301_500":    { COMPLETINO: 13.00, CANOTTA_SOLA: 7.00, PANTALONCINO_SOLO: 6.50 },
+            "501_OLTRE": { COMPLETINO: 12.95, CANOTTA_SOLA: 6.95, PANTALONCINO_SOLO: 6.45 }
         },
-        // Percentuali di aumento SPECIFICHE se si sceglie "Double"------ incrementare le percentuali double : compl : 22, canotta 25, pantaloncino 10 ???
+        //  : compl :14, canotta 16.7, pantaloncino 5.7
         "EXTRA_DOUBLE": {
-            "COMPLETINO": 14.0, 
-            "CANOTTA_SOLA": 16.7,
-            "PANTALONCINO_SOLO": 5.7
+            "COMPLETINO": 30, 
+            "CANOTTA_SOLA": 35,
+            "PANTALONCINO_SOLO": 32
         },
         "COSTO_GRAFICO": 20.00 
     },
 
   
-
-
+/*
+"1_5":       { COMPLETINO: 29.00, CANOTTA_SOLA: 17.00, PANTALONCINO_SOLO: 14.00 },
+            "6_20":       { COMPLETINO: 27.00, CANOTTA_SOLA: 16.00, PANTALONCINO_SOLO: 12.50 },
+            "21_50":     { COMPLETINO: 24.00, CANOTTA_SOLA: 15.00, PANTALONCINO_SOLO: 11.50 },
+            "51_70":     { COMPLETINO: 22.00, CANOTTA_SOLA: 13.50, PANTALONCINO_SOLO: 10.50 },
+			"71_100":    { COMPLETINO: 21.00, CANOTTA_SOLA: 11.50, PANTALONCINO_SOLO: 9.50 },
+			"101_150":    { COMPLETINO: 21.00, CANOTTA_SOLA: 11.50, PANTALONCINO_SOLO: 9.50 },
+			"151_200":    { COMPLETINO: 19.00, CANOTTA_SOLA: 9.90, PANTALONCINO_SOLO: 9.00 },
+			"201_300":    { COMPLETINO: 17.00, CANOTTA_SOLA: 8.50, PANTALONCINO_SOLO: 8.50 },
+			"301_500":    { COMPLETINO: 16.00, CANOTTA_SOLA: 7.90, PANTALONCINO_SOLO: 7.50 },
+            "501_OLTRE": { COMPLETINO: 16.00, CANOTTA_SOLA: 7.80, PANTALONCINO_SOLO: 7.50 }
+*/
 
 
 
