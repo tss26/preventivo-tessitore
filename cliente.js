@@ -704,7 +704,71 @@ async function gestisciCheckout() {
         document.getElementById('prevClienteContatti').value = "";
         
         aggiornaUIPreventivo();
-        
+
+		//-----------------------------inizio invio email per invio preventivo-------------------------------
+		// --- INIZIO INVIO EMAIL PREVENTIVO ---
+let righeTabellaHtml = "";
+dettagliCompleti.forEach(item => {
+    if (item.tipo === 'INFO_CLIENTE') return; // Saltiamo l'intestazione
+    
+    let pUnit = parseFloat(item.prezzo_unitario) || 0;
+    let extraInfo = item.componenti ? item.componenti.join(', ') : '';
+    
+    righeTabellaHtml += `
+        <tr>
+            <td style="padding:10px; border-bottom:1px solid #eee;">
+                <strong>${item.prodotto}</strong><br>
+                <small style="color:#666;">${extraInfo}</small>
+            </td>
+            <td style="padding:10px; text-align:center; border-bottom:1px solid #eee;">${item.quantita}</td>
+            <td style="padding:10px; text-align:right; border-bottom:1px solid #eee;">€ ${pUnit.toFixed(2)}</td>
+        </tr>`;
+});
+
+const htmlPreventivo = `
+    <h2 style="color: #007bff;">Riepilogo Preventivo N. ${numeroOrdineGenerato}</h2>
+    <p>Ciao ${nomeCliente || 'Cliente'},</p>
+    <p>Abbiamo ricevuto la tua richiesta di preventivo. Ecco il riepilogo:</p>
+    
+    <table style="width:100%; border-collapse:collapse; font-family:sans-serif;">
+        <tr style="background:#f8f9fa;">
+            <th style="padding:10px; text-align:left;">Prodotto</th>
+            <th style="padding:10px; text-align:center;">Q.tà</th>
+            <th style="padding:10px; text-align:right;">Prezzo</th>
+        </tr>
+        ${righeTabellaHtml}
+    </table>
+    
+    <div style="margin-top:20px; text-align:right; border-top:2px solid #333; padding-top:10px;">
+        <strong>TOTALE IMPONIBILE:</strong> € ${totaleCalcolato.toFixed(2)}<br>
+        <strong>IVA (22%):</strong> € ${(totaleCalcolato * 0.22).toFixed(2)}<br>
+        <strong style="font-size:1.2em;">TOTALE DOVUTO: € ${(totaleCalcolato * 1.22).toFixed(2)}</strong>
+    </div>
+    
+    <p style="margin-top:30px; font-size:0.9em; color:#555;">
+        Per procedere con l'ordine, effettua il Bonifico intestato a: Tessitore s.r.l.<br>
+        BANCA: SELLA - IBAN: IT56 O032 6804 6070 5227 9191 820
+    </p>
+`;
+
+try {
+    await fetch('https://www.tessitorestore.com/invia_email.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            email: user.email, // Manda l'email all'utente loggato
+            oggetto: `Conferma Ricezione Preventivo N. ${numeroOrdineGenerato} - Tessitore SRL`,
+            html: htmlPreventivo
+        })
+    });
+} catch (e) {
+    console.error("Errore invio email preventivo:", e);
+}
+// --- FINE INVIO EMAIL PREVENTIVO ---
+		//-----------------------------fine  invio email per invio preventivo--------------------------------
+
+
+		
         alert(`Ordine/Preventivo ${numeroOrdineGenerato} inviato con successo!`);
 
     } catch (e) {
