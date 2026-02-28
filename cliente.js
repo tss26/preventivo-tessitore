@@ -3423,7 +3423,10 @@ function calcolaPrezzoTeli() {
         const costoMq = PREZZI_MQ_TELI[tessuto];
         
         // Prezzo base grezzo
-        const prezzoGrezzo = areaMq * costoMq;
+        //const prezzoGrezzo = areaMq * costoMq;
+		
+		// Prezzo base grezzo con applicato l'eventuale aumento del 20%
+        const prezzoGrezzo = areaMq * costoMq * moltiplicatore77;
         
         // Applicazione sconto quantità custom
         const scontoPerc = getScontoTeliCustom(qta);
