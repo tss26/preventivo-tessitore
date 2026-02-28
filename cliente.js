@@ -3337,7 +3337,8 @@ function getScontoTeliCustom(qta) {
     if (qta <= 25) return 0.08; // 8%
     if (qta <= 50) return 0.13; // 13%
     if (qta <= 100) return 0.21; // 21%
-    return 0.30; // 30%
+	if (qta <= 250) return 0.30; // 21%
+    return 0.32; // 30%
 }
 
 // Funzione per gestire la visibilità dei box
