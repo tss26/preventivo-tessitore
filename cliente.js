@@ -32,8 +32,12 @@ const FASCE_QUANTITA_BASKET = [
     { max: 5, key: "1_5" },
     { max: 9, key: "6_9" },
     { max: 40, key: "10_40" },
-    { max: 100, key: "41_100" },
-    { max: 999999, key: "101_OLTRE" }
+    { max: 70, key: "41_70" },
+	{ max: 100, key: "71_100" },
+	{ max: 200, key: "101_200" },
+	{ max: 300, key: "201_300" },
+	{ max: 500, key: "301_500" },
+    { max: 999999, key: "501_OLTRE" }
 ];
 
 
@@ -99,7 +103,7 @@ const LISTINO_COMPLETO = {
             "151_200": { COMPLETINO: 15.00, MAGLIA_SOLA: 8.00, PANTALONCINO_SOLO: 7.50 },
             "201_250": { COMPLETINO: 14.00, MAGLIA_SOLA: 7.50, PANTALONCINO_SOLO: 7.00 },
             "251_350": { COMPLETINO: 13.50, MAGLIA_SOLA: 6.90, PANTALONCINO_SOLO: 6.90 },
-            "351_500": { COMPLETINO: 13.00, MAGLIA_SOLA: 6.50, PANTALONCINO_SOLO: 6.50 }
+            "351_500": { COMPLETINO: 13.50, MAGLIA_SOLA: 6.75, PANTALONCINO_SOLO: 6.75 }
         },
         "COSTO_GRAFICO": 20.00 // Costo impianto grafico 
     },
@@ -115,10 +119,14 @@ const LISTINO_COMPLETO = {
             "1_5":       { COMPLETINO: 29.00, CANOTTA_SOLA: 17.00, PANTALONCINO_SOLO: 14.00 },
             "6_9":       { COMPLETINO: 27.00, CANOTTA_SOLA: 16.00, PANTALONCINO_SOLO: 12.50 },
             "10_40":     { COMPLETINO: 24.00, CANOTTA_SOLA: 15.00, PANTALONCINO_SOLO: 11.50 },
-            "41_100":    { COMPLETINO: 22.00, CANOTTA_SOLA: 13.50, PANTALONCINO_SOLO: 10.50 },
-            "101_OLTRE": { COMPLETINO: 19.00, CANOTTA_SOLA: 12.20, PANTALONCINO_SOLO: 9.30 }
+            "41_70":     { COMPLETINO: 22.00, CANOTTA_SOLA: 13.50, PANTALONCINO_SOLO: 10.50 },
+			"71_100":    { COMPLETINO: 21.00, CANOTTA_SOLA: 11.50, PANTALONCINO_SOLO: 9.50 },
+			"101_200":    { COMPLETINO: 19.00, CANOTTA_SOLA: 9.90, PANTALONCINO_SOLO: 9.00 },
+			"201_300":    { COMPLETINO: 17.00, CANOTTA_SOLA: 8.50, PANTALONCINO_SOLO: 8.50 },
+			"301_500":    { COMPLETINO: 16.00, CANOTTA_SOLA: 7.90, PANTALONCINO_SOLO: 7.50 },
+            "501_OLTRE": { COMPLETINO: 16.00, CANOTTA_SOLA: 7,9, PANTALONCINO_SOLO: 7.50 }
         },
-        // Percentuali di aumento SPECIFICHE se si sceglie "Double"
+        // Percentuali di aumento SPECIFICHE se si sceglie "Double"------ incrementare le percentuali double : compl : 22, canotta 25, pantaloncino 10 ???
         "EXTRA_DOUBLE": {
             "COMPLETINO": 14.0, 
             "CANOTTA_SOLA": 16.7,
@@ -127,11 +135,7 @@ const LISTINO_COMPLETO = {
         "COSTO_GRAFICO": 20.00 
     },
 
-
-
-
-
-    
+  
 
 
 
