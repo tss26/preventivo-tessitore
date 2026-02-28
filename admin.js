@@ -669,14 +669,66 @@ function mostraDettagli(ordineId, dettagliProdottiString, numeroOrdineVisibile, 
         modalBody.parentNode.insertBefore(btnStampa, modalBody.nextSibling);
     }
 
+    // INIZIO NUOVA che serve all admin ad aggiungere il nuovo campo per l'inserimento dei costi aggiuntivi
+        document.getElementById('extraIdOrdine').value = ordineId;
+        // FINE NUOVA RIGA
+
+
     modal.style.display = 'block';
 }
 
 
 
 
+// ------------INIZIO NUOVA FUNZIONE per l'inserimento dei costi aggiuntivi----------------------------------------------
+async function aggiungiCostoExtraAdmin() {
+    const idOrdine = document.getElementById('extraIdOrdine').value;
+    const descrizione = document.getElementById('extraDescrizione').value.trim();
+    const prezzo = parseFloat(document.getElementById('extraPrezzo').value);
 
+    if (!idOrdine) return alert("Errore: Nessun ordine selezionato.");
+    if (!descrizione || isNaN(prezzo)) return alert("Inserisci una descrizione valida e un importo numerico.");
+    if (!confirm(`Sei sicuro di voler aggiungere "${descrizione}" di €${prezzo.toFixed(2)} a questo ordine?`)) return;
 
+    try {
+        const { data: ordineCorrente, error: fetchError } = await supabase
+            .from('ordini').select('totale, dettagli_prodotti').eq('id', idOrdine).single();
+        if (fetchError) throw fetchError;
+
+        const voceExtra = {
+            tipo: 'EXTRA_ADMIN',
+            prodotto: `📦 ${descrizione}`,
+            quantita: 1,
+            prezzo_unitario: prezzo,
+            componenti: ["Aggiunto in fase di elaborazione da Admin"],
+            personalizzazione_url: "",
+            note: ""
+        };
+
+        const arrayProdottiAttuale = Array.isArray(ordineCorrente.dettagli_prodotti) ? ordineCorrente.dettagli_prodotti : [];
+        const nuoviDettagli = [...arrayProdottiAttuale, voceExtra];
+        const nuovoTotale = (parseFloat(ordineCorrente.totale) || 0) + prezzo;
+
+        const { error: updateError } = await supabase
+            .from('ordini')
+            .update({ dettagli_prodotti: nuoviDettagli, totale: nuovoTotale })
+            .eq('id', idOrdine);
+
+        if (updateError) throw updateError;
+
+        alert(`Ordine aggiornato! Nuovo totale: €${nuovoTotale.toFixed(2)}`);
+        document.getElementById('extraDescrizione').value = "";
+        document.getElementById('extraPrezzo').value = "";
+        
+        // Chiude il modale e ricarica i dati
+        document.getElementById('orderDetailsModal').style.display = 'none';
+        caricaOrdini();
+    } catch (e) {
+        console.error("Errore extra:", e);
+        alert(`Errore: ${e.message}`);
+    }
+}
+// ------------FINE NUOVA FUNZIONE per l'inserimento dei costi aggiuntivi----------------------------------------------
 
 
 
